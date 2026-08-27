@@ -12,6 +12,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
+@keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes riseIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+[data-anim="bar"]{animation:barIn .5s cubic-bezier(.2,.85,.25,1) both;transform-origin:left center}
+[data-anim="rise"]{animation:riseIn .45s cubic-bezier(.2,.85,.25,1) both}
+@media (prefers-reduced-motion:reduce){[data-anim]{animation:none !important}}
 html,body{margin:0;padding:0;background:#0b0b0e}
 *{box-sizing:border-box}
 a{color:#f3f2ef;text-decoration:none}
@@ -543,6 +548,28 @@ html{scroll-behavior:smooth}
 </div>
 </sc-for>
 </div>
+
+<sc-if value="{{ gsStrip.on }}" hint-placeholder-val="{{ false }}">
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:20px 26px 18px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:13px;flex-wrap:wrap">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95">Minutes by scoreline</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78">{{ gsStrip.meta }}</div>
+</div>
+<div style="display:flex;height:26px;background:#101016;overflow:hidden">
+<sc-for list="{{ gsStrip.bands }}" as="b" hint-placeholder-count="3">
+<div title="{{ b.t }}" data-anim="bar" style="width:{{ b.w }}%;background:{{ b.col }};display:flex;align-items:center;justify-content:center;overflow:hidden">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:{{ b.fg }};white-space:nowrap">{{ b.tag }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:11px">
+<sc-for list="{{ gsStrip.bands }}" as="b" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:7px"><div style="width:12px;height:8px;background:{{ b.col }}"></div><span style="font-size:11px;color:#8d8a95">{{ b.s }} <span style="font-family:'IBM Plex Mono',monospace;color:#6f6d78">{{ b.min }}'</span></span></div>
+</sc-for>
+</div>
+<div style="font-size:11.5px;color:#6f6d78;margin-top:12px;text-wrap:pretty">{{ gsStrip.note }}</div>
+</div>
+</sc-if>
 
 <sc-if value="{{ mwR.hasXi }}" hint-placeholder-val="{{ false }}">
 <div data-stack="1" style="display:grid;grid-template-columns:1.6fr 1fr;gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
@@ -1389,6 +1416,305 @@ html{scroll-behavior:smooth}
 </div>
 </section>
 
+<section id="gamestate" data-screen-label="Game state" style="padding:56px 0 0">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:6px">
+<div style="display:flex;align-items:baseline;gap:14px">
+<div style="width:4px;height:20px;background:#e12b3f;align-self:center"></div>
+<h2 style="margin:0;font-family:Anton,sans-serif;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#f3f2ef">The trap is a question of when, not how</h2>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78">{{ gsMeta }}</div>
+</div>
+<p style="margin:0 0 22px 18px;font-size:14px;color:#8d8a95;max-width:90ch;text-wrap:pretty">Every minute of the season is assigned to the scoreline that existed while it was played, and every metric is conditioned on that state. The possession-versus-results inversion in the panel above is not a mystery about how United play. It is an artefact of when they had the ball.</p>
+
+<div data-scroll="1" style="background:#13131a;border:1px solid #23232c;overflow-x:auto">
+<div data-wide="1" style="min-width:940px">
+<div style="display:grid;grid-template-columns:120px 58px 46px 54px 52px 52px 52px minmax(200px,1fr) 56px 56px;gap:9px;padding:14px 24px 10px;border-bottom:1px solid #2e2e38;font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#6f6d78">
+<div>Game state</div><div style="text-align:right">Minutes</div><div style="text-align:right">Poss</div>
+<div style="text-align:right">Shots/90</div><div style="text-align:right">Against</div>
+<div style="text-align:right">xG/90</div><div style="text-align:right">xGA/90</div>
+<div>Expected-goal difference per 90</div><div style="text-align:right">xGD/90</div><div style="text-align:right">Goals</div>
+</div>
+<sc-for list="{{ gsRows }}" as="r" hint-placeholder-count="5">
+<div onMouseEnter="{{ r.onEnter }}" onMouseLeave="{{ r.onLeave }}" onClick="{{ r.onEnter }}" data-tipzone="1" style="display:grid;grid-template-columns:120px 58px 46px 54px 52px 52px 52px minmax(200px,1fr) 56px 56px;gap:9px;align-items:center;padding:11px 24px;border-bottom:1px solid #1a1a21" style-hover="background:#191920">
+<div style="display:flex;align-items:center;gap:8px;min-width:0">
+<div style="font-size:12.5px;font-weight:700;color:{{ r.nmCol }};white-space:nowrap">{{ r.s }}</div>
+<div style="font-size:8.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:{{ r.flagCol }}">{{ r.flag }}</div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ r.min }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ r.poss }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ r.sh }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#8d8a95">{{ r.ag }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ r.xg }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#8d8a95">{{ r.xga }}</div>
+<div style="position:relative;height:20px">
+<div style="position:absolute;left:{{ gsZero }}%;top:0;bottom:0;width:1px;background:#3d3b45"></div>
+<div style="position:absolute;left:{{ r.barLeft }}%;width:{{ r.barW }}%;top:4px;height:12px;background:{{ r.barCol }};opacity:{{ r.barOp }}"></div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;text-align:right;color:{{ r.barCol }}">{{ r.xgd }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#f3f2ef">{{ r.goals }}</div>
+</div>
+</sc-for>
+<div style="padding:14px 24px 16px;font-size:12.5px;color:#b8b5c0;text-wrap:pretty">United played their best football from behind and their worst in front. While leading by one, across 1,035 minutes, they scored 13 and conceded 20. The zero line is drawn on every bar; <span style="color:#f0b429">Trailing 2+ is three matches and drawn faint for that reason</span>.</div>
+</div>
+</div>
+
+<div data-stack="1" style="display:grid;grid-template-columns:1.15fr .85fr;gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:6px">What survives resampling</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;text-wrap:pretty">Matches resampled, not minutes — minutes inside a match are not independent. Bar is the 95% interval, the tick is the point estimate.</div>
+<sc-for list="{{ gsBoot }}" as="b" hint-placeholder-count="2">
+<div style="margin-bottom:20px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px;flex-wrap:wrap">
+<div style="font-size:12.5px;font-weight:700;color:#f3f2ef">{{ b.lab }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:{{ b.col }}">{{ b.v }} <span style="color:#6f6d78;font-weight:400">[{{ b.lo }}, {{ b.hi }}]</span></div>
+</div>
+<div style="position:relative;height:16px;background:#101016;border:1px solid #1d1d25">
+<div style="position:absolute;left:{{ gsBZero }}%;top:0;bottom:0;width:1px;background:#5d5b65"></div>
+<div style="position:absolute;left:{{ b.x }}%;width:{{ b.w }}%;top:4px;height:6px;background:{{ b.col }};opacity:.45"></div>
+<div style="position:absolute;left:{{ b.ptX }}%;top:1px;bottom:1px;width:2px;background:{{ b.col }}"></div>
+</div>
+<div style="font-size:11.5px;color:{{ b.vCol }};margin-top:7px;text-wrap:pretty">{{ b.verdict }}</div>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852;border-top:1px solid #1d1d25;padding-top:8px">
+<span>−1.0</span><span>0 · expected-goal difference per 90</span><span>+2.6</span>
+</div>
+<div style="font-size:11.5px;color:#6f6d78;margin-top:12px;text-wrap:pretty">The defensible claim is that United got materially worse when ahead, not that they were worse than their opponents when ahead.</div>
+</div>
+<div style="background:#13131a;padding:22px 26px 20px;display:flex;flex-direction:column;gap:20px">
+<div>
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:14px">Outcomes</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ gsOut }}" as="o" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:1fr 78px 44px;gap:10px;align-items:center">
+<div style="min-width:0">
+<div style="font-size:12px;color:#f3f2ef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.lab }} <span style="font-family:'IBM Plex Mono',monospace;color:#6f6d78">{{ o.n }}</span></div>
+<div style="height:5px;background:#1d1d25;margin-top:5px"><div style="height:5px;background:{{ o.col }};width:{{ o.w }}%"></div></div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#b8b5c0;text-align:right">{{ o.rec }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:{{ o.col }};text-align:right">{{ o.ppg }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:11.5px;color:#6f6d78;margin-top:12px;text-wrap:pretty">United never lost a match in which they led, but drew eight of them — sixteen points left on the table, and the whole distance between 71 points and a title challenge. Going two behind was terminal.</div>
+</div>
+<div style="margin-top:auto;padding-top:16px;border-top:1px solid #1d1d25">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:12px">The reactive instinct</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ gsTrans }}" as="t" hint-placeholder-count="2">
+<div>
+<div style="display:flex;align-items:baseline;gap:9px">
+<div style="font-family:Anton,sans-serif;font-size:26px;line-height:.85;color:{{ t.col }}">{{ t.pct }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6f6d78">{{ t.frac }}</div>
+</div>
+<div style="font-size:12px;color:#b8b5c0;margin-top:5px;text-wrap:pretty">{{ t.lab }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+
+<div data-stack="1" style="display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
+<div style="background:#13131a;padding:22px 26px 20px;min-width:0">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:4px">Worked example</div>
+<div style="font-size:13px;font-weight:700;color:#f3f2ef;margin-bottom:16px">{{ gsGw23.lab }}</div>
+<div style="display:flex;flex-direction:column;gap:1px;background:#1d1d25">
+<sc-for list="{{ gsGw23.walk }}" as="w" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:36px 44px 1fr auto;gap:9px;align-items:center;background:#13131a;padding:7px 2px">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6f6d78">{{ w.min }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#f3f2ef">{{ w.sc }}</div>
+<div style="display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden"><div style="width:3px;height:12px;background:{{ w.col }};flex:none"></div><span style="font-size:12px;color:#b8b5c0;white-space:nowrap">{{ w.st }}</span></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8d8a95;text-align:right;white-space:nowrap;padding-left:6px">{{ w.held }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:11px;color:#4a4852;margin-top:9px">Right column is minutes held in that state.</div>
+</div>
+<div style="background:#13131a;padding:22px 26px 20px;min-width:0">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:16px">The season pattern inside one match</div>
+<div data-scroll="1" style="overflow-x:auto"><div data-wide="1" style="min-width:470px">
+<div style="display:grid;grid-template-columns:96px 54px 48px 56px 56px 56px 56px;gap:9px;padding-bottom:8px;border-bottom:1px solid #2e2e38;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6f6d78">
+<div>State</div><div style="text-align:right">Minutes</div><div style="text-align:right">Poss</div><div style="text-align:right">Shots</div><div style="text-align:right">Against</div><div style="text-align:right">xG</div><div style="text-align:right">xGA</div>
+</div>
+<sc-for list="{{ gsGw23.split }}" as="s" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:96px 54px 48px 56px 56px 56px 56px;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a21">
+<div style="display:flex;align-items:center;gap:7px;min-width:0"><div style="width:3px;height:12px;background:{{ s.col }};flex:none"></div><span style="font-size:12px;font-weight:700;color:#f3f2ef;white-space:nowrap">{{ s.st }}</span></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ s.min }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ s.poss }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ s.sh }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#8d8a95">{{ s.ag }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#b8b5c0">{{ s.xg }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:#8d8a95">{{ s.xga }}</div>
+</div>
+</sc-for>
+</div></div>
+<p style="margin:14px 0 0;font-size:12.5px;color:#b8b5c0;text-wrap:pretty">Eight minutes behind produced three shots and none conceded. Forty-five minutes ahead produced two shots against eight, 0.10 expected goals against 0.70 — and they were pegged back on 86 minutes. They won it anyway three minutes later, which is why this reads as a famous away win rather than as a warning.</p>
+</div>
+</div>
+
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="display:flex;align-items:center;gap:9px;margin-bottom:16px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#f0b429">What does not hold up</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ gsFails }}" as="f" hint-placeholder-count="2">
+<div style="border-left:2px solid #4a3a12;padding-left:14px">
+<div style="font-size:12.5px;font-weight:700;color:#f3f2ef;margin-bottom:5px;text-wrap:pretty">{{ f.t }}</div>
+<div style="font-size:12px;color:#8d8a95;line-height:1.5;text-wrap:pretty">{{ f.b }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:16px">Method</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ gsMethod }}" as="m" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:16px 1fr;gap:10px">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#4a4852;padding-top:2px">{{ m.n }}</div>
+<div style="font-size:12px;color:#8d8a95;line-height:1.5;text-wrap:pretty">{{ m.t }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</section>
+
+<section id="leads" data-screen-label="One-goal leads" style="padding:56px 0 0">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:6px">
+<div style="display:flex;align-items:baseline;gap:14px">
+<div style="width:4px;height:20px;background:#e12b3f;align-self:center"></div>
+<h2 style="margin:0;font-family:Anton,sans-serif;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#f3f2ef">Forty-six leads, twenty of them given back</h2>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78">{{ ldMeta }}</div>
+</div>
+<p style="margin:0 0 22px 18px;font-size:14px;color:#8d8a95;max-width:90ch;text-wrap:pretty">The row above treats <span style="color:#b8b5c0">Leading by 1</span> as one block of 1,035 minutes. It was not one block. It was 46 separate spells across 28 matches, each one opened by a goal and closed by a goal, the whistle, or nothing at all. Cut that way, the state stops being a condition United were in and becomes a sequence of things they did.</p>
+
+<div data-stack="1" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#23232c;border:1px solid #23232c;margin-bottom:1px">
+<sc-for list="{{ ldHero }}" as="h" hint-placeholder-count="4">
+<div style="background:#13131a;padding:18px 22px 16px" data-anim="rise">
+<div style="font-family:Anton,sans-serif;font-size:38px;line-height:.82;color:{{ h.col }}">{{ h.v }}</div>
+<div style="font-size:11.5px;color:#b8b5c0;margin-top:9px;text-wrap:pretty">{{ h.lab }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852;margin-top:4px">{{ h.sub }}</div>
+</div>
+</sc-for>
+</div>
+
+<div data-scroll="1" style="background:#13131a;border:1px solid #23232c;overflow-x:auto">
+<div data-wide="1" style="min-width:780px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 24px 12px;border-bottom:1px solid #2e2e38;flex-wrap:wrap">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95">Every spell, in the minute it was held</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+<sc-for list="{{ ldLegend }}" as="k" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:8px;background:{{ k.col }}"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">{{ k.lab }}</span></div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:7px"><div style="width:2px;height:9px;background:#0b0b0e;outline:1px solid #6f6d78"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">Substitution</span></div>
+<div style="display:flex;align-items:center;gap:7px"><div style="width:2px;height:9px;background:#f0b429"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">Shape change</span></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:130px 1fr 46px;gap:12px;padding:9px 24px 7px;font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#4a4852">
+<div>Match</div><div style="position:relative">
+<sc-for list="{{ ldTicks }}" as="t" hint-placeholder-count="5">
+<span style="position:absolute;left:{{ t.x }}%;color:#4a4852">{{ t.lab }}</span>
+</sc-for>
+</div><div style="text-align:right">Mins</div>
+</div>
+<sc-for list="{{ ldRail }}" as="m" hint-placeholder-count="10">
+<div style="display:grid;grid-template-columns:130px 1fr 46px;gap:12px;align-items:center;padding:5px 24px;border-top:1px solid #1a1a21" style-hover="background:#191920">
+<div style="display:flex;align-items:baseline;gap:7px;min-width:0">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852;flex:none">{{ m.gw }}</div>
+<div style="font-size:11.5px;color:#b8b5c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.opp }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:{{ m.venCol }};flex:none">{{ m.ven }}</div>
+</div>
+<div style="position:relative;height:14px;background:#101016">
+<div style="position:absolute;left:{{ ldHalf }}%;top:0;bottom:0;width:1px;background:#2a2a33"></div>
+<div style="position:absolute;left:{{ ldFull }}%;top:0;bottom:0;width:1px;background:#2a2a33"></div>
+<sc-for list="{{ m.bands }}" as="b" hint-placeholder-count="1">
+<div title="{{ b.t }}" data-anim="bar" style="position:absolute;left:{{ b.x }}%;width:{{ b.w }}%;top:2px;height:10px;background:{{ b.col }}">
+<sc-for list="{{ b.marks }}" as="k" hint-placeholder-count="0">
+<div style="position:absolute;left:{{ k.x }}%;top:0;bottom:0;width:{{ k.w }}px;background:{{ k.col }};opacity:.85"></div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-align:right;color:#8d8a95">{{ m.tot }}</div>
+</div>
+</sc-for>
+<div style="padding:13px 24px 16px;border-top:1px solid #2e2e38;font-size:12.5px;color:#b8b5c0;text-wrap:pretty">Thirteen of the 28 matches contain more than one spell, which is what a scoreline moving twice looks like. The longest single lead was 81 minutes at Anfield, taken in the first minute and surrendered in the 82nd. The shortest was three minutes against Bournemouth, one of three leads United took and lost in that match alone.</div>
+</div>
+</div>
+
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:6px">How the lead ended</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;text-wrap:pretty">Bar is share of the 46 spells. Right column is the minutes those spells were worth.</div>
+<div style="display:flex;flex-direction:column;gap:15px">
+<sc-for list="{{ ldEnd }}" as="e" hint-placeholder-count="3">
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:7px">
+<div style="font-size:12.5px;font-weight:700;color:#f3f2ef">{{ e.lab }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6f6d78">{{ e.n }} · {{ e.mins }} min · avg {{ e.avg }}</div>
+</div>
+<div style="height:9px;background:#101016"><div style="height:9px;background:{{ e.col }};width:{{ e.w }}%"></div></div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;color:#b8b5c0;margin-top:18px;text-wrap:pretty">Twenty of 46 ended with a concession — 445 of the 1,035 minutes. United extended the lead 13 times and carried it to full time 13 times, so a spell was surrendered more often than either alternative.</div>
+</div>
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:6px">When the lead was taken</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;text-wrap:pretty">Spells grouped by the minute they opened, with the share that ended in a concession.</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ ldPhase }}" as="p" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:56px 1fr 62px;gap:11px;align-items:center">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8d8a95">{{ p.lab }}</div>
+<div style="position:relative;height:16px;background:#101016">
+<div style="position:absolute;left:0;top:0;height:16px;width:{{ p.wAll }}%;background:#23232c"></div>
+<div style="position:absolute;left:0;top:0;height:16px;width:{{ p.wLost }}%;background:#e12b3f"></div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ p.col }};text-align:right">{{ p.rate }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;color:#b8b5c0;margin-top:18px;text-wrap:pretty">Leads taken either side of the hour were the ones that went: five of seven from 45–60, five of ten from 60–75. The 75-plus bucket looks safest at two of eleven, but those spells averaged eleven minutes — most of them ran out of match before they could be tested.</div>
+</div>
+</div>
+
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 20px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95">The bench, while the lead was on</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78">{{ ldBench.nSub }} substitutions · {{ ldBench.nShape }} shape changes</div>
+</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;text-wrap:pretty">{{ ldBench.touched }} of the 46 spells saw a change made while the lead was live; {{ ldBench.untouched }} were played out with the same eleven and the same shape. Median time to the first change was {{ ldBench.medFirst }} minutes into the spell.</div>
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:26px">
+<div>
+<div style="font-size:11.5px;color:#6f6d78;margin-bottom:14px;text-wrap:pretty">Restricted to the 26 spells that lasted 15 minutes or more — long enough for a change to be a decision rather than an impossibility.</div>
+<div style="display:flex;flex-direction:column;gap:15px">
+<sc-for list="{{ ldBench.pair }}" as="p" hint-placeholder-count="2">
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:7px">
+<div style="font-size:12.5px;font-weight:700;color:#f3f2ef">{{ p.lab }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6f6d78">{{ p.lost }} of {{ p.n }} surrendered</div>
+</div>
+<div style="position:relative;height:18px;background:#101016">
+<div data-anim="bar" style="position:absolute;left:0;top:0;height:18px;width:{{ p.w }}%;background:{{ p.col }};opacity:.8"></div>
+<div style="position:absolute;right:7px;top:2px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:{{ p.col }}">{{ p.rate }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="font-size:12px;color:#b8b5c0;text-wrap:pretty">Leads he touched were surrendered a quarter of the time; leads he let run were surrendered nearly two thirds of the time, on 26 spells split 15 and 11. That is a gap worth looking at and not a finding — a manager who makes changes is also a manager who is watching a game he thinks is drifting, and the spells with no change include the ones that ended too fast to need one. Neither side of the split controls for opponent, venue, or whether United were already second best on the ball.</div>
+</div>
+</div>
+
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:16px 26px 18px;display:grid;grid-template-columns:1fr 1fr;gap:26px" data-stack="1">
+<div style="font-size:11.5px;color:#6f6d78;text-wrap:pretty"><span style="color:#8d8a95;font-weight:700">Home and away.</span> 30 spells at Old Trafford, 11 surrendered. 16 away, 9 surrendered. The away rate is 56% against 37% at home, on 16 spells — directional, not established.</div>
+<div style="font-size:11.5px;color:#6f6d78;text-wrap:pretty"><span style="color:#8d8a95;font-weight:700">Definition.</span> A spell is a continuous period at exactly plus one. 40 opened with a United goal; 6 opened with a concession that cut a two-goal lead. Minutes are clock minutes including stoppage, which is why some spells end past 90.</div>
+</div>
+</section>
+
 <section id="season" data-screen-label="Season 25/26" style="padding:56px 0 0">
 <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px">
 <div style="width:4px;height:20px;background:#c8102e;align-self:center"></div>
@@ -2065,6 +2391,13 @@ html{scroll-behavior:smooth}
 </sc-if>
 </div>
 
+
+<sc-if value="{{ loadErr }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:0;right:0;bottom:0;z-index:90;background:#c8102e;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.04em;padding:12px 18px;display:flex;gap:14px;align-items:baseline">
+    <span style="font-weight:600;text-transform:uppercase">Data payload failed to load</span>
+    <span style="opacity:.85">{{ loadErr }}</span>
+  </div>
+</sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;lens&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;GW1 v Hull&quot;,&quot;GW1 v 25/26 average&quot;],&quot;default&quot;:&quot;GW1 v Hull&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Match views&quot;},&quot;heatView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;United&quot;,&quot;Hull&quot;,&quot;Difference&quot;],&quot;default&quot;:&quot;United&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Match views&quot;},&quot;netMinPasses&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3,&quot;min&quot;:1,&quot;max&quot;:8,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Match views&quot;},&quot;sortPlayersBy&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Touches&quot;,&quot;Passes&quot;,&quot;Key passes&quot;,&quot;Box touches&quot;,&quot;Defensive actions&quot;,&quot;Minutes&quot;],&quot;default&quot;:&quot;Touches&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Squad table&quot;}}">
 class Component extends DCLogic {
@@ -2076,7 +2409,7 @@ class Component extends DCLogic {
   static get SECTAB() {
     return { spine: 'match', report: 'match', match: 'match', shots: 'match', territory: 'match',
       squad: 'squad', scorers: 'squad', availability: 'squad', player: 'player',
-      versus: 'season', trap: 'season', season: 'season', phase: 'season', resid: 'season',
+      versus: 'season', trap: 'season', gamestate: 'season', leads: 'season', season: 'season', phase: 'season', resid: 'season',
       league: 'league', rebuilt: 'league', dropped: 'league', method: 'method' };
   }
 
@@ -2207,10 +2540,13 @@ class Component extends DCLogic {
   }
   hideTip() { clearTimeout(this._tipT); this.setState({ tip: null }); }
   componentDidMount() {
-    import('./mufc.js?v=6').then(m => {
-      this.setState({ D: m.D });
+    const R = typeof window !== 'undefined' && window.__resources;
+    const srcUrl = (R && R.mufcData) || './mufc.js?v=20260827';
+    import(srcUrl).then(m => {
+      if (!m || !m.D) throw new Error('payload loaded but export D is missing');
+      this.setState({ D: m.D, L: m.LEADS || [] });
       setTimeout(() => { this.applyHash(); this.observe(); }, 120);
-    }).catch(e => this.setState({ err: String(e) }));
+    }).catch(e => this.setState({ err: String(e && e.message || e) }));
     this._onNav = () => this.applyHash();
     window.addEventListener('hashchange', this._onNav);
     window.addEventListener('popstate', this._onNav);
@@ -2257,10 +2593,104 @@ class Component extends DCLogic {
     if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
     this.closePoster();
   }
+  gsStripVals(D) {
+    const GS = D.gs, gw = this.state.mwGw;
+    if (!GS || !GS.perMatch || this.state.mwSeason === '2627') return { on: false, bands: [], meta: '', note: '' };
+    const rows = GS.perMatch[String(gw)] || GS.perMatch[gw];
+    if (!rows || !rows.length) return { on: false, bands: [], meta: '', note: '' };
+    const COL = ['#2f4d8f', '#5b7bd5', '#3f3d47', '#4ec98d', '#2f9e6b'];
+    const FG = ['#c9d4ef', '#0b0b0e', '#b8b5c0', '#0b0b0e', '#0b0b0e'];
+    const tot = rows.reduce((a, r) => a + r.m, 0);
+    const nm = i => GS.order[i] || '';
+    const bands = rows.map(r => ({
+      s: nm(r.s), min: r.m, w: +(r.m / tot * 100).toFixed(2), col: COL[r.s], fg: FG[r.s],
+      tag: r.m / tot > .13 ? r.m + "'" : '', t: nm(r.s) + ' \u00b7 ' + r.m + ' minutes'
+    }));
+    const lead = rows.filter(r => r.s >= 3).reduce((a, r) => a + r.m, 0);
+    const trail = rows.filter(r => r.s <= 1).reduce((a, r) => a + r.m, 0);
+    const lvl = tot - lead - trail;
+    const part = (v, l) => v ? v + ' ' + l : null;
+    const note = [part(lead, 'ahead'), part(lvl, 'level'), part(trail, 'behind')].filter(Boolean).join(' \u00b7 ')
+      + '. Every metric on this page is the sum of these blocks, weighted by how long each lasted.';
+    return { on: true, bands, meta: tot + ' minutes \u00b7 ' + rows.length + (rows.length === 1 ? ' state' : ' states'), note };
+  }
+  leadVals() {
+    const L = this.state.L || [];
+    const RED = '#e12b3f', GRN = '#4ec98d', BLU = '#5b7bd5';
+    const END = { 'we conceded': { lab: 'Surrendered — opponent equalised', col: RED },
+      'we scored': { lab: 'Extended — United scored again', col: GRN },
+      'full time': { lab: 'Held to the whistle', col: BLU } };
+    if (!L.length) return { ldMeta: '', ldHero: [], ldRail: [], ldEnd: [], ldPhase: [], ldLegend: [], ldTicks: [], ldHalf: 41, ldFull: 82 };
+    const SPAN = 110, n = L.length;
+    const mins = L.reduce((a, r) => a + r.d, 0);
+    const lost = L.filter(r => r.eb === 'we conceded').length;
+    const matches = {};
+    L.forEach(r => { (matches[r.m] = matches[r.m] || { gw: r.gw, opp: r.o, ven: r.v, sp: [] }).sp.push(r); });
+    const mArr = Object.values(matches).sort((a, b) => a.gw - b.gw);
+    const ldRail = mArr.map(m => ({
+      gw: 'GW' + m.gw, opp: m.opp.replace(' United', '').replace(' Hotspur', '').replace('Wolverhampton Wanderers', 'Wolves').replace('Nottingham Forest', 'Forest').replace('Manchester City', 'Man City'),
+      ven: m.ven, venCol: m.ven === 'H' ? '#6f6d78' : '#f0b429',
+      tot: m.sp.reduce((a, r) => a + r.d, 0),
+      bands: m.sp.map(r => ({ x: +(r.s / SPAN * 100).toFixed(2), w: +(Math.max(r.d, 0.9) / SPAN * 100).toFixed(2),
+        col: END[r.eb].col, t: r.s + "'–" + r.e + "' (" + r.d + " min) · " + END[r.eb].lab
+          + ((r.iv && r.iv.length) ? ' · ' + r.iv.length + ' change' + (r.iv.length > 1 ? 's' : '') : ' · no change'),
+        marks: (r.iv || []).filter((v, i, a) => a.findIndex(z => z.min === v.min && z.kind === v.kind) === i)
+          .map(v => ({ x: +(Math.min(.97, Math.max(.02, (v.min - r.s) / Math.max(r.d, 1))) * 100).toFixed(1),
+            col: v.kind === 'shape' ? '#f0b429' : '#0b0b0e', w: v.kind === 'shape' ? 2 : 1.4 })) }))
+    }));
+    const order = ['we conceded', 'full time', 'we scored'];
+    const ldEnd = order.map(k => {
+      const g = L.filter(r => r.eb === k), gm = g.reduce((a, r) => a + r.d, 0);
+      return { lab: END[k].lab, col: END[k].col, n: g.length + ' of ' + n, mins: gm,
+        avg: (gm / g.length).toFixed(1), w: +(g.length / n * 100).toFixed(1) };
+    });
+    const bk = [[0, 15], [15, 30], [30, 45], [45, 60], [60, 75], [75, 120]];
+    const maxN = Math.max.apply(null, bk.map(([a, b]) => L.filter(r => r.s >= a && r.s < b).length));
+    const ldPhase = bk.map(([a, b]) => {
+      const g = L.filter(r => r.s >= a && r.s < b), c = g.filter(r => r.eb === 'we conceded').length;
+      const rate = g.length ? c / g.length : 0;
+      return { lab: a + "–" + (b > 100 ? "90+" : b) + "'", wAll: +(g.length / maxN * 100).toFixed(1),
+        wLost: +(c / maxN * 100).toFixed(1), rate: c + '/' + g.length,
+        col: rate >= .5 ? RED : rate >= .34 ? '#f0b429' : '#8d8a95' };
+    });
+    const ivF = a => a.filter(r => r.iv && r.iv.length);
+    const lostN = a => a.filter(r => r.eb === 'we conceded').length;
+    const long = L.filter(r => r.d >= 15), lgI = ivF(long), lgN = long.filter(r => !(r.iv && r.iv.length));
+    const firsts = ivF(L).map(r => Math.min.apply(null, r.iv.map(v => v.el))).sort((a, b) => a - b);
+    const ldBench = {
+      touched: ivF(L).length, untouched: L.length - ivF(L).length,
+      medFirst: firsts.length ? firsts[Math.floor(firsts.length / 2)] : 0,
+      nSub: L.reduce((a, r) => a + (r.iv || []).filter(v => v.kind === 'sub').length, 0),
+      nShape: L.reduce((a, r) => a + (r.iv || []).filter(v => v.kind === 'shape').length, 0),
+      pair: [
+        { lab: 'He changed something', n: lgI.length, lost: lostN(lgI),
+          rate: lgI.length ? Math.round(lostN(lgI) / lgI.length * 100) + '%' : '\u2014',
+          w: lgI.length ? +(lostN(lgI) / lgI.length * 100).toFixed(1) : 0, col: GRN },
+        { lab: 'He left it alone', n: lgN.length, lost: lostN(lgN),
+          rate: lgN.length ? Math.round(lostN(lgN) / lgN.length * 100) + '%' : '\u2014',
+          w: lgN.length ? +(lostN(lgN) / lgN.length * 100).toFixed(1) : 0, col: RED }
+      ]
+    };
+    return {
+      ldBench,
+      ldMeta: n + ' spells · ' + mArr.length + ' matches · ' + mins.toLocaleString('en-GB') + ' minutes · Premier League 2025/26',
+      ldHalf: +(45 / SPAN * 100).toFixed(2), ldFull: +(90 / SPAN * 100).toFixed(2),
+      ldTicks: [0, 15, 30, 45, 60, 75, 90].map(v => ({ x: +(v / SPAN * 100).toFixed(2), lab: v })),
+      ldLegend: order.map(k => ({ lab: END[k].lab, col: END[k].col })),
+      ldHero: [
+        { v: n, lab: 'One-goal leads held during the season', sub: 'across ' + mArr.length + ' matches', col: '#f3f2ef' },
+        { v: lost, lab: 'ended with the opponent levelling the tie', sub: (lost / n * 100).toFixed(0) + '% of all spells', col: RED },
+        { v: (mins / n).toFixed(1), lab: 'Mean minutes a one-goal lead survived', sub: 'median 18 · longest 81', col: '#f3f2ef' },
+        { v: '445', lab: 'Minutes played inside a lead that was later given back', sub: 'of 1,035 total', col: RED }
+      ], ldRail, ldEnd, ldPhase
+    };
+  }
   renderVals() {
     const D = this.state.D;
-    if (!D) return {};
+    if (!D) return { loadErr: this.state.err || '' };
     const g = D.gw1, S = D.season;
+    const LD = this.leadVals();
+    const gsStrip = this.gsStripVals(D);
     const RED = '#e12b3f', BLU = '#5b7bd5', AMB = '#f0b429', GRN = '#4ec98d', DIM = '#8d8a95';
     const r2 = (v, d = 2) => v == null ? '—' : (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
     const fmt = v => v == null ? '—' : (Number.isInteger(v) ? String(v) : String(Math.round(v * 100) / 100));
@@ -2948,6 +3378,54 @@ class Component extends DCLogic {
     const everyWeek = AV.rows.filter(p => p.listed === 38).map(p => p.nm.split(' ').slice(-1)[0]);
     const neverPlayed = AV.rows.filter(p => p.st === 0 && p.on === 0);
 
+    // ================= GAME STATE =================
+    const GS = D.gs;
+    const STCOL = { 'Trailing 2+': '#ff8a5b', 'Trailing 1': GRN, 'Level': '#8d8a95', 'Leading 1': RED, 'Leading 2+': AMB };
+    const gsMeta = GS.nRows + ' state-rows \u00b7 ' + GS.totMin.toLocaleString() + ' minutes \u00b7 scoreline agrees on 38/38';
+    const gsLo = -0.6, gsSpan = 2.1, gsZero = +((0 - gsLo) / gsSpan * 100).toFixed(2);
+    const gsRows = GS.states.map(s => {
+      const thin = s.n < 6, w = +(Math.abs(s.xgd) / gsSpan * 100).toFixed(2);
+      const left = s.xgd >= 0 ? gsZero : +(gsZero - w).toFixed(2);
+      return { s: s.s, min: s.min.toLocaleString(), poss: s.poss + '%',
+        sh: s.sh.toFixed(1), ag: s.ag.toFixed(1), xg: s.xg.toFixed(2), xga: s.xga.toFixed(2),
+        xgd: (s.xgd > 0 ? '+' : '\u2212') + Math.abs(s.xgd).toFixed(2),
+        goals: s.goals + '\u2013' + s.conc,
+        barLeft: left, barW: w, barCol: s.xgd > 0 ? GRN : RED, barOp: thin ? 0.32 : 1,
+        nmCol: thin ? '#8d8a95' : '#f3f2ef',
+        flag: thin ? s.n + ' matches' : '', flagCol: AMB,
+        onEnter: tip(s.s + ' \u00b7 ' + s.min + ' minutes across ' + s.n + ' match' + (s.n === 1 ? '' : 'es'),
+          s.poss + '% of the ball \u00b7 ' + s.sh.toFixed(1) + ' shots per 90 against ' + s.ag.toFixed(1) +
+          ' \u00b7 scored ' + s.goals + ', conceded ' + s.conc),
+        onLeave: leave };
+    });
+    const bLo = -1.0, bSpan = 3.6, bx = v => +((v - bLo) / bSpan * 100).toFixed(2);
+    const gsBZero = bx(0);
+    const B = GS.boot;
+    const gsBoot = [
+      { lab: 'Trailing minus leading', v: '+' + B.gap.toFixed(2), lo: '+' + B.lo.toFixed(2), hi: '+' + B.hi.toFixed(2),
+        x: bx(B.lo), w: +(bx(B.hi) - bx(B.lo)).toFixed(2), ptX: bx(B.gap), col: GRN,
+        verdict: 'Reverses in ' + B.rev + '% of ' + B.nRes.toLocaleString() + ' resamples. The contrast is real.', vCol: GRN },
+      { lab: 'Leading by one, on its own', v: '\u2212' + Math.abs(B.l1.v).toFixed(2),
+        lo: '\u2212' + Math.abs(B.l1.lo).toFixed(2), hi: '+' + B.l1.hi.toFixed(2),
+        x: bx(B.l1.lo), w: +(bx(B.l1.hi) - bx(B.l1.lo)).toFixed(2), ptX: bx(B.l1.v), col: AMB,
+        verdict: 'Crosses zero. Not a standalone finding.', vCol: AMB }
+    ];
+    const gsOut = GS.outcomes.map(o => ({ lab: o.lab, n: o.n, rec: o.rec, ppg: o.ppg.toFixed(2),
+      w: +(o.ppg / 2.6 * 100).toFixed(1), col: o.ppg >= 2 ? GRN : o.ppg >= 1 ? AMB : RED }));
+    const T = GS.trans;
+    const gsTrans = [
+      { pct: Math.round(T.scoredAfterConc / T.concEvents * 100) + '%', frac: T.scoredAfterConc + ' of ' + T.concEvents,
+        lab: 'of the times United conceded, they scored again within fifteen minutes', col: GRN },
+      { pct: Math.round(T.concAfterScore / T.scoreEvents * 100) + '%', frac: T.concAfterScore + ' of ' + T.scoreEvents,
+        lab: 'of the times United scored, they conceded within fifteen minutes', col: RED }
+    ];
+    const gsGw23 = { lab: GS.gw23.lab,
+      walk: GS.gw23.walk.map(w => ({ min: w.min, sc: w.sc, st: w.st, held: w.held.toFixed(1), col: STCOL[w.st] })),
+      split: GS.gw23.split.map(s => ({ st: s.st, min: s.min.toFixed(1), poss: s.poss + '%',
+        sh: String(s.sh), ag: String(s.ag), xg: s.xg.toFixed(2), xga: s.xga.toFixed(2), col: STCOL[s.st] })) };
+    const gsFails = GS.fails;
+    const gsMethod = GS.method.map((t, i) => ({ n: String(i + 1).padStart(2, '0'), t }));
+
     // ================= MATCHWEEK SPINE =================
     const C3 = { 'Arsenal': 'ARS', 'Aston Villa': 'AVL', 'Bournemouth': 'BOU', 'Brentford': 'BRE',
       'Brighton and Hove Albion': 'BHA', 'Brighton': 'BHA', 'Burnley': 'BUR', 'Chelsea': 'CHE',
@@ -3134,6 +3612,7 @@ class Component extends DCLogic {
       cols, rows, unusedNote, quadPts, quadLabels, passRows, rails,
       matrixRows, matrixCols, matrixGrid, matrixNote, seasonRows, seasonTotals,
       p90Chips, p90Rows, p90Below, p90Label, loadDots, loadTicks, floorLeft, loadFacts, rateCols, xRows, xNote,
+      gsMeta, gsRows, gsZero, gsBoot, gsBZero, gsOut, gsTrans, gsGw23, gsFails, gsMethod,
       mwRows, mwSeasons, mwStats, mwForm, mwFormNote, mwPrev, mwNext, mwNow,
       mwFull, mwLite, mwR,
       roleTabs, playerList, groupsOut, keyCards, selHead, roleNote, tapeHead,
@@ -3142,7 +3621,7 @@ class Component extends DCLogic {
       trapPts, trapYLabels, trapXTicks, trapGridX, trapBands, trapLine, trapGw1, corrRows, buckets, form,
       xgYLabels, xgXTicks,
       cumYLabels, cumXTicks, cumEnd,
-      cumGfPath: path(S.tl.gf), cumXgPath: path(S.tl.xg), ledger, table, tiers, tierMetrics };
+      cumGfPath: path(S.tl.gf), cumXgPath: path(S.tl.xg), ledger, table, tiers, tierMetrics, gsStrip, ...LD };
   }
 }
 </script>
