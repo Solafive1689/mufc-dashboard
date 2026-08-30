@@ -571,6 +571,22 @@ html{scroll-behavior:smooth}
 </div>
 </sc-if>
 
+
+<sc-if value="{{ isBuildGw }}" hint-placeholder-val="{{ false }}">
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 24px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:18px">The figures · building from our own third</div>
+<div style="display:flex;flex-direction:column;gap:30px">
+<sc-for list="{{ buFigs }}" as="f" hint-placeholder-count="2">
+<figure style="margin:0">
+<figcaption style="font-size:14px;font-weight:700;color:#f3f2ef;margin-bottom:12px;text-wrap:pretty">{{ f.t }}</figcaption>
+<div style="background:#0d1410;border:1px solid #1d2a22"><img src="{{ f.src }}" alt="{{ f.t }}" loading="lazy" style="display:block;width:100%;height:auto"></div>
+<div style="font-size:11.5px;line-height:1.5;color:#6f6d78;margin-top:10px;max-width:104ch;text-wrap:pretty">{{ f.n }}</div>
+</figure>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ mwR.hasXi }}" hint-placeholder-val="{{ false }}">
 <div data-stack="1" style="display:grid;grid-template-columns:1.6fr 1fr;gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
 <div style="background:#13131a;padding:22px 26px 20px">
@@ -609,6 +625,168 @@ html{scroll-behavior:smooth}
 </sc-if>
 
 <p style="margin:14px 0 0;font-size:11.5px;color:#5d5b65;max-width:96ch;text-wrap:pretty">{{ mwR.prov }}</p>
+</section>
+</sc-if>
+
+<sc-if value="{{ isOppoGw }}" hint-placeholder-val="{{ true }}">
+<section id="oppo" data-screen-label="Opposition: Ipswich" style="padding:56px 0 0">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#e12b3f;margin-bottom:10px">Matchweek 2 · opposition analysis · Ipswich Town (H)</div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:6px">
+<div style="display:flex;align-items:baseline;gap:14px">
+<div style="width:4px;height:20px;background:#e12b3f;align-self:center"></div>
+<h2 style="margin:0;font-family:Anton,sans-serif;font-size:42px;line-height:.98;letter-spacing:.01em;text-transform:uppercase;color:#f3f2ef;max-width:22ch">Ipswich do not want the ball</h2>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78">{{ opMeta }}</div>
+</div>
+<p style="margin:0 0 22px 18px;font-size:14px;color:#8d8a95;max-width:90ch;text-wrap:pretty">Gary O'Neil's side had 37% of the ball at home and won. Both goals came off a Sunderland pass inside Sunderland's own half, and both were finished inside seven seconds of the ball changing hands. This is one match. It does not prove a habit, but it is the newest thing we have on how they want to play.</p>
+
+<div data-stack="1" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#23232c;border:1px solid #23232c;margin-bottom:1px">
+<sc-for list="{{ opHero }}" as="h" hint-placeholder-count="4">
+<div style="background:#13131a;padding:18px 22px 16px" data-anim="rise">
+<div style="font-family:Anton,sans-serif;font-size:38px;line-height:.82;color:{{ h.col }}">{{ h.v }}</div>
+<div style="font-size:11.5px;color:#b8b5c0;margin-top:9px;text-wrap:pretty">{{ h.lab }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852;margin-top:4px">{{ h.sub }}</div>
+</div>
+</sc-for>
+</div>
+
+
+<div style="background:#0b0b0e;border-left:1px solid #23232c;border-right:1px solid #23232c;padding:34px 26px 26px;display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap"><div style="font-family:Anton,sans-serif;font-size:64px;line-height:.8;color:#e12b3f;letter-spacing:-.01em">I</div><div style="flex:1;min-width:260px;border-bottom:2px solid #e12b3f;padding-bottom:10px"><div style="font-family:Anton,sans-serif;font-size:26px;line-height:1.05;letter-spacing:.01em;text-transform:uppercase;color:#f3f2ef">What the match actually says</div><div style="font-size:13px;color:#8d8a95;margin-top:7px;max-width:76ch;text-wrap:pretty">Twelve’s published numbers first, then the shape those numbers came out of.</div></div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-bottom:0;padding:24px 26px 24px"><div style="font-family:Anton,sans-serif;font-size:23px;line-height:1.08;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;max-width:26ch;margin-bottom:9px">Less of the ball, the same expected return</div><div style="font-size:13px;color:#8d8a95;margin-bottom:24px;max-width:78ch;text-wrap:pretty">Three figures, both sides, each value carrying how it was checked. Five of the six agreed against Sunderland’s own report; their possession share did not. Ipswich lose the first, draw the second and win the third.</div><div data-stack="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#23232c;border:1px solid #23232c;margin-bottom:26px"><sc-for list="{{ q2Head }}" as="h" hint-placeholder-count="3"><div style="background:#101016;padding:17px 19px 16px" data-anim="rise"><div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#6f6d78;margin-bottom:13px">{{ h.lab }}</div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px"><div style="font-family:Anton,sans-serif;font-size:32px;line-height:.86;color:#f3f2ef">{{ h.a }}</div><div style="font-family:Anton,sans-serif;font-size:22px;line-height:.86;color:#5d5b65">{{ h.b }}</div></div><div style="display:flex;height:9px;background:#0b0b0e;margin-bottom:9px"><div data-anim="bar" style="height:9px;background:#c8102e;width:{{ h.aW }}%"></div><div style="height:9px;background:#33333d;width:{{ h.bW }}%"></div></div><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#8d8a95;margin-bottom:11px;min-width:0"><span style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0"><span style="width:5px;height:5px;border-radius:50%;background:{{ h.aDot }};display:inline-block;flex:none"></span><span style="color:#b8b5c0">Ipswich</span><span style="min-width:0">{{ h.aVer }}</span></span><span style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0;justify-content:flex-end"><span style="min-width:0">{{ h.bVer }}</span><span style="color:#b8b5c0">Sunderland</span><span style="width:5px;height:5px;border-radius:50%;background:{{ h.bDot }};display:inline-block;flex:none"></span></span></div><div style="font-size:11.5px;line-height:1.45;color:#b8b5c0;text-wrap:pretty">{{ h.line }}</div></div></sc-for></div><div style="display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;padding:0 0 24px;margin-bottom:24px;border-bottom:1px solid #23232c"><div style="font-family:Anton,sans-serif;font-size:44px;line-height:.85;color:#c8102e;flex:none">{{ q2Tilt.v }}</div><div style="font-size:13px;color:#b8b5c0;max-width:64ch;text-wrap:pretty">{{ q2Tilt.line }}</div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#4a4852;padding-bottom:9px;border-bottom:1px solid #2e2e38;margin-bottom:16px">How each side turned the ball into a shot</div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;max-width:88ch;text-wrap:pretty">Sunderland reached the final third more often and got almost nowhere from it. Ipswich arrived less and penetrated twice as well. Their own funnel is hand transcription with no mirror, so it carries an amber dot; Sunderland’s is verified against their own report.</div><div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-bottom:6px"><sc-for list="{{ q2Funnel }}" as="f" hint-placeholder-count="2"><div><div style="display:flex;align-items:center;gap:9px;margin-bottom:15px"><div style="width:7px;height:7px;border-radius:50%;background:{{ f.dot }};flex:none"></div><div style="font-size:13px;font-weight:700;color:#f3f2ef">{{ f.who }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95;margin-left:auto">{{ f.ver }} · {{ f.touch }}</div></div><div style="display:flex;flex-direction:column;gap:13px"><sc-for list="{{ f.steps }}" as="s" hint-placeholder-count="3"><div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px"><div style="font-size:11.5px;color:#8d8a95;text-wrap:pretty">{{ s.lab }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#f3f2ef;flex:none">{{ s.v }}</div></div><div style="height:10px;background:#101016"><div data-anim="bar" style="height:10px;background:{{ f.col }};width:{{ s.w }}%"></div></div></div></sc-for></div></div></sc-for></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:18px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">Bars are read within their own step, not against each other: the second is a share of the first and the third a share of box touches. Sunderland turned 31% of possessions into final-third entries and 15% of those into the box; Ipswich 23% and 32%. So the block Ipswich defended with worked on the second step, not the first.</div><div style="margin-top:26px;padding-top:24px;border-top:1px solid #23232c"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#4a4852;padding-bottom:9px;border-bottom:1px solid #2e2e38;margin-bottom:16px">What we can stand behind</div><div style="display:flex;height:14px;background:#0b0b0e;margin-bottom:13px"><sc-for list="{{ q2Prov }}" as="p" hint-placeholder-count="4"><div data-anim="bar" style="height:14px;background:{{ p.col }};width:{{ p.w }}%"></div></sc-for></div><div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px"><sc-for list="{{ q2Prov }}" as="p" hint-placeholder-count="4"><div style="display:flex;align-items:baseline;gap:7px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:{{ p.col }}">{{ p.n }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#6f6d78">{{ p.lab }}</div></div></sc-for></div><div style="font-size:12.5px;color:#b8b5c0;max-width:92ch;text-wrap:pretty">Twenty-two of the 80 published metrics agreed exactly against Sunderland’s own report, and the verified set leans heavily one way: most of it describes what Ipswich <span style="color:#f3f2ef">allowed</span> rather than what they did, because those are the fields both reports carry. Their own pressing and transition numbers are single-sourced. Six metrics sit in neither validation list in the source and appear nowhere above.</div><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px solid #1a1a21"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#4a4852;margin-right:4px">Source table</div><div onClick="{{ q2SetVer }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Verified 22</div><div onClick="{{ q2SetAll }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">All 80</div><div onClick="{{ q2SetOff }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#e12b3f;color:#f3f2ef">Hide</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852;margin-left:auto">{{ q2MetCount }}</div></div><sc-if value="{{ q2ShowTable }}" hint-placeholder-val="{{ false }}"><div data-scroll="1" style="overflow-x:auto;margin-top:16px"><div data-wide="1" style="min-width:560px"><div style="display:grid;grid-template-columns:1fr 96px 38px 108px;gap:10px;padding:0 0 8px;border-bottom:1px solid #2e2e38;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#4a4852"><div>Metric</div><div style="text-align:right">Value</div><div title="Metrics beginning tw_opp_ describe Sunderland, not Ipswich" style="text-align:center">Ref</div><div title="How the figure was checked against Sunderland’s own report">Provenance</div></div><sc-for list="{{ q2Met }}" as="m" hint-placeholder-count="12"><div><sc-if value="{{ m.sec }}" hint-placeholder-val="{{ false }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#4ec98d;padding:15px 0 6px">{{ m.sec }}</div></sc-if><div style="display:grid;grid-template-columns:1fr 96px 38px 108px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a21" style-hover="background:#191920"><div style="font-size:12.5px;color:{{ m.kCol }};min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.k }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#f3f2ef;text-align:right">{{ m.v }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:{{ m.whoCol }};text-align:center">{{ m.who }}</div><div style="display:flex;align-items:center;gap:7px"><div style="width:6px;height:6px;border-radius:50%;background:{{ m.dot }};flex:none"></div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6f6d78">{{ m.ver }}</div></div></div></div></sc-for></div></div></sc-if></div></div>
+<div style="background:#13131a;border:1px solid #23232c;padding:22px 26px 20px">
+<div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:6px">Where they defend</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;text-wrap:pretty">Every tackle, interception, clearance, recovery, block and aerial, grouped by the third of the pitch it happened in. Ipswich made 150, Sunderland 121.</div>
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:26px">
+<div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#b8b5c0;margin-bottom:11px">IPSWICH · mean position 34.1 of 100</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ opDefIps }}" as="t" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:88px 1fr 58px;gap:11px;align-items:center">
+<div style="font-size:11.5px;color:#8d8a95">{{ t.lab }}</div>
+<div style="height:15px;background:#101016"><div data-anim="bar" style="height:15px;width:{{ t.w }}%;background:{{ t.col }}"></div></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#b8b5c0;text-align:right">{{ t.n }} · {{ t.pct }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78;margin-bottom:11px">SUNDERLAND · mean position 38.4</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ opDefSun }}" as="t" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:88px 1fr 58px;gap:11px;align-items:center">
+<div style="font-size:11.5px;color:#6f6d78">{{ t.lab }}</div>
+<div style="height:15px;background:#101016"><div data-anim="bar" style="height:15px;width:{{ t.w }}%;background:{{ t.col }};opacity:.45"></div></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6f6d78;text-align:right">{{ t.n }} · {{ t.pct }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="font-size:12.5px;color:#b8b5c0;margin-top:20px;text-wrap:pretty">Eleven defensive actions in the final third across the whole match. They allowed 16.5 passes per defensive action; Sunderland allowed 11.0, so the away side pressed harder at Portman Road than the home side. Thirty-three clearances to Sunderland's thirteen tells you the rest. They give up territory, keep bodies between the ball and the goal, and clear it.</div>
+<div style="font-size:12px;color:#6f6d78;margin-top:12px;text-wrap:pretty">{{ opShape }}</div>
+</div>
+
+
+<div style="background:#0b0b0e;border-left:1px solid #23232c;border-right:1px solid #23232c;padding:34px 26px 26px;display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap"><div style="font-family:Anton,sans-serif;font-size:64px;line-height:.8;color:#e12b3f;letter-spacing:-.01em">II</div><div style="flex:1;min-width:260px;border-bottom:2px solid #e12b3f;padding-bottom:10px"><div style="font-family:Anton,sans-serif;font-size:26px;line-height:1.05;letter-spacing:.01em;text-transform:uppercase;color:#f3f2ef">How the two goals happened</div><div style="font-size:13px;color:#8d8a95;margin-top:7px;max-width:76ch;text-wrap:pretty">Neither was built. Both came off a Sunderland pass inside their own half.</div></div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 20px">
+<div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:6px">Both goals, end to end</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:22px;text-wrap:pretty">Marker is where Ipswich won the ball, bar is the ground covered before the shot, and the notch is where it was struck. Pitch runs left to right, their goal behind the left edge.</div>
+<div style="display:flex;flex-direction:column;gap:22px">
+<sc-for list="{{ opGoals }}" as="g" hint-placeholder-count="2">
+<div>
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+<div style="font-family:Anton,sans-serif;font-size:20px;color:#e12b3f">{{ g.m }}</div>
+<div style="font-size:13px;font-weight:700;color:#f3f2ef">{{ g.who }}</div>
+<div style="font-size:12px;color:#8d8a95">assisted by {{ g.assist }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#f0b429;margin-left:auto">{{ g.sec }} ball-to-goal</div>
+</div>
+<div style="position:relative;height:22px;background:#101016;margin-bottom:9px">
+<div style="position:absolute;left:33.3%;top:0;bottom:0;width:1px;background:#2a2a33"></div>
+<div style="position:absolute;left:66.6%;top:0;bottom:0;width:1px;background:#2a2a33"></div>
+<div data-anim="bar" style="position:absolute;left:{{ g.wx }}%;top:7px;height:8px;right:{{ g.rx }}%;background:{{ g.col }};opacity:.55"></div>
+<div style="position:absolute;left:{{ g.wx }}%;top:2px;bottom:2px;width:2px;background:#f0b429"></div>
+<div style="position:absolute;left:{{ g.fx }}%;top:0;bottom:0;width:3px;background:#f3f2ef"></div>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6f6d78">{{ g.win }} on {{ g.wx }} · error by {{ g.err }} · finish on {{ g.fx }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852">{{ g.tag }}</div>
+</div>
+<div style="font-size:12.5px;color:#b8b5c0;text-wrap:pretty">{{ g.carry }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12.5px;color:#b8b5c0;margin-top:20px;padding-top:16px;border-top:1px solid #2e2e38;text-wrap:pretty">Neither goal was built. Both were taken from a pass played by a Sunderland defender inside his own half, and the file marks both of those passes as errors leading directly to a goal. Ipswich created ten shots in total and scored the two that started this way.</div>
+</div>
+
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#23232c;border:1px solid #23232c;border-top:0">
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:6px">How they move it forward</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;text-wrap:pretty">They are not building through the thirds. Nineteen per cent of their passes were long, and their keeper played four short passes all match.</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ opBuild }}" as="b" hint-placeholder-count="4">
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px">
+<div style="font-size:12.5px;color:#f3f2ef">{{ b.lab }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#b8b5c0">{{ b.v }}</div>
+</div>
+<div style="height:8px;background:#101016;margin-bottom:4px"><div data-anim="bar" style="height:8px;width:{{ b.w }}%;background:{{ b.col }}"></div></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852">{{ b.sub }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;color:#b8b5c0;margin-top:18px;text-wrap:pretty">Zero through balls in the match. Their forward passing is long and vertical rather than threaded, which is consistent with a side that wants the ball moved out of its own third quickly and contested high up.</div>
+</div>
+<div style="background:#13131a;padding:22px 26px 20px">
+<div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:6px">Which side they arrive down</div>
+<div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;text-wrap:pretty">Twenty-seven completed passes into the final third, by the channel they landed in.</div>
+<div style="display:flex;flex-direction:column;gap:13px">
+<sc-for list="{{ opFlank }}" as="f" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:56px 1fr 34px;gap:11px;align-items:center">
+<div style="font-size:12px;color:#8d8a95">{{ f.lab }}</div>
+<div style="height:17px;background:#101016"><div data-anim="bar" style="height:17px;width:{{ f.w }}%;background:{{ f.col }}"></div></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#b8b5c0;text-align:right">{{ f.n }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;color:#b8b5c0;margin-top:18px;text-wrap:pretty">Twenty of the twenty-seven entries arrived in the two touchline channels, four in the centre and three in the half-spaces. Nine of them arrived in the right channel and produced no shot at all.</div>
+<div style="font-size:11.5px;color:#6f6d78;margin-top:12px;text-wrap:pretty">Three corners taken all match. Set pieces produced one shot, a header from Emersonn on 26 minutes.</div>
+</div>
+</div>
+
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 22px"><div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:6px">Who moves the ball, and in which direction</div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;max-width:92ch;text-wrap:pretty">Counts only. Nobody in this fixture has the minutes to support a per-90 rate, so the source ships none and none is computed here. Forward and backward count passes of five metres or more along the pitch; the bar is centred, backward to the left of the line and forward to the right.</div><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#4a4852;margin-right:4px">Sort</div><div onClick="{{ q2SortPs }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Passes</div><div onClick="{{ q2SortPg }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Progressive</div><div onClick="{{ q2SortF3 }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Final third</div><div onClick="{{ q2SortLs }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 10px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Turnovers</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852;margin-left:auto">sorted by {{ q2SortLab }}</div></div><div data-scroll="1" style="overflow-x:auto"><div data-wide="1" style="min-width:772px"><div style="display:grid;grid-template-columns:108px 40px 36px 1fr 40px 98px 36px 34px 32px 42px 36px;gap:9px;padding:0 0 8px;border-bottom:1px solid #2e2e38;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a4852"><div style="text-align:left">Player</div><div title="Every touch of the ball, including defensive actions" style="text-align:right">Touch</div><div title="Passes attempted" style="text-align:right">Pass</div><div></div><div title="Share of passes completed" style="text-align:right">Cmp</div><div title="Passes of five metres or more against the direction of play, and with it" style="text-align:center">Back ← | → Forward</div><div title="Forward minus backward" style="text-align:right">Net</div><div title="Progressive passes: a pass that meaningfully advances the ball toward goal" style="text-align:right">Prog</div><div title="Completed passes into the final third" style="text-align:right">F3</div><div title="Take-ons won of take-ons attempted" style="text-align:right">Take-on</div><div title="Every turnover: unsuccessful pass, dispossession or error" style="text-align:right">Lost</div></div><sc-for list="{{ q2Pl }}" as="p" hint-placeholder-count="14"><div style="display:grid;grid-template-columns:108px 40px 36px 1fr 40px 98px 36px 34px 32px 42px 36px;gap:9px;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a21" style-hover="background:#191920"><div style="min-width:0"><div style="font-size:12.5px;color:{{ p.nmCol }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.short }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#4a4852">{{ p.role }}</div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#8d8a95;text-align:right">{{ p.tou }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#f3f2ef;text-align:right">{{ p.ps }}</div><div style="height:7px;background:#101016"><div data-anim="bar" style="height:7px;background:#3f5f52;width:{{ p.psW }}%"></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ p.pcCol }};text-align:right">{{ p.pc }}</div><div style="position:relative;height:14px;background:#101016"><div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:#3a3a45"></div><div style="position:absolute;left:{{ p.bkX }}%;top:3px;height:8px;width:{{ p.bkW }}%;background:#5b7bd5;opacity:.8"></div><div style="position:absolute;left:50%;top:3px;height:8px;width:{{ p.fwW }}%;background:#4ec98d"></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:{{ p.netCol }};text-align:right">{{ p.net }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ p.pgCol }};text-align:right">{{ p.pg }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ p.f3Col }};text-align:right">{{ p.f3 }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ p.toCol }};text-align:right">{{ p.to }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ p.lsCol }};text-align:right">{{ p.ls }}</div></div></sc-for><div style="display:grid;grid-template-columns:108px 40px 36px 1fr 40px 98px 36px 34px 32px 42px 36px;gap:9px;align-items:center;padding:11px 0 0;border-top:1px solid #2e2e38"><div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8d8a95">All Ipswich</div><div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#f3f2ef;text-align:right">{{ q2PlTot.ps }}</div><div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#b8b5c0;text-align:right">{{ q2PlTot.pc }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78;text-align:center">{{ q2PlTot.bk }} back · {{ q2PlTot.fw }} fwd</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#4ec98d;text-align:right">{{ q2PlTot.net }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#f0b429;text-align:right">{{ q2PlTot.pg }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#f3f2ef;text-align:right">{{ q2PlTot.f3 }}</div><div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#f0b429;text-align:right">{{ q2PlTot.ls }}</div></div></div></div><div style="display:flex;gap:17px;flex-wrap:wrap;margin-top:13px"><div style="display:flex;align-items:center;gap:7px"><div style="width:12px;height:7px;background:#4ec98d"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">forward 5m+</span></div><div style="display:flex;align-items:center;gap:7px"><div style="width:12px;height:7px;background:#5b7bd5;opacity:.8"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">backward 5m+</span></div><div style="display:flex;align-items:center;gap:7px"><div style="width:12px;height:7px;background:#f0b429"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">flagged low or high</span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4a4852">the four wide starters are shown in white</div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:16px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">The team tilts forward by 21, and both players doing it are the two furthest from goal: Scherpen +18 and Greaves +11. The midfield goes the other way. Lukic plays more passes than anyone and is −3; Davis is −10 on 7 forward against 17 backward, with two progressive passes in ninety minutes. Fatawu completed 7 of 16 and entered the final third once. O’Shea is the busiest player on the pitch at 70 touches and reaches only two partners at four passes or more, so the right is not disconnected, it is busy and unproductive. Núñez and Lukic played 9 of the 27 final-third entries between them and are the only functioning route forward.</div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 20px">
+<div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:16px">Who does the damage</div>
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:1px 26px">
+<sc-for list="{{ opThreat }}" as="p" hint-placeholder-count="4">
+<div style="padding:0 0 16px">
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px">
+<div style="font-size:13px;font-weight:700;color:#f3f2ef">{{ p.nm }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#6f6d78">{{ p.role }}</div>
+</div>
+<div style="font-size:12.5px;color:#b8b5c0;text-wrap:pretty">{{ p.line }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+
+
+<div style="background:#0b0b0e;border-left:1px solid #23232c;border-right:1px solid #23232c;padding:34px 26px 26px;display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap"><div style="font-family:Anton,sans-serif;font-size:64px;line-height:.8;color:#e12b3f;letter-spacing:-.01em">III</div><div style="flex:1;min-width:260px;border-bottom:2px solid #e12b3f;padding-bottom:10px"><div style="font-family:Anton,sans-serif;font-size:26px;line-height:1.05;letter-spacing:.01em;text-transform:uppercase;color:#f3f2ef">Six plates from the event file</div><div style="font-size:13px;color:#8d8a95;margin-top:7px;max-width:76ch;text-wrap:pretty">One pitch, one scale, one label size across all six, so they can be read against each other.</div></div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:20px 26px 18px"><div style="font-family:Anton,sans-serif;font-size:19px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef;margin-bottom:6px">The evidence · six plates from 1,549 events</div><div style="font-size:12.5px;color:#8d8a95;text-wrap:pretty">Every plate uses the same pitch, the same scale and the same label size. Coordinates are WhoScored’s per-team frame; chance quality is a shot-angle proxy scaled to Twelve’s published non-penalty xG and is never summed across matches.</div></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ipsArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#4ec98d"></path></marker><marker id="ipsArrowA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#4ec98d"></path></marker></defs></svg>
+<div style="background:#13131a;border:1px solid #23232c;border-top:2px solid #e12b3f;padding:20px 26px 22px"><div style="display:flex;align-items:baseline;gap:11px;margin-bottom:7px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#e12b3f;border:1px solid #e12b3f;padding:1px 5px 2px">01</div><div style="font-family:Anton,sans-serif;font-size:17.5px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef">Both goals began with a ball win and ended inside ten seconds</div></div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;text-wrap:pretty">One plate per goal. Cross marks where Ipswich won the ball, the dashed line is the ball travelling with a player, the solid arrow is a pass and the star is the finish.</div><div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:22px"><sc-for list="{{ ipSeqs }}" as="s" hint-placeholder-count="2"><div><div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2e2e38;flex-wrap:wrap"><div style="font-family:Anton,sans-serif;font-size:20px;line-height:1;color:#e12b3f">{{ s.m }}</div><div style="font-size:13px;font-weight:700;color:#f3f2ef">{{ s.who }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#f0b429;margin-left:auto">{{ s.secs }}</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:#6f8a7d">{{ s.kind }}</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#5d7a6d">attacking</span><svg viewBox="0 0 34 8" style="width:34px;height:8px;display:block"><line x1="0" y1="4" x2="28" y2="4" stroke="#5d8272" stroke-width="1.1"></line><path d="M27,1 L33,4 L27,7 z" fill="#5d8272"></path></svg></div></div><div style="background:#0e1a15;border:1px solid #2b4038;padding:12px"><svg viewBox="-4.5 -4.5 114 77" style="display:block;width:100%;height:auto;overflow:visible" role="img"><rect x="0" y="0" width="105" height="68" fill="#0e1a15"></rect><g fill="none" stroke="#46685a" stroke-width=".55" stroke-linecap="square"><rect x="0" y="0" width="105" height="68"></rect><line x1="52.5" y1="0" x2="52.5" y2="68"></line><circle cx="52.5" cy="34" r="9.15"></circle><rect x="0" y="13.85" width="16.5" height="40.3"></rect><rect x="88.5" y="13.85" width="16.5" height="40.3"></rect></g><g fill="none" stroke="#3d5b4f" stroke-width=".42"><rect x="0" y="24.85" width="5.5" height="18.3"></rect><rect x="99.5" y="24.85" width="5.5" height="18.3"></rect><path d="M16.5,26.7 A9.15,9.15 0 0 1 16.5,41.3"></path><path d="M88.5,26.7 A9.15,9.15 0 0 0 88.5,41.3"></path><path d="M0,2 A2,2 0 0 0 2,0"></path><path d="M103,0 A2,2 0 0 0 105,2"></path><path d="M105,66 A2,2 0 0 0 103,68"></path><path d="M2,68 A2,2 0 0 0 0,66"></path></g><g fill="#46685a"><circle cx="52.5" cy="34" r=".55"></circle><circle cx="11" cy="34" r=".5"></circle><circle cx="94" cy="34" r=".5"></circle></g><g fill="none" stroke="#5d8272" stroke-width=".8"><path d="M-.7,30.34 L-.7,37.66"></path><path d="M105.7,30.34 L105.7,37.66"></path></g><sc-for list="{{ s.segs }}" as="g" hint-placeholder-count="3"><line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="{{ g.col }}" stroke-width="{{ g.w }}" stroke-dasharray="{{ g.dash }}" marker-end="{{ g.head }}" stroke-linecap="round"></line></sc-for><path d="M -2.6,-2.6 L 2.6,2.6 M -2.6,2.6 L 2.6,-2.6" transform="translate({{ s.winX }},{{ s.winY }})" stroke="#e12b3f" stroke-width="1.9" stroke-linecap="round" fill="none"></path>{{ s.winEl }}<path d="M0,-4.4 L1.3,-1.35 L4.4,-1.35 L1.9,.6 L2.8,3.8 L0,1.9 L-2.8,3.8 L-1.9,.6 L-4.4,-1.35 L-1.3,-1.35 z" transform="translate({{ s.gx }},{{ s.gy }})" fill="#f3f2ef" stroke="#0e1a15" stroke-width=".5"></path></svg></div></div></sc-for></div><div style="display:flex;gap:17px;flex-wrap:wrap;margin-top:12px"><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 12 12" style="width:12px;height:12px;display:block"><path d="M2.6,2.6 L9.4,9.4 M2.6,9.4 L9.4,2.6" stroke="#0b1410" stroke-width="2.6" stroke-linecap="round" fill="none"></path><path d="M2.6,2.6 L9.4,9.4 M2.6,9.4 L9.4,2.6" stroke="#e12b3f" stroke-width="1.2" stroke-linecap="round" fill="none"></path></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">ball won</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 16 8" style="width:16px;height:8px;display:block"><line x1="0" y1="4" x2="16" y2="4" stroke="#7f8b84" stroke-width="1.6" stroke-dasharray="3 2.4"></line></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">carried</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 18 8" style="width:18px;height:8px;display:block"><line x1="0" y1="4" x2="13" y2="4" stroke="#4ec98d" stroke-width="1.7"></line><path d="M12,1 L18,4 L12,7 z" fill="#4ec98d"></path></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">pass</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 12 12" style="width:12px;height:12px;display:block"><path d="M6,0.8 L7.4,4.5 L11.2,4.5 L8.2,6.9 L9.3,10.6 L6,8.3 L2.7,10.6 L3.8,6.9 L0.8,4.5 L4.6,4.5 z" fill="#f3f2ef"></path></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">finish</span></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:16px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">Enciso wins it on his own 37, beats two men, carries to the byline and squares it — six touches, all his but the finish. Lukic intercepts on halfway and plays one pass. 0.60 of Ipswich’s 0.86 non-penalty xG came within ten seconds of a recovery. Carry paths are inferred from consecutive event locations, not tracked.</div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:2px solid #f0b429;padding:20px 26px 22px"><div style="display:flex;align-items:baseline;gap:11px;margin-bottom:7px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#f0b429;border:1px solid #f0b429;padding:1px 5px 2px">02</div><div style="font-family:Anton,sans-serif;font-size:17.5px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef">Win it, shoot within ten seconds</div></div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;text-wrap:pretty">All 73 ball recoveries, interceptions and tackles. Grey is a win that led nowhere inside ten seconds; amber produced a shot, with an arrow to where it was struck and the elapsed time beside it.</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px"><div style="background:#101016;border:1px solid #23232c;padding:8px 11px"><div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#5d5b65">own third</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#b8b5c0;margin-top:3px">0.21<span style="font-size:9.5px;color:#5d5b65"> xT within 10s</span></div></div><div style="background:#101016;border:1px solid #23232c;padding:8px 11px"><div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#5d5b65">middle third</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#4ec98d;margin-top:3px">0.49<span style="font-size:9.5px;color:#5d5b65"> xT within 10s</span></div></div><div style="background:#101016;border:1px solid #23232c;padding:8px 11px"><div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#5d5b65">final third</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#b8b5c0;margin-top:3px">0.04<span style="font-size:9.5px;color:#5d5b65"> xT within 10s</span></div></div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:#6f8a7d">73 ball wins · 8 led to a shot</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#5d7a6d">attacking</span><svg viewBox="0 0 34 8" style="width:34px;height:8px;display:block"><line x1="0" y1="4" x2="28" y2="4" stroke="#5d8272" stroke-width="1.1"></line><path d="M27,1 L33,4 L27,7 z" fill="#5d8272"></path></svg></div></div><div style="background:#0e1a15;border:1px solid #2b4038;padding:12px"><svg viewBox="-4.5 -4.5 114 77" style="display:block;width:100%;height:auto;overflow:visible" role="img"><rect x="0" y="0" width="105" height="68" fill="#0e1a15"></rect><g fill="none" stroke="#46685a" stroke-width=".55" stroke-linecap="square"><rect x="0" y="0" width="105" height="68"></rect><line x1="52.5" y1="0" x2="52.5" y2="68"></line><circle cx="52.5" cy="34" r="9.15"></circle><rect x="0" y="13.85" width="16.5" height="40.3"></rect><rect x="88.5" y="13.85" width="16.5" height="40.3"></rect></g><g fill="none" stroke="#3d5b4f" stroke-width=".42"><rect x="0" y="24.85" width="5.5" height="18.3"></rect><rect x="99.5" y="24.85" width="5.5" height="18.3"></rect><path d="M16.5,26.7 A9.15,9.15 0 0 1 16.5,41.3"></path><path d="M88.5,26.7 A9.15,9.15 0 0 0 88.5,41.3"></path><path d="M0,2 A2,2 0 0 0 2,0"></path><path d="M103,0 A2,2 0 0 0 105,2"></path><path d="M105,66 A2,2 0 0 0 103,68"></path><path d="M2,68 A2,2 0 0 0 0,66"></path></g><g fill="#46685a"><circle cx="52.5" cy="34" r=".55"></circle><circle cx="11" cy="34" r=".5"></circle><circle cx="94" cy="34" r=".5"></circle></g><g fill="none" stroke="#5d8272" stroke-width=".8"><path d="M-.7,30.34 L-.7,37.66"></path><path d="M105.7,30.34 L105.7,37.66"></path></g><g stroke="#4d6b5c" stroke-width=".45" stroke-dasharray="2.4 2"><line x1="35" y1="0" x2="35" y2="68"></line><line x1="70" y1="0" x2="70" y2="68"></line></g><sc-for list="{{ ipTransLeaders }}" as="k" hint-placeholder-count="0"><line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="#f0b429" stroke-width=".4" opacity=".8"></line></sc-for><sc-for list="{{ ipTransArr }}" as="a" hint-placeholder-count="8"><line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="#4ec98d" stroke-width="1" opacity=".9" marker-end="url(#ipsArrowA)"></line></sc-for><sc-for list="{{ ipTrans }}" as="d" hint-placeholder-count="30"><circle cx="{{ d.cx }}" cy="{{ d.cy }}" r="{{ d.r }}" fill="{{ d.col }}" opacity="{{ d.op }}"></circle></sc-for><sc-for list="{{ ipTransArr }}" as="a" hint-placeholder-count="8">{{ a.labEl }}</sc-for></svg></div><div style="display:flex;gap:17px;flex-wrap:wrap;margin-top:12px"><div style="display:flex;align-items:center;gap:7px"><div style="width:11px;height:11px;border-radius:50%;background:#7f9c8c"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">led nowhere in 10s</span></div><div style="display:flex;align-items:center;gap:7px"><div style="width:11px;height:11px;border-radius:50%;background:#f0b429"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">produced a shot</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 18 8" style="width:18px;height:8px;display:block"><line x1="0" y1="4" x2="13" y2="4" stroke="#4ec98d" stroke-width="1.7"></line><path d="M12,1 L18,4 L12,7 z" fill="#4ec98d"></path></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">to the shot</span></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:16px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">Middle-third recoveries produced more threat within ten seconds than the other two thirds combined: 6 of the 8 shot-producing wins came from the 39 in the middle third, against 1 of 31 in their own third. The third-by-third xT figures are Twelve’s, printed on their report; the dots and arrows are computed from the event file. One definition per chart: the event feed logs 73 ball wins for this match and Twelve’s own recoveries field says 35, roughly twice apart because they count different things. This panel is the event-feed definition throughout, and the two are never differenced.</div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:2px solid #4ec98d;padding:20px 26px 22px"><div style="display:flex;align-items:baseline;gap:11px;margin-bottom:7px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#4ec98d;border:1px solid #4ec98d;padding:1px 5px 2px">03</div><div style="font-family:Anton,sans-serif;font-size:17.5px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef">They come in wide and shoot central</div></div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;text-wrap:pretty">27 completed passes into the final third, plotted where they arrived, with all ten Ipswich shots as crosses. The amber band is y36 to y62 — every shot they took fell inside it.</div><div data-stack="1" style="display:grid;grid-template-columns:1fr 210px;gap:22px;align-items:start"><div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:#6f8a7d">27 entries · 10 shots</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#5d7a6d">attacking</span><svg viewBox="0 0 34 8" style="width:34px;height:8px;display:block"><line x1="0" y1="4" x2="28" y2="4" stroke="#5d8272" stroke-width="1.1"></line><path d="M27,1 L33,4 L27,7 z" fill="#5d8272"></path></svg></div></div><div style="background:#0e1a15;border:1px solid #2b4038;padding:12px"><svg viewBox="-4.5 -4.5 114 77" style="display:block;width:100%;height:auto;overflow:visible" role="img"><rect x="0" y="0" width="105" height="68" fill="#0e1a15"></rect><g fill="none" stroke="#46685a" stroke-width=".55" stroke-linecap="square"><rect x="0" y="0" width="105" height="68"></rect><line x1="52.5" y1="0" x2="52.5" y2="68"></line><circle cx="52.5" cy="34" r="9.15"></circle><rect x="0" y="13.85" width="16.5" height="40.3"></rect><rect x="88.5" y="13.85" width="16.5" height="40.3"></rect></g><g fill="none" stroke="#3d5b4f" stroke-width=".42"><rect x="0" y="24.85" width="5.5" height="18.3"></rect><rect x="99.5" y="24.85" width="5.5" height="18.3"></rect><path d="M16.5,26.7 A9.15,9.15 0 0 1 16.5,41.3"></path><path d="M88.5,26.7 A9.15,9.15 0 0 0 88.5,41.3"></path><path d="M0,2 A2,2 0 0 0 2,0"></path><path d="M103,0 A2,2 0 0 0 105,2"></path><path d="M105,66 A2,2 0 0 0 103,68"></path><path d="M2,68 A2,2 0 0 0 0,66"></path></g><g fill="#46685a"><circle cx="52.5" cy="34" r=".55"></circle><circle cx="11" cy="34" r=".5"></circle><circle cx="94" cy="34" r=".5"></circle></g><g fill="none" stroke="#5d8272" stroke-width=".8"><path d="M-.7,30.34 L-.7,37.66"></path><path d="M105.7,30.34 L105.7,37.66"></path></g><sc-for list="{{ ipChanBands }}" as="b" hint-placeholder-count="5"><rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="{{ b.fill }}" opacity="{{ b.op }}"></rect></sc-for><rect x="70" y="25.8" width="35" height="17.7" fill="#f0b429" opacity=".09"></rect><line x1="70" y1="0" x2="70" y2="68" stroke="#4ec98d" stroke-width=".6" stroke-dasharray="2.4 2" opacity=".75"></line><sc-for list="{{ ipChanDots }}" as="d" hint-placeholder-count="12"><circle cx="{{ d.cx }}" cy="{{ d.cy }}" r="1.45" fill="#4ec98d" stroke="#0b1410" stroke-width=".5"></circle></sc-for><sc-for list="{{ ipChanShots }}" as="k" hint-placeholder-count="10"><path d="M -1.45,-1.45 L 1.45,1.45 M -1.45,1.45 L 1.45,-1.45" transform="translate({{ k.x }},{{ k.y }})" stroke="#0b1410" stroke-width="1.3" stroke-linecap="round" fill="none"></path></sc-for><sc-for list="{{ ipChanShots }}" as="k" hint-placeholder-count="10"><path d="M -1.45,-1.45 L 1.45,1.45 M -1.45,1.45 L 1.45,-1.45" transform="translate({{ k.x }},{{ k.y }})" stroke="#e12b3f" stroke-width="0.58" stroke-linecap="round" fill="none"></path></sc-for></svg></div><div style="display:flex;gap:17px;flex-wrap:wrap;margin-top:12px"><div style="display:flex;align-items:center;gap:7px"><div style="width:11px;height:11px;border-radius:50%;background:#4ec98d"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">final-third entry</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 12 12" style="width:12px;height:12px;display:block"><path d="M2.6,2.6 L9.4,9.4 M2.6,9.4 L9.4,2.6" stroke="#0b1410" stroke-width="2.6" stroke-linecap="round" fill="none"></path><path d="M2.6,2.6 L9.4,9.4 M2.6,9.4 L9.4,2.6" stroke="#e12b3f" stroke-width="1.2" stroke-linecap="round" fill="none"></path></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">shot</span></div></div></div><div style="padding-top:2px"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4a4852;padding-bottom:8px;border-bottom:1px solid #2e2e38">Entries against shots</div><sc-for list="{{ q2Chan }}" as="c" hint-placeholder-count="5"><div style="padding:10px 0;border-bottom:1px solid #1a1a21"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px"><div style="font-size:11.5px;color:#b8b5c0">{{ c.ch }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#f0b429">{{ c.flag }}</div></div><div style="display:grid;grid-template-columns:1fr 42px;gap:8px;align-items:center"><div style="height:7px;background:#101016"><div data-anim="bar" style="height:7px;background:#4ec98d;width:{{ c.enW }}%"></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#b8b5c0;text-align:right">{{ c.en }} in</div></div><div style="display:grid;grid-template-columns:1fr 42px;gap:8px;align-items:center;margin-top:3px"><div style="height:7px;background:#101016"><div data-anim="bar" style="height:7px;background:#e12b3f;width:{{ c.shW }}%"></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ c.shCol }};text-align:right">{{ c.sh }} sh</div></div></div></sc-for><div style="font-size:11px;color:#6f6d78;margin-top:12px;text-wrap:pretty">Nine entries down the right produced nothing. Nine of their ten shots came from the centre, which they entered four times.</div></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:16px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">The ball goes wide to come back in, so the entry and the finish are two different problems. Entries counted from completed passes only; carries into the final third are not included.</div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:2px solid #e12b3f;padding:20px 26px 22px"><div style="display:flex;align-items:baseline;gap:11px;margin-bottom:7px;flex-wrap:wrap"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#e12b3f;border:1px solid #e12b3f;padding:1px 5px 2px">04</div><div style="font-family:Anton,sans-serif;font-size:17.5px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef">Narrow at both ends, and the goal they conceded was a free kick</div><div style="display:flex;gap:0;margin-left:auto;flex:none"><div onClick="{{ svSetChart }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;padding:5px 11px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Chart</div><div onClick="{{ svSetTable }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d8a95;border:1px solid #2e2e38;border-left:0;padding:5px 11px;cursor:pointer" style-hover="border-color:#4ec98d;color:#f3f2ef">Table</div></div></div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;max-width:92ch;text-wrap:pretty">All twenty-one shots on one pitch in true match geometry, so the two sides attack opposite goals. Marker area is chance quality from a shot-angle proxy scaled so each side sums to the 0.86 non-penalty xG Twelve printed. Hollow markers were blocked, stars are goals.</div><sc-if value="{{ svChart }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:9px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 34 8" style="width:34px;height:8px;display:block"><path d="M7,1 L1,4 L7,7 z" fill="#dd7a3a"></path><line x1="6" y1="4" x2="34" y2="4" stroke="#dd7a3a" stroke-width="1.1"></line></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#dd7a3a">Sunderland attacking</span></div><div style="display:flex;align-items:center;gap:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#4ec98d">Ipswich attacking</span><svg viewBox="0 0 34 8" style="width:34px;height:8px;display:block"><line x1="0" y1="4" x2="28" y2="4" stroke="#4ec98d" stroke-width="1.1"></line><path d="M27,1 L33,4 L27,7 z" fill="#4ec98d"></path></svg></div></div><div style="background:#0e1a15;border:1px solid #2b4038;padding:12px"><svg viewBox="-4.5 -4.5 114 77" style="display:block;width:100%;height:auto;overflow:visible" role="img"><rect x="0" y="0" width="105" height="68" fill="#0e1a15"></rect><g fill="none" stroke="#46685a" stroke-width=".55" stroke-linecap="square"><rect x="0" y="0" width="105" height="68"></rect><line x1="52.5" y1="0" x2="52.5" y2="68"></line><circle cx="52.5" cy="34" r="9.15"></circle><rect x="0" y="13.85" width="16.5" height="40.3"></rect><rect x="88.5" y="13.85" width="16.5" height="40.3"></rect></g><g fill="none" stroke="#3d5b4f" stroke-width=".42"><rect x="0" y="24.85" width="5.5" height="18.3"></rect><rect x="99.5" y="24.85" width="5.5" height="18.3"></rect><path d="M16.5,26.7 A9.15,9.15 0 0 1 16.5,41.3"></path><path d="M88.5,26.7 A9.15,9.15 0 0 0 88.5,41.3"></path><path d="M0,2 A2,2 0 0 0 2,0"></path><path d="M103,0 A2,2 0 0 0 105,2"></path><path d="M105,66 A2,2 0 0 0 103,68"></path><path d="M2,68 A2,2 0 0 0 0,66"></path></g><g fill="#46685a"><circle cx="52.5" cy="34" r=".55"></circle><circle cx="11" cy="34" r=".5"></circle><circle cx="94" cy="34" r=".5"></circle></g><g fill="none" stroke="#5d8272" stroke-width=".8"><path d="M-.7,30.34 L-.7,37.66"></path><path d="M105.7,30.34 L105.7,37.66"></path></g><rect x="70" y="25.8" width="35" height="17.7" fill="#4ec98d" opacity=".045"></rect><rect x="0" y="25.8" width="35" height="17.7" fill="#dd7a3a" opacity=".045"></rect><sc-for list="{{ svLeaders }}" as="k" hint-placeholder-count="0"><line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="{{ k.col }}" stroke-width=".35" opacity=".8"></line></sc-for><sc-for list="{{ svDots }}" as="d" hint-placeholder-count="21"><circle cx="{{ d.cx }}" cy="{{ d.cy }}" r="{{ d.r }}" fill="{{ d.fill }}" stroke="{{ d.st }}" stroke-width="{{ d.sw }}" stroke-dasharray="{{ d.dash }}" fill-opacity="{{ d.op }}"><title>{{ d.t }}</title></circle></sc-for><sc-for list="{{ svStars }}" as="s" hint-placeholder-count="3"><path d="M0,-2.2 L.66,-.68 L2.2,-.68 L.95,.3 L1.42,1.9 L0,.95 L-1.42,1.9 L-.95,.3 L-2.2,-.68 L-.66,-.68 z" transform="translate({{ s.cx }},{{ s.cy }})" fill="{{ s.col }}" stroke="#0e1a15" stroke-width=".28"><title>{{ s.t }}</title></path></sc-for><sc-for list="{{ svStars }}" as="s" hint-placeholder-count="3">{{ s.labEl }}</sc-for></svg></div><div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-top:12px"><div style="display:flex;align-items:center;gap:9px"><svg viewBox="0 0 58 18" style="width:58px;height:18px;display:block"><circle cx="6" cy="9" r="4" fill="#8d8a95" fill-opacity=".8"></circle><circle cx="22" cy="9" r="6.5" fill="#8d8a95" fill-opacity=".8"></circle><circle cx="44" cy="9" r="8.5" fill="#8d8a95" fill-opacity=".8"></circle></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">chance quality</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block"><circle cx="7" cy="7" r="5.4" fill="none" stroke="#8d8a95" stroke-width="1.2" stroke-dasharray="2.4 2"></circle></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">blocked</span></div><div style="display:flex;align-items:center;gap:7px"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block"><path d="M7,1 L8.6,5.4 L13,5.4 L9.4,8.2 L10.8,12.6 L7,10 L3.2,12.6 L4.6,8.2 L1,5.4 L5.4,5.4 z" fill="#8d8a95"></path></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">goal</span></div><sc-for list="{{ svTot }}" as="s" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:7px"><div style="width:11px;height:11px;border-radius:50%;background:{{ s.col }}"></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">{{ s.who }} · {{ s.n }} shots · {{ s.xg }} xG · {{ s.g }} scored</span></div></sc-for></div></sc-if><sc-if value="{{ svTable }}" hint-placeholder-val="{{ false }}"><div data-scroll="1" style="overflow-x:auto"><div data-wide="1" style="min-width:600px"><div style="display:grid;grid-template-columns:40px 1fr 84px 74px 52px 1fr;gap:10px;padding:0 0 8px;border-bottom:1px solid #2e2e38;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#4a4852"><div>Min</div><div>Player</div><div>Team</div><div>Result</div><div title="Shot-angle proxy scaled so each side sums to the published non-penalty xG" style="text-align:right">Quality</div><div>Context</div></div><sc-for list="{{ svRows }}" as="r" hint-placeholder-count="21"><div style="display:grid;grid-template-columns:40px 1fr 84px 74px 52px 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a21" style-hover="background:#191920"><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#8d8a95">{{ r.m }}</div><div style="font-size:12.5px;color:#f3f2ef;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.p }}</div><div style="display:flex;align-items:center;gap:7px;min-width:0"><div style="width:6px;height:6px;border-radius:50%;background:{{ r.col }};flex:none"></div><div style="font-size:11.5px;color:#b8b5c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.team }}</div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ r.resCol }};font-weight:{{ r.bold }}">{{ r.res }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#b8b5c0;text-align:right">{{ r.q }}</div><div style="display:flex;align-items:center;gap:9px;min-width:0"><div style="width:52px;height:6px;background:#101016;flex:none"><div data-anim="bar" style="height:6px;background:{{ r.col }};width:{{ r.qW }}%"></div></div><div style="font-size:11px;color:#6f6d78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.ctx }}</div></div></div></sc-for></div></div></sc-if><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:16px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">Ipswich took every one of their ten shots between y36 and y62, not one from a wide position. Four of Sunderland’s eleven came from a dead ball, including the 38′ direct free kick that was their only goal, so Ipswich’s open-play penalty-area defence conceded nothing all match. The per-side xG totals are Twelve’s; the split across individual shots is computed here and is never summed across matches.</div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:2px solid #f0b429;padding:20px 26px 22px"><div style="display:flex;align-items:baseline;gap:11px;margin-bottom:7px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#f0b429;border:1px solid #f0b429;padding:1px 5px 2px">05</div><div style="font-family:Anton,sans-serif;font-size:17.5px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef">Where they operate, and where the ball is loose</div></div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:20px;max-width:92ch;text-wrap:pretty">Raw counts binned into six columns by five channels, attacking left to right. Colour is the only encoding, banded into six steps so neighbouring cells separate. Read intensity against the scale under each title and hover any cell for its count. The two grids keep separate maxima, printed on their scales, because 96 losses and 536 touches on one scale would leave the losses invisible.</div><div data-stack="1" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px"><sc-for list="{{ ipZones }}" as="z" hint-placeholder-count="2"><div style="min-width:0"><div style="display:flex;align-items:baseline;gap:10px;margin-bottom:11px;flex-wrap:wrap;min-width:0"><div style="font-size:13px;font-weight:700;color:#f3f2ef">{{ z.lab }}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95;margin-left:auto">{{ z.tot }}</div></div><div style="display:flex;align-items:center;gap:9px;margin-bottom:13px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95;flex:none">0</span><div style="flex:1;display:flex;gap:1px"><sc-for list="{{ z.steps }}" as="s" hint-placeholder-count="6"><div title="{{ s.range }}" style="flex:1;height:8px;background:{{ z.ramp }};opacity:{{ s.op }}"></div></sc-for></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#b8b5c0;flex:none">{{ z.max }}</span></div><div style="background:#0e1a15;border:1px solid #2b4038;padding:12px"><svg viewBox="-24 -9 132 80" style="display:block;width:100%;height:auto;overflow:visible" role="img"><rect x="0" y="0" width="105" height="68" fill="#0b120f"></rect><sc-for list="{{ z.cells }}" as="c" hint-placeholder-count="30"><rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" fill="{{ c.fill }}" opacity="{{ c.op }}"><title>{{ c.t }}</title></rect></sc-for><g fill="none" stroke="#cfe0d6" stroke-width=".45" opacity=".34" stroke-linecap="square"><rect x="0" y="0" width="105" height="68"></rect><line x1="52.5" y1="0" x2="52.5" y2="68"></line><circle cx="52.5" cy="34" r="9.15"></circle><rect x="0" y="13.85" width="16.5" height="40.3"></rect><rect x="88.5" y="13.85" width="16.5" height="40.3"></rect><rect x="0" y="24.85" width="5.5" height="18.3"></rect><rect x="99.5" y="24.85" width="5.5" height="18.3"></rect><path d="M16.5,26.7 A9.15,9.15 0 0 1 16.5,41.3"></path><path d="M88.5,26.7 A9.15,9.15 0 0 0 88.5,41.3"></path><path d="M0,2 A2,2 0 0 0 2,0"></path><path d="M103,0 A2,2 0 0 0 105,2"></path><path d="M105,66 A2,2 0 0 0 103,68"></path><path d="M2,68 A2,2 0 0 0 0,66"></path></g><g fill="#cfe0d6" opacity=".34"><circle cx="52.5" cy="34" r=".55"></circle><circle cx="11" cy="34" r=".5"></circle><circle cx="94" cy="34" r=".5"></circle></g><g fill="none" stroke="#cfe0d6" stroke-width=".7" opacity=".5"><path d="M-.7,30.34 L-.7,37.66"></path><path d="M105.7,30.34 L105.7,37.66"></path></g><text x="-3" y="62.8" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">right</text><text x="-3" y="49.2" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">right half</text><text x="-3" y="35.6" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">centre</text><text x="-3" y="22.0" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">left half</text><text x="-3" y="8.4" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">left</text><text x="17.5" y="-3.4" text-anchor="middle" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">own third</text><text x="52.5" y="-3.4" text-anchor="middle" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">middle third</text><text x="87.5" y="-3.4" text-anchor="middle" style="font-family:'IBM Plex Mono',monospace;font-size:3.1px;fill:#6f8a7d;letter-spacing:.04em">final third</text><g stroke="#2c4239" stroke-width=".45"><line x1="0" y1="-1.6" x2="0" y2="0"></line><line x1="35" y1="-1.6" x2="35" y2="0"></line><line x1="70" y1="-1.6" x2="70" y2="0"></line><line x1="105" y1="-1.6" x2="105" y2="0"></line></g></svg></div></div></sc-for></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:18px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">Ninety-six losses in all, 52 of them inside their own half. The right channel on its own accounts for 26 across the own and middle thirds, the densest loose-ball band on the pitch and the darkest run of cells on the right-hand grid. The caveat matters more than the finding: only 2 of those 52 own-half losses were followed by a Sunderland shot within fifteen seconds. The ball was free there all afternoon and Sunderland did nothing with it, so this is well evidenced as where the ball comes loose and not evidenced at all as where shots come from.</div></div>
+<div style="background:#13131a;border:1px solid #23232c;border-top:2px solid #4ec98d;padding:20px 26px 22px"><div style="display:flex;align-items:baseline;gap:11px;margin-bottom:7px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.06em;color:#4ec98d;border:1px solid #4ec98d;padding:1px 5px 2px">06</div><div style="font-family:Anton,sans-serif;font-size:17.5px;line-height:1.12;letter-spacing:.015em;text-transform:uppercase;color:#f3f2ef">Passing network — open play, links at four or more passes</div></div><div style="font-size:12.5px;color:#8d8a95;margin-bottom:18px;text-wrap:pretty">A node sits at the mean of that player’s touches and is sized by total involvement; link weight is passes exchanged in both directions.</div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:#6f8a7d">11 nodes · 24 links</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#5d7a6d">attacking</span><svg viewBox="0 0 34 8" style="width:34px;height:8px;display:block"><line x1="0" y1="4" x2="28" y2="4" stroke="#5d8272" stroke-width="1.1"></line><path d="M27,1 L33,4 L27,7 z" fill="#5d8272"></path></svg></div></div><div style="background:#0e1a15;border:1px solid #2b4038;padding:12px"><svg viewBox="-4.5 -4.5 114 77" style="display:block;width:100%;height:auto;overflow:visible" role="img"><rect x="0" y="0" width="105" height="68" fill="#0e1a15"></rect><g fill="none" stroke="#46685a" stroke-width=".55" stroke-linecap="square"><rect x="0" y="0" width="105" height="68"></rect><line x1="52.5" y1="0" x2="52.5" y2="68"></line><circle cx="52.5" cy="34" r="9.15"></circle><rect x="0" y="13.85" width="16.5" height="40.3"></rect><rect x="88.5" y="13.85" width="16.5" height="40.3"></rect></g><g fill="none" stroke="#3d5b4f" stroke-width=".42"><rect x="0" y="24.85" width="5.5" height="18.3"></rect><rect x="99.5" y="24.85" width="5.5" height="18.3"></rect><path d="M16.5,26.7 A9.15,9.15 0 0 1 16.5,41.3"></path><path d="M88.5,26.7 A9.15,9.15 0 0 0 88.5,41.3"></path><path d="M0,2 A2,2 0 0 0 2,0"></path><path d="M103,0 A2,2 0 0 0 105,2"></path><path d="M105,66 A2,2 0 0 0 103,68"></path><path d="M2,68 A2,2 0 0 0 0,66"></path></g><g fill="#46685a"><circle cx="52.5" cy="34" r=".55"></circle><circle cx="11" cy="34" r=".5"></circle><circle cx="94" cy="34" r=".5"></circle></g><g fill="none" stroke="#5d8272" stroke-width=".8"><path d="M-.7,30.34 L-.7,37.66"></path><path d="M105.7,30.34 L105.7,37.66"></path></g><sc-for list="{{ ipLinks }}" as="l" hint-placeholder-count="12"><line x1="{{ l.x1 }}" y1="{{ l.y1 }}" x2="{{ l.x2 }}" y2="{{ l.y2 }}" stroke="#4ec98d" stroke-width="{{ l.w }}" opacity="{{ l.op }}"><title>{{ l.t }}</title></line></sc-for><sc-for list="{{ ipNodeLeaders }}" as="k" hint-placeholder-count="0"><line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="#8fd8b0" stroke-width=".4" opacity=".85"></line></sc-for><sc-for list="{{ ipNodes }}" as="n" hint-placeholder-count="11"><circle cx="{{ n.cx }}" cy="{{ n.cy }}" r="{{ n.r }}" fill="#4ec98d" stroke="#0e1a15" stroke-width=".7"></circle></sc-for><sc-for list="{{ ipNodes }}" as="n" hint-placeholder-count="11">{{ n.labEl }}</sc-for></svg></div><div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-top:12px"><div style="display:flex;align-items:center;gap:9px"><svg viewBox="0 0 52 16" style="width:52px;height:16px;display:block"><circle cx="5" cy="8" r="3" fill="#4ec98d"></circle><circle cx="19" cy="8" r="4.6" fill="#4ec98d"></circle><circle cx="38" cy="8" r="6.4" fill="#4ec98d"></circle></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">involvement</span></div><div style="display:flex;align-items:center;gap:9px"><svg viewBox="0 0 46 12" style="width:46px;height:12px;display:block"><line x1="0" y1="3" x2="46" y2="3" stroke="#4ec98d" stroke-width="1" opacity=".45"></line><line x1="0" y1="9" x2="46" y2="9" stroke="#4ec98d" stroke-width="2.6" opacity=".8"></line></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8d8a95">passes exchanged</span></div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#6b7d74;margin-top:16px;padding-left:13px;border-left:2px solid #2b4038;max-width:96ch;text-wrap:pretty">Receivers are inferred — the next team-mate touch within three events — because WhoScored records who passed and where the ball ended, not who got it. A node is not a position: a full-back who overlaps twice and defends for eighty minutes is drawn between the two. Strongest axis: Núñez–Lukic, 19 passes between them.</div></div>
+<div style="background:#c8102e;border:1px solid #c8102e;border-top:0;padding:34px 30px 28px"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#fff;margin-bottom:12px">The read</div><div style="font-family:Anton,sans-serif;font-size:34px;line-height:1.02;letter-spacing:.01em;text-transform:uppercase;color:#fff;max-width:30ch;margin-bottom:20px">What it asks of United</div>
+<div data-stack="1" style="display:grid;grid-template-columns:1fr 1fr;gap:30px">
+<div style="font-size:14.5px;line-height:1.5;color:#fff;text-wrap:pretty">United will get the ball. It will not be worth much by itself. What beat Sunderland was not Ipswich's attacking play but two passes out of their own defence, intercepted and finished. The risk in this fixture sits in United's build-up.</div>
+<div style="font-size:14.5px;line-height:1.5;color:#fff;text-wrap:pretty">{{ opAgainst }} Their block holds and waits. Getting through it means entries into a central area they gave up four times in ninety minutes. The price of a loose pass in the first two thirds is a seven-second sequence that finishes in the box.</div>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#fff;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.42);max-width:96ch;text-wrap:pretty">Single match, 1,549 events, Portman Road, 22 August 2026. Ipswich 2–1 Sunderland, referee Farai Hallam. Every figure on this page is computed from that event file: defensive thirds from the pitch coordinate of each defensive action, passes per defensive action from opponent passes in their own 60% divided by Ipswich actions in the same area, goal sequences from the event timestamps. One match cannot establish a tendency. Read it as what they last tried to do, not as a profile.</div>
+</div>
 </section>
 </sc-if>
 
@@ -1581,6 +1759,20 @@ html{scroll-behavior:smooth}
 </div>
 </section>
 
+
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 24px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:18px">The figure · state profile, all 38 matches</div>
+<div style="display:flex;flex-direction:column;gap:30px">
+<sc-for list="{{ gsFigs }}" as="f" hint-placeholder-count="2">
+<figure style="margin:0">
+<figcaption style="font-size:14px;font-weight:700;color:#f3f2ef;margin-bottom:12px;text-wrap:pretty">{{ f.t }}</figcaption>
+<div style="background:#0d1410;border:1px solid #1d2a22"><img src="{{ f.src }}" alt="{{ f.t }}" loading="lazy" style="display:block;width:100%;height:auto"></div>
+<div style="font-size:11.5px;line-height:1.5;color:#6f6d78;margin-top:10px;max-width:104ch;text-wrap:pretty">{{ f.n }}</div>
+</figure>
+</sc-for>
+</div>
+</div>
+
 <section id="leads" data-screen-label="One-goal leads" style="padding:56px 0 0">
 <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:6px">
 <div style="display:flex;align-items:baseline;gap:14px">
@@ -1709,6 +1901,19 @@ html{scroll-behavior:smooth}
 </div>
 </div>
 
+
+<div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:22px 26px 24px">
+<div style="font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8d8a95;margin-bottom:18px">The figures · when the lead decays, and why</div>
+<div style="display:flex;flex-direction:column;gap:30px">
+<sc-for list="{{ ldFigs }}" as="f" hint-placeholder-count="2">
+<figure style="margin:0">
+<figcaption style="font-size:14px;font-weight:700;color:#f3f2ef;margin-bottom:12px;text-wrap:pretty">{{ f.t }}</figcaption>
+<div style="background:#0d1410;border:1px solid #1d2a22"><img src="{{ f.src }}" alt="{{ f.t }}" loading="lazy" style="display:block;width:100%;height:auto"></div>
+<div style="font-size:11.5px;line-height:1.5;color:#6f6d78;margin-top:10px;max-width:104ch;text-wrap:pretty">{{ f.n }}</div>
+</figure>
+</sc-for>
+</div>
+</div>
 <div style="background:#13131a;border:1px solid #23232c;border-top:0;padding:16px 26px 18px;display:grid;grid-template-columns:1fr 1fr;gap:26px" data-stack="1">
 <div style="font-size:11.5px;color:#6f6d78;text-wrap:pretty"><span style="color:#8d8a95;font-weight:700">Home and away.</span> 30 spells at Old Trafford, 11 surrendered. 16 away, 9 surrendered. The away rate is 56% against 37% at home, on 16 spells — directional, not established.</div>
 <div style="font-size:11.5px;color:#6f6d78;text-wrap:pretty"><span style="color:#8d8a95;font-weight:700">Definition.</span> A spell is a continuous period at exactly plus one. 40 opened with a United goal; 6 opened with a concession that cut a two-goal lead. Minutes are clock minutes including stoppage, which is why some spells end past 90.</div>
@@ -2403,12 +2608,13 @@ html{scroll-behavior:smooth}
 class Component extends DCLogic {
   state = { D: null, err: null, role: 'ALL', pid: 'Bruno Fernandes',
     tab: 'match', query: '', card: null, tip: null, cmp: null, squadRole: 'ALL',
-    mwSeason: '2627', mwGw: 1, cur: null, copied: false };
+    mwSeason: '2627', mwGw: 1, cur: null, copied: false, ipVer: 'off', ipSort: 'ps', shotView: 'chart' };
 
   static get TABS() { return ['match', 'squad', 'player', 'season', 'league', 'method']; }
   static get SECTAB() {
     return { spine: 'match', report: 'match', match: 'match', shots: 'match', territory: 'match',
       squad: 'squad', scorers: 'squad', availability: 'squad', player: 'player',
+      oppo: 'match',
       versus: 'season', trap: 'season', gamestate: 'season', leads: 'season', season: 'season', phase: 'season', resid: 'season',
       league: 'league', rebuilt: 'league', dropped: 'league', method: 'method' };
   }
@@ -2541,10 +2747,10 @@ class Component extends DCLogic {
   hideTip() { clearTimeout(this._tipT); this.setState({ tip: null }); }
   componentDidMount() {
     const R = typeof window !== 'undefined' && window.__resources;
-    const srcUrl = (R && R.mufcData) || './mufc.js?v=20260827';
+    const srcUrl = (R && R.mufcData) || './mufc.js?v=1788085124';
     import(srcUrl).then(m => {
       if (!m || !m.D) throw new Error('payload loaded but export D is missing');
-      this.setState({ D: m.D, L: m.LEADS || [] });
+      this.setState({ D: m.D, L: m.LEADS || [], IPS: m.IPS || null, IPS2: m.IPS2 || null });
       setTimeout(() => { this.applyHash(); this.observe(); }, 120);
     }).catch(e => this.setState({ err: String(e && e.message || e) }));
     this._onNav = () => this.applyHash();
@@ -2592,6 +2798,519 @@ class Component extends DCLogic {
     window.removeEventListener('keydown', this._onKey);
     if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
     this.closePoster();
+  }
+  fig(n) {
+    const R = typeof window !== 'undefined' && window.__resources;
+    return (R && R['fig_' + n]) || ('figures/' + n + '.png');
+  }
+  shotVals() {
+    const I = this.state.IPS2;
+    const IPS = '#4ec98d', SUN = '#dd7a3a';
+    if (!I || !I.shots) return { svOn: false, svDots: [], svStars: [], svLeaders: [], svRows: [],
+      svChart: true, svMeta: '', svTot: [] };
+    const PX = x => +(x / 100 * 105).toFixed(2), PY = y => +((100 - y) / 100 * 68).toFixed(2);
+    const TX = (x, y, str, o) => React.createElement('text', Object.assign({
+      x: x, y: y, fill: '#f3f2ef', textAnchor: 'middle',
+      style: { fontFamily: "'IBM Plex Mono',monospace", fontWeight: 600, fontSize: '1.6px',
+        paintOrder: 'stroke', stroke: '#0e1a15', strokeWidth: '0.42px', strokeLinejoin: 'round' } }, o || {}), str);
+    const KEEP = { BigChance: 'big chance', FastBreak: 'fast break', FromCorner: 'corner',
+      SetPiece: 'set piece', DirectFreekick: 'free kick', ThrowinSetPiece: 'throw-in',
+      Head: 'header', Blocked: 'blocked', Penalty: 'penalty' };
+    const S = I.shots.slice().sort((a, b) => a.m - b.m);
+    const qmax = Math.max.apply(null, S.map(s => s.q || 0));
+    const tagsOf = s => (s.tags || []).filter(t => KEEP[t]).map(t => KEEP[t]);
+    const svDots = S.map(s => {
+      const col = s.t === 'IPS' ? IPS : SUN;
+      const blocked = (s.tags || []).indexOf('Blocked') > -1;
+      const tg = tagsOf(s).filter(t => t !== 'blocked');
+      return { cx: PX(s.x), cy: PY(s.y), r: +(0.7 + 1.55 * Math.sqrt((s.q || 0) / qmax)).toFixed(2),
+        fill: s.g ? 'none' : blocked ? 'none' : col, st: col, sw: blocked ? 0.42 : 0.3,
+        dash: blocked ? '1.1 0.9' : '0', op: s.g ? 0 : 0.82,
+        t: s.p + ' ' + s.m + "' \u00b7 " + (s.t === 'IPS' ? 'Ipswich' : 'Sunderland') + ' \u00b7 '
+          + (s.g ? 'goal' : blocked ? 'blocked' : s.r === 'SavedShot' ? 'saved' : 'off target')
+          + ' \u00b7 ' + (s.q || 0).toFixed(2) + ' chance quality' + (tg.length ? ' \u00b7 ' + tg.join(', ') : '') };
+    });
+    const goals = S.filter(s => s.g);
+    const CAND = [{ dy: 5.6 }, { dy: -4.4 }, { dy: 9.2 }, { dy: -8.2 }, { dy: 13 }, { dy: -12 }];
+    const taken = [];
+    const svLeaders = [];
+    const svStars = goals.map(s => {
+      const cx = PX(s.x), cy = PY(s.y), col = s.t === 'IPS' ? IPS : SUN;
+      const txt = s.p + ' ' + s.m + "'", w = txt.length * 0.98 + 1.2;
+      let best = null;
+      CAND.forEach((c, i) => {
+        const y = cy + c.dy, x0 = cx - w / 2, x1 = cx + w / 2;
+        let cost = i * 0.5 + Math.abs(c.dy) * 0.25;
+        svDots.forEach(d => { const dx = Math.max(0, Math.max(x0 - d.cx, d.cx - x1));
+          const dy = Math.abs(d.cy - y); if (dx < d.r && dy < d.r + 1.9) cost += 22 * (d.r + 1.9 - dy); });
+        taken.forEach(p => { const ow = Math.min(x1, p.x1) - Math.max(x0, p.x0);
+          if (ow > 0 && Math.abs(p.y - y) < 2.6) cost += 70 * ow; });
+        if (y < 3 || y > 65) cost += 300;
+        if (!best || cost < best.cost) best = { cost: cost, dy: c.dy, y: y, x0: x0, x1: x1 };
+      });
+      taken.push({ x0: best.x0, x1: best.x1, y: best.y });
+      if (Math.abs(best.dy) > 7) svLeaders.push({ x1: cx, y1: cy, x2: cx, y2: best.y - (best.dy > 0 ? 1.5 : -0.6), col: col });
+      return { cx: cx, cy: cy, col: col,
+        labEl: TX(cx, best.y, txt, { fill: col }),
+        t: s.p + ' ' + s.m + "' \u00b7 goal \u00b7 " + (tagsOf(s).join(', ') || 'open play') };
+    });
+    const dead = S.filter(s => s.t === 'SUN' && (s.tags || []).some(t => /FromCorner|DirectFreekick|SetPiece|ThrowinSetPiece/.test(t))).length;
+    const svRows = S.map(s => {
+      const blocked = (s.tags || []).indexOf('Blocked') > -1;
+      return { m: s.m + "'", p: s.p, team: s.t === 'IPS' ? 'Ipswich' : 'Sunderland',
+        col: s.t === 'IPS' ? IPS : SUN,
+        res: s.g ? 'Goal' : blocked ? 'Blocked' : s.r === 'SavedShot' ? 'Saved' : 'Off target',
+        resCol: s.g ? '#f3f2ef' : '#8d8a95', bold: s.g ? 700 : 400,
+        q: (s.q || 0).toFixed(3), qW: +((s.q || 0) / qmax * 100).toFixed(1),
+        ctx: tagsOf(s).filter(t => t !== 'blocked').join(' \u00b7 ') || 'open play' };
+    });
+    const side = k => { const g = S.filter(s => s.t === k);
+      return { who: k === 'IPS' ? 'Ipswich' : 'Sunderland', col: k === 'IPS' ? IPS : SUN,
+        n: g.length, xg: g.reduce((a, s) => a + (s.q || 0), 0).toFixed(2),
+        g: g.filter(s => s.g).length,
+        blk: g.filter(s => (s.tags || []).indexOf('Blocked') > -1).length }; };
+    return { svOn: true, svDots, svStars, svLeaders, svRows,
+      svChart: this.state.shotView === 'chart',
+      svTable: this.state.shotView === 'table',
+      svMeta: S.length + ' shots \u00b7 marker area is chance quality \u00b7 ' + dead + ' of Sunderland\u2019s from a dead ball',
+      svTot: [side('IPS'), side('SUN')],
+      svSetChart: () => this.setState({ shotView: 'chart' }),
+      svSetTable: () => this.setState({ shotView: 'table' }) };
+  }
+  ips2Vals() {
+    const I = this.state.IPS2;
+    const GRN = '#4ec98d', RED = '#e12b3f', AMB = '#f0b429', BLU = '#5b7bd5';
+    if (!I) return { q2On: false, q2Tiles: [], q2Met: [], q2Cen: [], q2Pl: [], q2PlTot: {},
+      q2Chan: [], q2Zone: [], q2Deg: [], q2Dict: {}, q2VerAll: false, q2MetCount: '' };
+    const VER = { mirror_verified: { c: GRN, l: 'verified' }, single_source: { c: AMB, l: 'single source' },
+      unclassified_in_source: { c: RED, l: 'unclassified' }, fixture_identifier: { c: BLU, l: 'fixture' } };
+    const dict = {}; (I.dict || []).forEach(r => { if (!dict[r.c]) dict[r.c] = r.m; });
+
+    const TLAB = { 'Possession %': 'Possession', 'Field tilt %': 'Field tilt',
+      'Box touches': 'Box touches allowed', 'Non-penalty shots': 'Non-penalty shots allowed' };
+    const q2Tiles = I.tiles.map(t => ({
+      k: TLAB[t.k] || (t.k === 'xG' ? (t.opp ? 'xG conceded' : 'xG') : t.k),
+      v: t.v, opp: t.opp ? 'Sunderland' : 'Ipswich',
+      dot: VER[t.ver].c, ver: VER[t.ver].l, kCol: t.opp ? '#8d8a95' : '#f3f2ef' }));
+
+    const order = ['fixture', 'outcome', 'attack', 'chance_creation', 'defence',
+      'defensive_transition', 'attacking_transition', 'opp_chance_creation', 'match_stats_card'];
+    const SECN = { fixture: 'Fixture', outcome: 'Outcome', attack: 'Attack', chance_creation: 'Chance creation',
+      defence: 'Defence', defensive_transition: 'Defensive transition', attacking_transition: 'Attacking transition',
+      opp_chance_creation: 'Sunderland chance creation', match_stats_card: 'Match stats card' };
+    const all = this.state.ipVer === 'all';
+    const showTable = this.state.ipVer !== 'off';
+    const rows = showTable ? I.metRows.filter(r => all || r.ver === 'mirror_verified') : [];
+    let last = null;
+    const q2Met = [];
+    order.forEach(s => rows.filter(r => r.s === s).forEach(r => {
+      q2Met.push({ sec: r.s === last ? '' : SECN[r.s] || r.s,
+        k: r.opp && /^(xG|xT)$/.test(r.k) ? r.k + ' conceded' : r.k, v: r.v,
+        who: r.opp ? 'SUN' : '', whoCol: r.opp ? AMB : '#2e2e38',
+        dot: VER[r.ver].c, ver: VER[r.ver].l, raw: r.raw,
+        kCol: r.opp ? '#8d8a95' : '#f3f2ef' });
+      last = r.s;
+    }));
+    const q2Cen = ['mirror_verified', 'single_source', 'unclassified_in_source', 'fixture_identifier']
+      .map(k => ({ lab: VER[k].l, n: I.cen[k] || 0, col: VER[k].c,
+        w: +((I.cen[k] || 0) / 80 * 100).toFixed(1) }));
+
+    const FLANK = { "O'Shea": 1, Fatawu: 1, Davis: 1, Maeda: 1 };
+    const dmax = Math.max.apply(null, I.players.map(p => Math.max(p.fw, p.bk)));
+    const pmax = Math.max.apply(null, I.players.map(p => p.ps));
+    const sortKey = this.state.ipSort;
+    const pl = I.players.slice().sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0) || b.ps - a.ps);
+    const q2Pl = pl.filter(p => p.ps >= 3).map(p => ({
+      nm: p.nm, short: p.short, role: p.st ? 'start' : 'on ' + p.on + "'",
+      flank: FLANK[p.short] ? 1 : 0, nmCol: FLANK[p.short] ? '#f3f2ef' : '#b8b5c0',
+      tou: p.tou, ps: p.ps, pok: p.pok, pc: p.pc.toFixed(0) + '%',
+      pcCol: p.pc < 60 ? AMB : '#b8b5c0',
+      psW: +(p.ps / pmax * 100).toFixed(1),
+      fw: p.fw, bk: p.bk,
+      fwW: +(p.fw / dmax * 50).toFixed(2), bkW: +(p.bk / dmax * 50).toFixed(2),
+      bkX: +(50 - p.bk / dmax * 50).toFixed(2),
+      net: (p.fw - p.bk > 0 ? '+' : '') + (p.fw - p.bk),
+      netCol: p.fw - p.bk > 2 ? GRN : p.fw - p.bk < -2 ? RED : '#8d8a95',
+      pg: p.pg, pgCol: p.pg <= 2 ? AMB : '#f3f2ef',
+      f3: p.f3, f3Col: p.f3 === 0 ? AMB : '#f3f2ef',
+      to: p.to ? p.tow + '/' + p.to : '\u2013', toCol: p.to >= 4 ? RED : '#8d8a95',
+      ls: p.ls, lsCol: p.ls >= 12 ? AMB : '#8d8a95'
+    }));
+    const sum = k => I.players.reduce((a, p) => a + (p[k] || 0), 0);
+    const q2PlTot = { ps: sum('ps'), pok: sum('pok'), fw: sum('fw'), bk: sum('bk'),
+      pg: sum('pg'), f3: sum('f3'), ls: sum('ls'),
+      net: (sum('fw') - sum('bk') > 0 ? '+' : '') + (sum('fw') - sum('bk')),
+      pc: Math.round(sum('pok') / sum('ps') * 100) + '%' };
+
+    const cmax = Math.max.apply(null, I.chan.map(c => Math.max(c.en, c.sh)));
+    const q2Chan = I.chan.map(c => ({ ch: c.ch, en: c.en, sh: c.sh,
+      enW: +(c.en / cmax * 100).toFixed(1), shW: +(c.sh / cmax * 100).toFixed(1),
+      flag: c.en >= 9 && c.sh === 0 ? 'no shots' : '',
+      shCol: c.sh === 0 && c.en >= 9 ? AMB : '#b8b5c0' }));
+
+    const zmax = Math.max.apply(null, I.zt.map(z => z.l));
+    const q2Zone = I.zt.map(z => ({ ch: z.ch, th: z.th + ' third', t: z.t, l: z.l,
+      r: z.r == null ? '\u2013' : z.r + '%',
+      w: +(z.l / zmax * 100).toFixed(1),
+      col: z.l >= 15 ? RED : z.l >= 8 ? AMB : '#3f3d47',
+      rCol: z.r >= 25 ? AMB : '#8d8a95' }));
+
+    const gmax = Math.max.apply(null, Object.keys(I.deg).map(k => I.deg[k]));
+    const q2Deg = Object.keys(I.deg).map(k => ({ nm: k, n: I.deg[k],
+      w: +(I.deg[k] / gmax * 100).toFixed(1),
+      tou: (I.players.find(p => p.short === k) || {}).tou || 0,
+      flag: I.deg[k] <= 2 ? 'weakly linked' : '',
+      col: I.deg[k] <= 2 ? AMB : GRN })).sort((a, b) => b.n - a.n || b.tou - a.tou);
+
+    return { q2On: true, q2Tiles, q2Met, q2Cen, q2Pl, q2PlTot, q2Chan, q2Zone, q2Deg, q2Dict: dict,
+      q2VerAll: all, q2ShowTable: showTable,
+      q2MetCount: showTable ? q2Met.length + ' of 80 shown' : '',
+      q2TableLab: showTable ? (all ? 'All 80 metrics' : 'Mirror-verified only') : 'Closed',
+      q2Head: [
+        { lab: 'Possession', a: '37%', b: '63%', aW: 37, bW: 63,
+          aDot: GRN, aVer: 'verified', bDot: AMB, bVer: 'single source',
+          line: 'Ipswich were second on the ball by a distance. Sunderland\u2019s 63% is the one figure here with no mirror.' },
+        { lab: 'Expected goals', a: '0.86', b: '0.86', aW: 50, bW: 50,
+          aDot: GRN, aVer: 'verified', bDot: GRN, bVer: 'verified',
+          line: 'Identical expected return, on Twelve\u2019s numbers for both sides.' },
+        { lab: 'Goals', a: '2', b: '1', aW: 66.7, bW: 33.3,
+          aDot: GRN, aVer: 'verified', bDot: GRN, bVer: 'verified',
+          line: 'The only column Ipswich win.' }
+      ],
+      q2Tilt: { v: '36%', line: 'Field tilt \u2014 their share of final-third possession. Second in territory too, by about the same margin as the ball.' },
+      q2Funnel: [
+        { who: 'Ipswich', ver: 'single source', col: '#f0b429', dot: AMB, touch: '19 box touches',
+          steps: [{ lab: 'Possessions reaching the final third', v: '23%', w: 23 },
+            { lab: 'Of those, reaching the box', v: '32%', w: 32 },
+            { lab: 'Box touches becoming a shot', v: '45%', w: 45 }] },
+        { who: 'Sunderland', ver: 'mirror-verified', col: '#4ec98d', dot: GRN, touch: '15 box touches',
+          steps: [{ lab: 'Possessions reaching the final third', v: '31%', w: 31 },
+            { lab: 'Of those, reaching the box', v: '15%', w: 15 },
+            { lab: 'Box touches becoming a shot', v: '50%', w: 50 }] }
+      ],
+      q2Prov: [
+        { lab: 'mirror-verified', n: 22, w: 27.5, col: GRN },
+        { lab: 'single source', n: 47, w: 58.75, col: AMB },
+        { lab: 'unclassified', n: 6, w: 7.5, col: RED },
+        { lab: 'fixture identifiers', n: 5, w: 6.25, col: BLU }
+      ],
+      q2SortLab: { ps: 'passes', pg: 'progressive passes', f3: 'final-third entries', ls: 'turnovers' }[sortKey],
+      q2SetAll: () => this.setState({ ipVer: 'all' }),
+      q2SetVer: () => this.setState({ ipVer: 'verified' }),
+      q2SetOff: () => this.setState({ ipVer: 'off' }),
+      q2SortPs: () => this.setState({ ipSort: 'ps' }),
+      q2SortPg: () => this.setState({ ipSort: 'pg' }),
+      q2SortF3: () => this.setState({ ipSort: 'f3' }),
+      q2SortLs: () => this.setState({ ipSort: 'ls' }) };
+  }
+  ipsVals() {
+    const I = this.state.IPS;
+    const GRN = '#4ec98d', RED = '#e12b3f', AMB = '#f0b429', DIM = '#7f9c8c';
+    const empty = { ipsOn: false, ipKpi: [], ipPlayers: [], ipTot: {}, ipNodeLeaders: [], ipTransLeaders: [], ipSeqs: [], ipTrans: [], ipTransArr: [], ipChanBands: [], ipChanDots: [],
+      ipChanShots: [], ipShotPanels: [], ipZones: [], ipNodes: [], ipLinks: [] };
+    if (!I) return empty;
+    const PX = x => +(x / 100 * 105).toFixed(2), PY = y => +((100 - y) / 100 * 68).toFixed(2);
+    // HALF = panels rendered two-up, so their user units map to about half the pixels.
+    // Label sizes are pre-multiplied so every in-plot label lands at the same optical size.
+    const HALF = 1, FULL = 0.5;
+    const TX = (x, y, str, o, k, fs) => React.createElement('text', Object.assign({
+      x: x, y: y, fill: '#f3f2ef', textAnchor: 'middle',
+      style: { fontFamily: "'IBM Plex Mono',monospace", fontWeight: 600,
+        fontSize: ((fs || 3.4) * (k || 1)).toFixed(2) + 'px',
+        paintOrder: 'stroke', stroke: '#0e1a15', strokeWidth: (0.5 * (k || 1)).toFixed(2) + 'px',
+        strokeLinejoin: 'round' } }, o || {}), str);
+
+    const ipSeqs = I.seqs.map(s => {
+      const segs = [];
+      for (let i = 0; i < s.pts.length - 1; i++) {
+        const a = s.pts[i], b = s.pts[i + 1];
+        const isPass = a.t === 'Pass' && a.ex != null;
+        segs.push({ x1: PX(a.x), y1: PY(a.y), x2: PX(isPass ? a.ex : b.x), y2: PY(isPass ? a.ey : b.y),
+          col: isPass ? GRN : '#7f8b84', dash: isPass ? '0' : '2.4 2.2', w: isPass ? 1.5 : 1.1,
+          head: isPass ? 'url(#ipsArrow)' : 'none' });
+      }
+      const last = s.pts[s.pts.length - 1];
+      return { m: s.m + "'", who: s.who, kind: s.kind === 'FastBreak' ? 'Fast break' : 'Regular play',
+        secs: s.secs + 's from the ' + (s.win.type === 'Interception' ? 'interception' : 'ball win'),
+        winBy: s.win.by, winX: PX(s.win.x), winY: PY(s.win.y),
+        gx: PX(last.x), gy: PY(last.y), segs,
+        winEl: TX(PX(s.win.x), PY(s.win.y) + 7.6, s.win.by, { fill: '#ff6070' }, HALF, 3.3) };
+    });
+
+    const ipTrans = I.trans.map(t => ({ cx: PX(t.x), cy: PY(t.y), r: t.s ? 1.5 : 1.0,
+      col: t.s ? AMB : DIM, op: t.s ? 1 : .5 }));
+    // seconds labels: nearest to their own marker, then clear of everything else
+    const hard = [], soft = [];
+    I.trans.forEach(t => (t.s ? hard : soft).push({ x0: PX(t.x) - 1.9, x1: PX(t.x) + 1.9,
+      y: PY(t.y), cx: PX(t.x), cy: PY(t.y), amber: !!t.s }));
+    const amberPts = hard.slice();
+    const TCAND = [{ dy: 3.8, a: 'middle' }, { dy: -3.2, a: 'middle' },
+      { dy: 1.2, a: 'start' }, { dy: 1.2, a: 'end' },
+      { dy: 6.4, a: 'middle' }, { dy: -5.8, a: 'middle' },
+      { dy: 4.2, a: 'start' }, { dy: 4.2, a: 'end' },
+      { dy: -3.6, a: 'start' }, { dy: -3.6, a: 'end' }];
+    const hit = (b, p) => { const w = Math.min(b.x1, p.x1) - Math.max(b.x0, p.x0);
+      const h = 3.2 - Math.abs(p.y - b.y); return w > 0 && h > 0 ? w * h : 0; };
+    const ipTransLeaders = [];
+    const ipTransArr = I.trans.filter(t => t.s && t.sx != null).map(t => {
+      const x = PX(t.x), y = PY(t.y), w = String(t.sec).length * 0.95 + 1.9, gap = 3;
+      const geo = c => { const ax = x + (c.a === 'start' ? gap : c.a === 'end' ? -gap : 0);
+        const x0 = c.a === 'start' ? ax : c.a === 'end' ? ax - w : ax - w / 2;
+        return { ax: ax, x0: x0, x1: x0 + w, y: y + c.dy, mx: x0 + w / 2, my: y + c.dy }; };
+      const d2 = (a, b, px, py) => (a - px) * (a - px) + (b - py) * (b - py);
+      let best = null;
+      TCAND.forEach((c, i) => {
+        const g = geo(c), own = d2(g.mx, g.my, x, y);
+        let cost = i * 0.3 + Math.sqrt(own) * 0.6;
+        hard.forEach(p => { if (p.cx === x && p.cy === y) return; cost += 12 * hit(g, p); });
+        soft.forEach(p => { cost += 0.7 * hit(g, p); });
+        amberPts.forEach(p => { if (p.cx === x && p.cy === y) return;
+          const dn = d2(g.mx, g.my, p.cx, p.cy);
+          if (dn < own) cost += 300; else if (dn < own * 1.8) cost += 45; });
+        if (!best || cost < best.cost) best = { cost: cost, c: c, g: g };
+      });
+      hard.push({ x0: best.g.x0, x1: best.g.x1, y: best.g.y, cx: best.g.mx, cy: best.g.my, amber: false });
+      const far = Math.sqrt((best.g.mx - x) * (best.g.mx - x) + (best.g.my - y) * (best.g.my - y));
+      if (far > 4.6) ipTransLeaders.push({ x1: x, y1: y,
+        x2: best.g.mx + (best.g.mx > x ? -w / 2 : w / 2), y2: best.g.my - 1.1 });
+      return { x1: x, y1: y, x2: PX(t.sx), y2: PY(t.sy),
+        labEl: TX(best.g.ax, y + best.c.dy, t.sec + 's', { textAnchor: best.c.a, fill: '#f0b429' }, FULL, 3.1) };
+    });
+    const CH = [{ k: 'left', lab: 'Left', y0: 80, y1: 100 }, { k: 'left half', lab: 'Left half', y0: 60, y1: 80 },
+      { k: 'centre', lab: 'Centre', y0: 40, y1: 60 }, { k: 'right half', lab: 'Right half', y0: 20, y1: 40 },
+      { k: 'right', lab: 'Right', y0: 0, y1: 20 }];
+    const ipChanBands = CH.map(c => {
+      const n = I.chan.filter(e => e.ch === c.k).length;
+      const wide = c.k === 'left' || c.k === 'right';
+      return { lab: c.lab, n, x: PX(66.7), y: PY(c.y1), w: PX(33.3), h: PY(c.y0) - PY(c.y1),
+        fill: wide ? GRN : '#8d8a95', op: wide ? .16 : .06,
+        wide: wide ? 1 : 0, barW: +(n / 11 * 100).toFixed(1),
+        barCol: wide ? GRN : '#5f5d68' };
+    });
+    const ipChanDots = I.chan.map(e => ({ cx: PX(e.x), cy: PY(e.y) }));
+    const ipChanShots = I.chanShots.map(s => ({ x: PX(s.x), y: PY(s.y) }));
+
+    const mk = (rows, who, xg) => {
+      const max = Math.max.apply(null, rows.map(r => r.q));
+      const dots = rows.map(r => ({ cx: PX(r.x), cy: PY(r.y), r: +(1.6 + 4.2 * Math.sqrt(r.q / max)).toFixed(2),
+        fill: r.b ? 'none' : GRN, sw: r.b ? 1.1 : 0.45, goal: r.g, st: r.b ? GRN : '#0e1a15',
+        t: r.who + ' ' + r.m + "' \u00b7 " + (r.g ? 'goal' : r.b ? 'blocked' : 'shot') }));
+      // goal captions get the same slot scoring as the network and transition labels
+      const SCAND = [{ dy: 8.4, a: 'middle' }, { dy: -6.6, a: 'middle' },
+        { dy: 1.4, a: 'start' }, { dy: 1.4, a: 'end' },
+        { dy: 12.6, a: 'middle' }, { dy: -11, a: 'middle' },
+        { dy: 8, a: 'start' }, { dy: 8, a: 'end' },
+        { dy: -6.4, a: 'start' }, { dy: -6.4, a: 'end' },
+        { dy: 16.4, a: 'middle' }, { dy: -15, a: 'middle' }];
+      const goals = rows.filter(r => r.g);
+      const taken = [];
+      const stars = goals.map(r => {
+        const cx = PX(r.x), cy = PY(r.y), txt = r.who + ' ' + r.m + "'";
+        const w = txt.length * 1.86 + 1.6, gap = 3.6;
+        const own = dots.find(d => d.cx === cx && d.cy === cy) || { r: 2 };
+        const geo = c => { const ax = cx + (c.a === 'start' ? gap : c.a === 'end' ? -gap : 0);
+          const x0 = c.a === 'start' ? ax : c.a === 'end' ? ax - w : ax - w / 2;
+          return { ax: ax, x0: x0, x1: x0 + w, y: cy + c.dy, mx: x0 + w / 2, my: cy + c.dy }; };
+        const dist2 = (a, b, px, py) => (a - px) * (a - px) + (b - py) * (b - py);
+        let best = null;
+        SCAND.forEach((c, i) => {
+          const g = geo(c), ownD = dist2(g.mx, g.my, cx, cy);
+          let cost = i * 0.6 + Math.sqrt(ownD) * 0.8;
+          // every shot marker on this plate pushes the caption away, big ones harder
+          dots.forEach(d => {
+            const dx = Math.max(0, Math.max(g.x0 - d.cx, d.cx - g.x1));
+            const dy = Math.abs(d.cy - g.my);
+            if (dx < d.r && dy < d.r + 2.4) cost += 26 * (d.r + 2.4 - dy) * (d.r - dx + 0.6);
+          });
+          // and it must stay nearest its own goal marker
+          goals.forEach(o => { if (o === r) return;
+            const dn = dist2(g.mx, g.my, PX(o.x), PY(o.y));
+            if (dn < ownD * 1.4) cost += 500; });
+          taken.forEach(p => { const ow = Math.min(g.x1, p.x1) - Math.max(g.x0, p.x0),
+            oh = 5.6 - Math.abs(p.y - g.y); if (ow > 0 && oh > 0) cost += 60 * ow * oh; });
+          if (!best || cost < best.cost) best = { cost: cost, c: c, g: g };
+        });
+        taken.push({ x0: best.g.x0, x1: best.g.x1, y: best.g.y });
+        const far = Math.sqrt(dist2(best.g.mx, best.g.my, cx, cy));
+        return { cx: cx, cy: cy,
+          leader: far > own.r + 7.5 ? 1 : 0,
+          lx1: cx, ly1: cy,
+          lx2: best.g.mx + (best.g.mx > cx ? -w / 2 : w / 2), ly2: best.g.my - 1.2,
+          labEl: TX(best.g.ax, best.g.y, txt, { textAnchor: best.c.a }, HALF, 3.1) };
+      });
+      return { who: who, meta: rows.length + ' shots \u00b7 ' + xg + ' non-penalty xG (Twelve)',
+        dots: dots, stars: stars, leaders: stars.filter(s2 => s2.leader) };
+    };
+    const ipShotPanels = [mk(I.shotsFor, 'Ipswich created', '0.86'), mk(I.shotsAg, 'Ipswich conceded', '0.86')];
+
+    const CHN = ['right', 'right half', 'centre', 'left half', 'left'];
+    const THR = ['own third', 'middle third', 'final third'];
+    // six discrete bands rather than a continuous ramp: mid-range counts separate
+    const BAND = [0.10, 0.24, 0.39, 0.55, 0.72, 0.92];
+    const ipZones = I.zones.map(z => {
+      const max = Math.max.apply(null, z.cells.map(c => c.n));
+      const loss = z.m === 'losses';
+      const tot = z.cells.reduce((a, c) => a + c.n, 0);
+      const step = n => n ? BAND[Math.min(5, Math.floor(n / max * 5.999))] : 0.035;
+      return {
+        lab: loss ? 'Where they lost it' : 'Where they touched the ball',
+        tot: tot + (loss ? ' losses' : ' touches'),
+        ramp: loss ? '#c2622a' : GRN, max: max,
+        steps: BAND.map((op, i) => ({ op: op,
+          range: Math.max(1, Math.round(i / 6 * max)) + '\u2013' + Math.round((i + 1) / 6 * max)
+            + (loss ? ' losses' : ' touches') })),
+        cells: z.cells.map(c => ({
+          x: +(c.cx * 17.5).toFixed(2), y: +((4 - c.cy) * 13.6).toFixed(2), w: 17.5, h: 13.6,
+          fill: loss ? '#c2622a' : GRN, op: step(c.n),
+          t: c.n + (loss ? ' losses' : ' touches') + ' \u00b7 ' + CHN[c.cy] + ' channel, '
+            + THR[Math.floor(c.cx / 2)] }))
+      };
+    });
+    const pos = {};    const maxInv = Math.max.apply(null, I.nodes.map(n => n.inv));
+    const ipNodes = I.nodes.map(n => { const o = { nm: n.nm, cx: PX(n.x), cy: PY(n.y),
+      r: +(1.9 + 3.4 * (n.inv / maxInv)).toFixed(2), inv: n.inv };
+      pos[n.nm] = o; return o; });
+    // score every slot: no overlap, and the label must stay nearest to its own node
+    const boxes = [];
+    const CAND = [{ dy: 5.4, a: 'middle' }, { dy: -4.6, a: 'middle' },
+      { dy: 1.6, a: 'start' }, { dy: 1.6, a: 'end' },
+      { dy: 8.4, a: 'middle' }, { dy: -7.6, a: 'middle' },
+      { dy: 5.6, a: 'start' }, { dy: 5.6, a: 'end' },
+      { dy: -4.8, a: 'start' }, { dy: -4.8, a: 'end' },
+      { dy: 11.4, a: 'middle' }, { dy: -10.6, a: 'middle' }];
+    const ipNodeLeaders = [];
+    ipNodes.slice().sort((a, b) => b.r - a.r || a.cy - b.cy).forEach(o => {
+      const w = o.nm.length * 0.96 + 1, gap = o.r + 1.4;
+      const geo = c => {
+        const ax = o.cx + (c.a === 'start' ? gap : c.a === 'end' ? -gap : 0);
+        const x0 = c.a === 'start' ? ax : c.a === 'end' ? ax - w : ax - w / 2;
+        return { ax: ax, x0: x0, x1: x0 + w, y: o.cy + c.dy, mx: x0 + w / 2, my: o.cy + c.dy };
+      };
+      const d2 = (x, y, p) => (x - p.cx) * (x - p.cx) + (y - p.cy) * (y - p.cy);
+      let best = null;
+      CAND.forEach((c, i) => {
+        const g = geo(c);
+        let cost = i * 0.35 + Math.sqrt(d2(g.mx, g.my, o)) * 0.9;
+        boxes.forEach(p => { const ow = Math.min(g.x1, p.x1) - Math.max(g.x0, p.x0),
+          oh = 5.4 - Math.abs(p.y - g.y); if (ow > 0 && oh > 0) cost += 40 * ow * oh; });
+        const own = d2(g.mx, g.my, o);
+        ipNodes.forEach(n => { if (n === o) return;
+          const dn = d2(g.mx, g.my, n);
+          if (dn < own * 1.45) cost += 600;
+          else if (dn < own * 2.4) cost += 55; });
+        if (!best || cost < best.cost) best = { cost: cost, c: c, g: g };
+      });
+      o.lab = { dy: best.c.dy, a: best.c.a, dx: best.g.ax - o.cx };
+      boxes.push({ x0: best.g.x0, x1: best.g.x1, y: best.g.y });
+      const far = Math.sqrt((best.g.mx - o.cx) * (best.g.mx - o.cx) + (best.g.my - o.cy) * (best.g.my - o.cy));
+      if (far > o.r + 4.2) ipNodeLeaders.push({ x1: o.cx, y1: o.cy,
+        x2: best.g.mx + (best.g.mx > o.cx ? -w / 2 : w / 2), y2: best.g.my - 1.1 });
+    });
+    ipNodes.forEach(o => { o.labEl = TX(o.cx + o.lab.dx, o.cy + o.lab.dy, o.nm, { textAnchor: o.lab.a }, FULL, 3.15); });
+    const maxLink = Math.max.apply(null, I.links.map(l => l.n));
+    const seen = {};
+    const ipLinks = I.links.filter(l => { const k = [l.a, l.b].sort().join('|');
+      if (seen[k] || !pos[l.a] || !pos[l.b]) return false; seen[k] = 1; return true; })
+      .map(l => ({ x1: pos[l.a].cx, y1: pos[l.a].cy, x2: pos[l.b].cx, y2: pos[l.b].cy,
+        w: +(0.5 + 2.2 * (l.both / maxLink)).toFixed(2), op: +(0.3 + 0.5 * (l.both / maxLink)).toFixed(2),
+        t: l.a + ' \u2013 ' + l.b + ' \u00b7 ' + l.both + ' passes both ways' }));
+
+    const ipKpi = (I.kpi || []).map(g => ({ g: g.g, rows: g.rows.map(r => ({ lab: r.lab, v: r.v, k: r.k })) }));
+    const PS = I.players || [];
+    const mx = k => Math.max.apply(null, PS.map(p => p[k]));
+    const mF3 = mx('f3'), mPs = mx('ps');
+    const ipPlayers = PS.filter(p => p.ps >= 4).map(p => {
+      const mins = (p.off == null ? 94 : p.off) - p.on;
+      const dir = p.fw + p.bk;
+      return { nm: p.nm, role: p.st ? 'start' : 'sub \u00b7 ' + p.on + "'", mins: mins + "'",
+        tch: p.tch, ps: p.ps, pc: p.pc.toFixed(1) + '%',
+        psW: +(p.ps / mPs * 100).toFixed(1),
+        fw: p.fw, bk: p.bk,
+        fwW: dir ? +(p.fw / dir * 100).toFixed(1) : 0,
+        bkW: dir ? +(p.bk / dir * 100).toFixed(1) : 0,
+        tilt: dir ? (p.fw > p.bk ? '+' : '') + (p.fw - p.bk) : '0',
+        tiltCol: p.fw - p.bk > 2 ? GRN : p.fw - p.bk < -2 ? RED : '#8d8a95',
+        pg: p.pg, f3: p.f3, f3W: mF3 ? +(p.f3 / mF3 * 100).toFixed(1) : 0,
+        lb: p.lb ? p.lbc + '/' + p.lb : '\u2014',
+        rec: p.rec, ls: p.ls,
+        lsCol: p.ls >= 9 ? AMB : '#8d8a95' };
+    });
+    const ipTot = (() => { const s = k => PS.reduce((a, p) => a + p[k], 0);
+      const fw = s('fw'), bk = s('bk');
+      return { ps: s('ps'), fw, bk, pg: s('pg'), f3: s('f3'), rec: s('rec'), ls: s('ls'),
+        tilt: (fw > bk ? '+' : '') + (fw - bk) }; })();
+    return { ipsOn: true, ipSeqs, ipTrans, ipTransArr, ipChanBands, ipChanDots, ipChanShots,
+      ipShotPanels, ipZones, ipNodes, ipLinks, ipKpi, ipPlayers, ipTot, ipNodeLeaders, ipTransLeaders };
+  }
+  figVals() {
+    return {
+      gsFigs: [
+        { src: this.fig('gamestate_profile'), t: 'United dominated the ball when losing and surrendered it when winning',
+          n: 'Every minute of all 38 matches attributed to a scoreline state. Bars on the left are 95% intervals from 10,000 bootstrap resamples of matches, not minutes \u2014 minutes inside one match are not independent. Only the gap between trailing and leading is firm (+1.43, CI +0.40 to +2.43); the \u22120.15 while leading by one crosses zero on its own. Trailing 2+ is three matches and is drawn hollow because it is an anecdote, not a rate.' }
+      ],
+      ldFigs: [
+        { src: this.fig('lead_decay'), t: 'The sag is not immediate \u2014 it arrives after about 25 minutes in front',
+          n: 'Both gradients point the same way, but time-held is the steeper one and it survives holding the clock roughly fixed: among leads taken before half time the same three bands read +0.96, +0.57, \u22121.20. First-10 minus 25+ is +1.58 (95% CI +0.40 to +2.49), and the sign flips in 0.7% of 10,000 match-level resamples. Goals are attributed to the spell they ended, never to the one they created. The 25+ band is 14 spells in 14 matches \u2014 the thinnest evidence here, and the band the conclusion rests on.' },
+        { src: this.fig('lead_cause'), t: 'It is us, not them',
+          n: 'The decay happens past our own 25-minute mark whether or not the opposition has changed anything: \u22121.24 when they had not acted, \u22121.17 when they had. Opposition interventions are their substitutions and formation changes \u2014 52 and 5 respectively while we led by one, landing a median 7.5 minutes into our leads. Both 283-minute cells are thin and their intervals are wide; the evidence is that the two point estimates agree, which is what the opponent story predicted they would not do. Controlled for opposition interventions, not opposition effort. Physical load is not in this dataset.' },
+        { src: this.fig('sub_timing'), t: 'The bench arrives after the line, not before it',
+          n: 'Every one-goal lead that lasted past 25 minutes \u2014 14 spells in 14 matches. The white line on each bar is 25 minutes into that lead, where chance balance turns from +0.49 to \u22121.21 per 90. Of the ten long leads taken before half time, one had a change before that line and four had no change at all. The four taken after 45\u2032 all did, but a lead taken at 68\u2032 is already inside the normal substitution window, so those say nothing about intent. Observational: this shows when the bench was used, not what using it earlier would have done.' }
+      ],
+      buFigs: [
+        { src: this.fig('buildup_gw1'), t: 'Where the ball went when we built from the back',
+          n: 'Mean touch position in the 47 possessions that began in our own third. The number beside each name is his touch count in those possessions. This is where players were involved as the ball moved forward, not where they stood \u2014 event data has no record of a player who did not touch it. Below the 5-touch floor and not plotted: Dorgu (4), Cunha (4), Lacey (2), Dalot (2).' },
+        { src: this.fig('buildup_gw1_vs_2526'), t: 'This match against last season, role by role',
+          n: 'Hollow ring is the 2025/26 baseline over the 20 matches that also started 4-2-3-1; filled dot is GW1 v Hull. The arrows are not like for like. We held 71.7% of the ball here, more than in any match of 2025/26 (highest was 69.9%), and Hull defended in a 5-4-1 \u2014 a back five we did not face once in 38 matches. Every average moves up the pitch against a deep block, so the shift belongs to the opponent until a comparable fixture says otherwise. There is no such fixture in the baseline.' }
+      ]
+    };
+  }
+  oppoVals() {
+    const RED = '#e12b3f', GRN = '#4ec98d', AMB = '#f0b429', BLU = '#5b7bd5';
+    const thirds = (a, tot) => a.map((v, i) => ({
+      lab: ['Own third', 'Middle third', 'Final third'][i], n: v,
+      pct: Math.round(v / tot * 100) + '%', w: +(v / tot * 100).toFixed(1),
+      col: [RED, '#3f3d47', GRN][i]
+    }));
+    return {
+      opMeta: 'Ipswich 2–1 Sunderland · Portman Road · 22 Aug 2026 · 29,669 · 1,549 events',
+      opHero: [
+        { v: '37%', lab: 'Possession, and they won the match', sub: 'field tilt 36% \u00b7 Twelve, mirror-verified', col: '#f3f2ef' },
+        { v: '16.5', lab: 'Passes allowed per defensive action. They do not press', sub: 'Sunderland 11.0', col: AMB },
+        { v: '2 / 2', lab: 'Goals scored from a Sunderland error in their own half', sub: 'both flagged leading-to-goal', col: RED },
+        { v: '7s', lab: 'Longest of the two win-to-finish sequences', sub: 'the other took three', col: '#f3f2ef' }
+      ],
+      opShape: '4-2-3-1 for all 94 minutes. Five formation records in the file and the same shape in every one. O’Neil made five substitutions and never changed the structure they defend in.',
+      opDefIps: thirds([78, 61, 11], 150),
+      opDefSun: thirds([55, 50, 16], 121),
+      opGoals: [
+        { m: "23'", who: 'Emersonn', assist: 'Julio Enciso', win: 'Enciso intercepts', err: 'Luke O’Nien',
+          sec: '7 seconds', wx: 37, fx: 90, rx: 10, carry: 'Enciso wins it on his own third line, beats the challenge, carries 48 metres of pitch and squares it.',
+          tag: 'Fast break · big chance · box centre', col: RED },
+        { m: "92'", who: 'Clarke', assist: 'Sasa Lukic', win: 'Lukic intercepts on halfway', err: 'Omar Alderete',
+          sec: '3 seconds', wx: 64, fx: 85, rx: 15, carry: 'Alderete’s pass out from a goalkeeper throw goes straight to Lukic, who is already facing goal. One pass, one finish.',
+          tag: 'Regular play · box centre · one pass from the interception', col: RED }
+      ],
+      opBuild: [
+        { lab: 'Long balls', v: '70 of 371', sub: '19% of passes · 29 found a man', w: 19, col: AMB },
+        { lab: 'Scherpen goes long', v: '29 of 33', sub: '88% of his distribution · 15 found a man', w: 88, col: RED },
+        { lab: 'Passes forward 10m+', v: '36%', sub: 'Sunderland 25%', w: 36, col: GRN },
+        { lab: 'Crosses completed', v: '5 of 15', sub: 'not a crossing side', w: 33, col: '#6f6d78' }
+      ],
+      opFlank: [
+        { lab: 'Left', n: 11, w: 100, col: AMB },
+        { lab: 'Right', n: 9, w: 82, col: RED },
+        { lab: 'Centre', n: 4, w: 36, col: '#3f3d47' },
+        { lab: 'Half-spaces', n: 3, w: 27, col: '#3f3d47' }
+      ],
+
+      opThreat: [
+        { nm: 'Emersonn', role: 'Striker', line: '1 goal, 3 shots, all inside the box. The big chance and the header from the set piece both his.' },
+        { nm: 'Julio Enciso', role: 'Right of the three', line: '8 take-ons, 4 won — double the next man in the side. 1 assist, 3 shots, and he won the ball for the opener himself. Logged from y16 to y83, so he is not one full-back’s problem.' },
+        { nm: 'Clarke', role: 'Left of the three', line: '1 goal, 2 shots, both in the last five minutes. Arrives late in the box centre.' },
+        { nm: 'Sasa Lukic', role: 'Deep pivot', line: 'The interception and the assist for the winner. Reads the pass out from the back.' }
+      ],
+      opAgainst: 'Sunderland had 11 shots to Ipswich’s 10 and 63% of the ball, for exactly the same 0.86 non-penalty expected goals. They lost. The one Ipswich concession was a direct free kick on 38 minutes, so the block itself was never opened up.'
+    };
   }
   gsStripVals(D) {
     const GS = D.gs, gw = this.state.mwGw;
@@ -2691,6 +3410,13 @@ class Component extends DCLogic {
     const g = D.gw1, S = D.season;
     const LD = this.leadVals();
     const gsStrip = this.gsStripVals(D);
+    const OP = this.oppoVals();
+    OP.isOppoGw = this.state.mwSeason === '2627' && this.state.mwGw === 2;
+    OP.isBuildGw = this.state.mwSeason === '2627' && this.state.mwGw === 1;
+    const FG = this.figVals();
+    const IPSV = this.ipsVals();
+    const Q2 = this.ips2Vals();
+    const SV = this.shotVals();
     const RED = '#e12b3f', BLU = '#5b7bd5', AMB = '#f0b429', GRN = '#4ec98d', DIM = '#8d8a95';
     const r2 = (v, d = 2) => v == null ? '—' : (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
     const fmt = v => v == null ? '—' : (Number.isInteger(v) ? String(v) : String(Math.round(v * 100) / 100));
@@ -3446,6 +4172,10 @@ class Component extends DCLogic {
 
     const mkCell = w => {
       const m = byGw[w], sel = w === selGw;
+      if (!m && is2627 && w === 2) return { gwv: '2', opp: 'IPS', sc: 'NEXT', bg: sel ? '#1f1f28' : '#0e0e13',
+        bar: '#f0b429', gwCol: sel ? '#b8b5c0' : '#5d5b65', oppCol: sel ? '#fff' : '#b8b5c0',
+        scCol: '#f0b429', cursor: 'pointer', ring: sel ? '1px solid #f0b429' : '0', on: pickGw(2),
+        onEnter: tip('GW2 \u00b7 Ipswich Town (H)', 'Not played \u00b7 opposition analysis available'), onLeave: leave };
       if (!m) return { gwv: String(w), opp: '\u00b7', sc: '\u2014', bg: '#0e0e13', bar: '#1a1a21',
         gwCol: '#3d3b45', oppCol: '#2b2933', scCol: '#2b2933', cursor: 'default', ring: '0',
         on: null, onEnter: null, onLeave: null };
@@ -3621,7 +4351,7 @@ class Component extends DCLogic {
       trapPts, trapYLabels, trapXTicks, trapGridX, trapBands, trapLine, trapGw1, corrRows, buckets, form,
       xgYLabels, xgXTicks,
       cumYLabels, cumXTicks, cumEnd,
-      cumGfPath: path(S.tl.gf), cumXgPath: path(S.tl.xg), ledger, table, tiers, tierMetrics, gsStrip, ...LD };
+      cumGfPath: path(S.tl.gf), cumXgPath: path(S.tl.xg), ledger, table, tiers, tierMetrics, gsStrip, ...LD, ...OP, ...FG, ...IPSV, ...Q2, ...SV };
   }
 }
 </script>
