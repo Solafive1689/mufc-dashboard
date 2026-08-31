@@ -211,6 +211,7 @@ html{scroll-behavior:smooth}
 <div style="height:3px;background:{{ c.bar }};flex:none;order:-1"></div>
 <div style="padding:8px 4px 9px;display:{{ c.inner }};flex-direction:column;gap:3px;align-items:center;min-width:0">
 <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.02em;color:{{ c.gwCol }};white-space:nowrap">{{ c.gwv }}</div>
+<img sc-camel-src="{{ c.crest }}" alt="" style="visibility:{{ c.crDisp }};width:19px;height:19px;object-fit:contain;flex:none" />
 <div style="font-size:10.5px;font-weight:800;letter-spacing:.02em;color:{{ c.oppCol }};white-space:nowrap">{{ c.opp }}</div>
 <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:{{ c.scCol }};white-space:nowrap">{{ c.sc }}</div>
 </div>
@@ -234,10 +235,117 @@ html{scroll-behavior:smooth}
 <div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:3px;background:#93b8a4"></div><span style="font-size:11px;color:#8d8a95">Won</span></div>
 <div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:3px;background:#a5a2b0"></div><span style="font-size:11px;color:#8d8a95">Drawn</span></div>
 <div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:3px;background:#c39ba2"></div><span style="font-size:11px;color:#8d8a95">Lost</span></div>
-<div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:6px;background:#0e0e13;border:1px solid #23232c"></div><span style="font-size:11px;color:#8d8a95">Not played</span></div>
+<div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:3px;background:#2a2a34"></div><span style="font-size:11px;color:#8d8a95">To come</span></div>
+<div style="display:flex;align-items:center;gap:7px"><div style="width:14px;height:3px;background:#e8b64c"></div><span style="font-size:11px;color:#8d8a95">Next match</span></div>
 </div>
-<p style="margin:9px 0 0;font-size:11.5px;color:#7a7883;text-wrap:pretty">Played matchweeks stand at full height; the rest are stubs on the same baseline, so the season reads as a shape. <span style="font-family:'IBM Plex Mono',monospace">·A</span> after the number marks an away match. Left and right arrow keys step through the played matches.</p>
+<p style="margin:9px 0 0;font-size:11.5px;color:#7a7883;text-wrap:pretty">Played matchweeks stand at full height and carry the score; matchweeks still to come sit lower and carry the fixture date, so the season reads as a shape before it reads as a schedule. The amber bar is the next match. <span style="font-family:'IBM Plex Mono',monospace">·A</span> after the number marks an away match. Left and right arrow keys step through the played matches; any upcoming cell jumps to the full fixture list.</p>
 </section>
+
+<sc-if value="{{ fxOn }}" hint-placeholder-val="{{ true }}">
+<section id="fixtures" data-screen-label="Fixtures and schedule" style="padding:56px 0 0">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:6px">
+<div style="display:flex;align-items:baseline;gap:14px">
+<div style="width:4px;height:20px;background:#c8102e;align-self:center"></div>
+<h2 style="margin:0;font-family:Anton,sans-serif;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#f3f2ef">Every fixture, league and Europe</h2>
+</div>
+<div style="display:flex;gap:1px;background:#23232c;border:1px solid #23232c">
+<sc-for list="{{ fxTabs }}" as="t" hint-placeholder-count="3">
+<div onClick="{{ t.on }}" style="padding:8px 15px;background:{{ t.bg }};color:{{ t.fg }};font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;white-space:nowrap" style-hover="filter:brightness(1.3)">{{ t.lab }}</div>
+</sc-for>
+</div>
+</div>
+<p style="margin:0 0 22px 18px;font-size:14px;color:#8d8a95;max-width:88ch;text-wrap:pretty">Thirty-eight league matches and eight Champions League league-phase matchdays, in one column in date order, so the calendar reads the way the season is actually played. The rest column is days since the previous match in <em style="font-style:normal;color:#b8b5c0">either</em> competition — amber marks a turnaround of three days or fewer. A played league match is clickable and loads that matchweek above.</p>
+
+<sc-if value="{{ fxNextOn }}" hint-placeholder-val="{{ true }}">
+<div data-stack="1" style="display:grid;grid-template-columns:auto 1fr auto;gap:26px;align-items:center;background:#13131a;border:1px solid #23232c;border-left:3px solid {{ fxNext.compCol }};padding:22px 28px;margin-bottom:1px">
+<img sc-camel-src="{{ fxNext.crest }}" alt="" style="visibility:{{ fxNext.crDisp }};width:52px;height:52px;object-fit:contain;flex:none" />
+<div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+<span style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:{{ fxNext.compCol }}">Next up · {{ fxNext.comp }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6f6d78">{{ fxNext.rd }}</span>
+</div>
+<div style="font-family:Anton,sans-serif;font-size:30px;line-height:1;color:#f3f2ef">{{ fxNext.opp }}</div>
+<div style="font-size:12.5px;color:#8d8a95">{{ fxNext.when }} · {{ fxNext.ven }} · {{ fxNext.tv }}</div>
+<div style="font-size:11.5px;color:#6f6d78">{{ fxNext.rest }}</div>
+</div>
+<div style="text-align:right;white-space:nowrap">
+<div style="font-family:Anton,sans-serif;font-size:34px;line-height:.9;color:#e8b64c">{{ fxNext.cd }}</div>
+<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78;margin-top:4px">Until kick-off</div>
+</div>
+</div>
+</sc-if>
+
+<div data-stack="1" style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#23232c;border:1px solid #23232c">
+<sc-for list="{{ fxStats }}" as="s" hint-placeholder-count="5">
+<div style="background:#13131a;padding:17px 20px 15px;display:flex;flex-direction:column;gap:5px">
+<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">{{ s.lab }}</div>
+<div style="display:flex;align-items:baseline;gap:7px">
+<div style="font-family:Anton,sans-serif;font-size:32px;line-height:.85;color:#f3f2ef">{{ s.v }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6f6d78">{{ s.unit }}</div>
+</div>
+<div style="font-size:11.5px;color:#6f6d78;line-height:1.4">{{ s.note }}</div>
+</div>
+</sc-for>
+</div>
+
+<div data-scroll="1" style="margin-top:20px;background:#13131a;border:1px solid #23232c">
+<table data-export-label="Fixtures 2026/27" style="width:100%;border-collapse:collapse;min-width:840px">
+<thead>
+<tr style="border-bottom:1px solid #23232c">
+<th style="text-align:left;padding:11px 16px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Date</th>
+<th style="text-align:left;padding:11px 10px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Comp</th>
+<th style="text-align:left;padding:11px 10px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Round</th>
+<th style="text-align:left;padding:11px 10px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Opponent</th>
+<th style="text-align:left;padding:11px 10px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Venue</th>
+<th style="text-align:right;padding:11px 10px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Rest</th>
+<th style="text-align:left;padding:11px 10px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Broadcast</th>
+<th style="text-align:right;padding:11px 16px;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f6d78">Kick-off</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{ fxRows }}" as="r" hint-placeholder-count="12">
+<tr onClick="{{ r.on }}" style="border-bottom:1px solid #1a1a21;background:{{ r.bg }};outline:{{ r.ring }};outline-offset:-1px;cursor:{{ r.cursor }};opacity:{{ r.opa }}" style-hover="filter:brightness(1.35)">
+<td style="padding:10px 16px;white-space:nowrap">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5d5b65">{{ r.dow }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#e6e4ea;margin-left:7px">{{ r.dlab }}</span>
+</td>
+<td style="padding:10px 10px;white-space:nowrap"><span style="display:inline-block;width:7px;height:7px;background:{{ r.compCol }};margin-right:7px"></span><span style="font-size:10px;font-weight:800;letter-spacing:.1em;color:#8d8a95">{{ r.comp }}</span></td>
+<td style="padding:10px 10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6f6d78;white-space:nowrap">{{ r.rd }}</td>
+<td style="padding:10px 10px">
+<div style="display:flex;align-items:center;gap:10px;min-width:0">
+<img sc-camel-src="{{ r.crest }}" alt="" style="visibility:{{ r.crDisp }};width:22px;height:22px;object-fit:contain;flex:none" />
+<span style="font-size:13.5px;font-weight:700;color:#f3f2ef;white-space:nowrap">{{ r.opp }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#5d5b65">{{ r.code }}</span>
+</div>
+</td>
+<td style="padding:10px 10px;white-space:nowrap"><span style="display:inline-block;padding:3px 8px;background:{{ r.venBg }};font-size:9px;font-weight:800;letter-spacing:.13em;color:{{ r.venCol }}">{{ r.ven }}</span></td>
+<td style="padding:10px 10px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:{{ r.restCol }};white-space:nowrap">{{ r.cong }} {{ r.rest }}</td>
+<td style="padding:10px 10px;font-size:11.5px;color:#6f6d78;white-space:nowrap">{{ r.tv }}</td>
+<td style="padding:10px 16px;text-align:right;white-space:nowrap">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:{{ r.stCol }}">{{ r.st }}</div>
+<div style="font-size:10px;color:#5d5b65">{{ r.when }}</div>
+</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;flex-wrap:wrap">
+<sc-if value="{{ fxMore }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ fxMoreOn }}" style="padding:9px 15px;border:1px solid #33333d;color:#b8b5c0;cursor:pointer;font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase" style-hover="border-color:#e12b3f;background:#17171d">{{ fxMoreLab }}</div>
+</sc-if>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#5d5b65">{{ fxMeta }}</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:12px">
+<div style="display:flex;align-items:center;gap:7px"><div style="width:7px;height:7px;background:#c8102e"></div><span style="font-size:11px;color:#8d8a95">Premier League</span></div>
+<div style="display:flex;align-items:center;gap:7px"><div style="width:7px;height:7px;background:#2b5fd9"></div><span style="font-size:11px;color:#8d8a95">Champions League</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="color:#e8b64c;font-size:11px">●</span><span style="font-size:11px;color:#8d8a95">Three days or fewer since the last match</span></div>
+</div>
+<p style="margin:9px 0 0;font-size:11.5px;color:#7a7883;text-wrap:pretty">League fixtures and kick-off times are the published schedule and are subject to change; broadcast picks are announced a few matchweeks at a time, so later rounds read “not selected” rather than a guess. Champions League matchdays are the league-phase draw, converted to UK time. Europe sits outside the analytics pipeline, which is Premier League only — a past European match therefore shows as played with no score attached.</p>
+</section>
+</sc-if>
 
 <sc-if value="{{ vsOn }}" hint-placeholder-val="{{ false }}">
 <section id="mwvs" data-screen-label="Matchweek against matchweek" style="padding:56px 0 0">
@@ -3239,6 +3347,7 @@ class Component extends DCLogic {
   state = { D: null, err: null, role: 'ALL', pid: 'Bruno Fernandes',
     tab: 'match', query: '', card: null, tip: null, cmp: null, squadRole: 'ALL',
     mwSeason: '2627', mwGw: 1, cur: null, copied: false, ipVer: 'off', ipSort: 'ps', shotView: 'chart',
+    fxComp: 'all', fxAll: false,
     ex: false, exList: [], exSel: {}, exKind: { chart: true, table: true, prose: true }, exMsg: '', exBad: false,
     selSeason: null, rail: [], shotSit: '', shotRes: '', shotDist: '',
     rngA: null, rngB: null, sparkMode: 'cum', hitIx: -1, vsA: null, vsB: null };
@@ -3247,11 +3356,12 @@ class Component extends DCLogic {
   static get SECTAB() {
     return { spine: 'match', report: 'match', match: 'match', shots: 'match', territory: 'match',
       squad: 'squad', scorers: 'squad', availability: 'squad', player: 'player',
-      oppo: 'match',
+      oppo: 'match', fixtures: 'match',
       versus: 'season', trap: 'season', gamestate: 'season', leads: 'season', season: 'season', phase: 'season', resid: 'season',
       league: 'league', rebuilt: 'league', dropped: 'league', method: 'method' };
   }
 
+  static get BLANKPX() { return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; }
   static get DETAIL() { return { match: 1, shots: 1, territory: 1 }; }
   // ---- multi-season index. 26/27 is assembled from whatever matchweek payloads exist,
   // so adding D.gw3 extends the season with no further wiring.
@@ -3293,6 +3403,130 @@ class Component extends DCLogic {
     if (!D) return null;
     const sel = this.state.mwSeason === '2627' ? D['gw' + this.state.mwGw] : null;
     return sel || D.gw1;
+  }
+
+  // ---- 26/27 fixture layer. D.fix is the combined league + Europe schedule in
+  // date order; D.crest maps a three-letter code to an inlined 44px badge.
+  // Premier League rounds resolve their result from the matchweek payloads, so a
+  // fixture becomes a result the moment its D.gwN lands. Nothing here is modelled.
+  fixList() {
+    const D = this.state.D;
+    const BLANK = Component.BLANKPX;
+    if (!D || !D.fix) return [];
+    const CR = D.crest || {};
+    const t = new Date(); t.setHours(0, 0, 0, 0);
+    return D.fix.map(f => {
+      const dt = new Date(f.date + 'T00:00:00');
+      const days = Math.round((dt - t) / 86400000);
+      const g = f.comp === 'PL' ? D['gw' + f.rd] : null;
+      let sc = '', res = '', status = 'upcoming';
+      if (g) {
+        const p = String(g.score).split('-').map(Number);
+        sc = p[0] + '–' + p[1];
+        res = p[0] > p[1] ? 'W' : p[0] < p[1] ? 'L' : 'D';
+        status = 'played';
+      } else if (days < 0) {
+        status = f.comp === 'UCL' ? 'outside' : 'awaiting';
+      } else if (days === 0) {
+        status = 'today';
+      }
+      return Object.assign({}, f, { dt, days, sc, res, status, crest: CR[f.code] || BLANK });
+    });
+  }
+  fixVals() {
+    const BLANK = Component.BLANKPX;
+    const all = this.fixList();
+    if (!all.length) return { fxOn: false, fxRows: [], fxTabs: [], fxStats: [], fxNext: null,
+      fxNextOn: false, fxMeta: '', fxMore: false, fxMoreLab: '', fxMoreOn: null };
+    const RESCOL = { W: '#93b8a4', D: '#a5a2b0', L: '#c39ba2' };
+    const COMPCOL = { PL: '#c8102e', UCL: '#2b5fd9' };
+    const comp = this.state.fxComp;
+    const pick = all.filter(f => comp === 'all' || f.comp === comp);
+    const next = all.find(f => f.status === 'today' || f.status === 'upcoming') || null;
+
+    // Default to the road ahead: the run from the next fixture on, plus the two
+    // most recent results for context. "Show every fixture" opens the full 46.
+    const ni = next ? pick.indexOf(next) : pick.length;
+    const from = this.state.fxAll ? 0 : Math.max(0, ni - 2);
+    const rows = pick.slice(from);
+    const hidden = from;
+
+    const dayLab = d => d < 0 ? '' : d === 0 ? 'Today' : d === 1 ? 'Tomorrow'
+      : d < 7 ? 'In ' + d + ' days' : d < 14 ? 'Next week' : 'In ' + Math.round(d / 7) + ' weeks';
+    const stTxt = f => f.status === 'played' ? f.sc
+      : f.status === 'awaiting' ? 'Awaiting data'
+      : f.status === 'outside' ? 'Played' : f.ko;
+    const stCol = f => f.status === 'played' ? RESCOL[f.res]
+      : f.status === 'today' ? '#e8b64c' : f.status === 'upcoming' ? '#b8b5c0' : '#5d5b65';
+
+    const fxRows = rows.map(f => {
+      const isNext = next && f.date === next.date && f.rd === next.rd && f.comp === next.comp;
+      const past = f.status === 'played' || f.status === 'awaiting' || f.status === 'outside';
+      return {
+        key: f.comp + f.rd,
+        dow: f.dow, dlab: f.dlab, yr: f.date.slice(0, 4),
+        comp: f.comp, compCol: COMPCOL[f.comp],
+        rd: (f.comp === 'PL' ? 'MW' : 'MD') + f.rd,
+        crest: f.crest, crDisp: f.crest === BLANK ? 'hidden' : 'visible',
+        code: f.code, opp: f.short,
+        ven: f.ven === 'H' ? 'HOME' : 'AWAY',
+        venCol: f.ven === 'H' ? '#f3f2ef' : '#8d8a95',
+        venBg: f.ven === 'H' ? '#23232c' : 'transparent',
+        ko: f.ko, tv: f.tv || (past ? '' : 'Not selected'),
+        rest: f.rest == null ? '—' : f.rest + 'd',
+        restCol: f.cong ? '#e8b64c' : '#5d5b65',
+        cong: f.cong ? '●' : '',
+        st: stTxt(f), stCol: stCol(f),
+        when: past ? '' : dayLab(f.days),
+        bg: isNext ? '#1c1c26' : past ? '#101015' : '#13131a',
+        ring: isNext ? '1px solid #e12b3f' : '0',
+        opa: past ? '.62' : '1',
+        on: f.comp === 'PL' && f.status === 'played'
+          ? () => this.setState({ mwSeason: '2627', mwGw: f.rd })
+          : null,
+        cursor: f.comp === 'PL' && f.status === 'played' ? 'pointer' : 'default'
+      };
+    });
+
+    const rem = all.filter(f => f.status === 'upcoming' || f.status === 'today');
+    const remPl = rem.filter(f => f.comp === 'PL'), remUcl = rem.filter(f => f.comp === 'UCL');
+    const cong = all.filter(f => f.cong);
+    const soon = rem.filter(f => f.days <= 30);
+    const fxStats = [
+      { lab: 'Fixtures remaining', v: String(rem.length), unit: '/ 46',
+        note: remPl.length + ' league, ' + remUcl.length + ' Europe' },
+      { lab: 'League run left', v: String(remPl.length), unit: '/ 38',
+        note: remPl.filter(f => f.ven === 'H').length + ' home, ' + remPl.filter(f => f.ven === 'A').length + ' away' },
+      { lab: 'Champions League', v: String(remUcl.length), unit: '/ 8',
+        note: 'League phase, eight matchdays' },
+      { lab: 'Short turnarounds', v: String(cong.length), unit: '',
+        note: 'Three days or fewer between matches' },
+      { lab: 'Next thirty days', v: String(soon.length), unit: '',
+        note: soon.length ? 'Through ' + (soon[soon.length - 1].dlab) : 'Nothing scheduled' }
+    ];
+
+    const fxTabs = [{ k: 'all', lab: 'All · 46' }, { k: 'PL', lab: 'Premier League · 38' },
+      { k: 'UCL', lab: 'Champions League · 8' }]
+      .map(t => ({ lab: t.lab, bg: comp === t.k ? '#c8102e' : '#13131a',
+        fg: comp === t.k ? '#fff' : '#8d8a95', on: () => this.setState({ fxComp: t.k }) }));
+
+    const fxNext = !next ? null : {
+      comp: next.comp === 'PL' ? 'Premier League' : 'Champions League',
+      compCol: COMPCOL[next.comp],
+      rd: (next.comp === 'PL' ? 'Matchweek ' : 'Matchday ') + next.rd,
+      crest: next.crest, crDisp: next.crest === BLANK ? 'hidden' : 'visible', code: next.code,
+      opp: next.opp, ven: next.ven === 'H' ? 'Old Trafford' : 'Away',
+      when: next.dow + ' ' + next.dlab + ' · ' + next.ko,
+      cd: next.days === 0 ? 'Today' : next.days === 1 ? 'Tomorrow' : next.days + ' days',
+      tv: next.tv || 'Broadcast not yet selected',
+      rest: next.rest == null ? '' : next.rest + ' days since the last match'
+    };
+
+    return { fxOn: true, fxRows, fxTabs, fxStats, fxNext, fxNextOn: !!fxNext,
+      fxMeta: fxRows.length + ' of ' + pick.length + ' shown',
+      fxMore: hidden > 0 || this.state.fxAll,
+      fxMoreLab: this.state.fxAll ? 'Show the road ahead' : 'Show every fixture, from GW1',
+      fxMoreOn: () => this.setState({ fxAll: !this.state.fxAll }) };
   }
   liveList() {
     const D = this.state.D;
@@ -3425,7 +3659,7 @@ class Component extends DCLogic {
   hideTip() { clearTimeout(this._tipT); this.setState({ tip: null }); }
   componentDidMount() {
     const R = typeof window !== 'undefined' && window.__resources;
-    const srcUrl = (R && R.mufcData) || './mufc.js?v=1788166321';
+    const srcUrl = (R && R.mufcData) || './mufc.js?v=1788181949';
     import(srcUrl).then(m => {
       if (!m || !m.D) throw new Error('payload loaded but export D is missing');
       this.setState({ D: m.D, L: m.LEADS || [], IPS: m.IPS || null, IPS2: m.IPS2 || null });
@@ -5709,14 +5943,41 @@ class Component extends DCLogic {
     const selGw = this.state.mwGw, mwSel = byGw[selGw] || null;
     const pickGw = w => () => this.setState({ mwGw: w });
 
+    // Fixtures for the matchweeks that have not been played, so the empty half of
+    // the strip carries the schedule rather than a row of stubs.
+    const FIXBY = {}; let nextFx = null;
+    if (is2627 && D.fix) {
+      const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+      D.fix.forEach(f => { if (f.comp === 'PL') FIXBY[f.rd] = f; });
+      const up = D.fix.filter(f => f.comp === 'PL' && !byGw[f.rd]
+        && new Date(f.date + 'T00:00:00') >= t0);
+      nextFx = up.length ? up[0].rd : null;
+    }
+    const CRESTS = D.crest || {};
     const mkCell = w => {
       const m = byGw[w], sel = w === selGw;
-      if (!m) return { gwv: String(w), opp: '\u00b7', sc: '\u2014', bg: '#0e0e13', bar: '#1a1a21',
-        gwCol: '#3d3b45', oppCol: '#2b2933', scCol: '#2b2933', cursor: 'default', ring: '0',
-        h: '16px', inner: 'none', played: false,
-        on: null, onEnter: this.tipFn('Matchweek ' + w, 'Not played yet'), onLeave: () => this.hideTip() };
+      if (!m) {
+        const f = FIXBY[w];
+        if (!f) return { gwv: String(w), opp: '\u00b7', sc: '\u2014', bg: '#0e0e13', bar: '#1a1a21',
+          gwCol: '#3d3b45', oppCol: '#2b2933', scCol: '#2b2933', cursor: 'default', ring: '0',
+          h: '16px', inner: 'none', played: false, crest: Component.BLANKPX, crDisp: 'hidden',
+          on: null, onEnter: this.tipFn('Matchweek ' + w, 'Not played yet'), onLeave: () => this.hideTip() };
+        const isNext = w === nextFx;
+        return { gwv: w + (f.ven === 'A' ? '\u00b7A' : ''), opp: f.code, sc: f.dlab,
+          h: '62px', inner: 'flex', played: false,
+          crest: CRESTS[f.code] || Component.BLANKPX, crDisp: CRESTS[f.code] ? 'visible' : 'hidden',
+          bg: isNext ? '#17171f' : '#0e0e13', bar: isNext ? '#e8b64c' : '#2a2a34',
+          gwCol: '#4d4b55', oppCol: isNext ? '#d8d5de' : '#6f6d78', scCol: '#4d4b55',
+          cursor: 'pointer', ring: isNext ? '1px solid #6d5a24' : '0',
+          on: () => this.go('match', 'fixtures'),
+          onEnter: this.tipFn('GW' + w + ' \u00b7 ' + f.short + ' (' + f.ven + ')',
+            f.dow + ' ' + f.dlab + ' \u00b7 ' + f.ko + (f.tv ? ' \u00b7 ' + f.tv : '')
+            + (isNext ? ' \u00b7 next up' : '')),
+          onLeave: () => this.hideTip() };
+      }
       return { gwv: w + (m.ven === 'A' ? '\u00b7A' : ''), opp: c3(m.opp), sc: m.gf + '\u2013' + m.ga,
-        h: '74px', inner: 'flex', played: true,
+        crest: CRESTS[c3(m.opp)] || Component.BLANKPX, crDisp: CRESTS[c3(m.opp)] ? 'visible' : 'hidden',
+        h: '86px', inner: 'flex', played: true,
         bg: sel ? '#1f1f28' : '#13131a', bar: RESCOL[m.res],
         gwCol: sel ? '#b8b5c0' : '#5d5b65', oppCol: sel ? '#fff' : '#e6e4ea',
         scCol: sel ? '#f3f2ef' : '#8d8a95', cursor: 'pointer',
@@ -5991,7 +6252,7 @@ class Component extends DCLogic {
       ledgerNote: selSea.id === '2526'
         ? 'Validation: PASS on all 20 clubs across position, played, won, drawn, lost, goals for, goals against and points, against two independent published tables.'
         : 'The WhoScored core reconciles for both matchweeks. The Twelve layer is complete for GW1 and empty for GW2, which is why this season shows no validated rate.',
-      railItems, railOn, subnavOn, srcKey, ...rngVals, ...vsVals,
+      railItems, railOn, subnavOn, srcKey, ...rngVals, ...vsVals, ...this.fixVals(),
       sparkTog, sparkColLab, cmpThin, cmpBarA, cmpThinNote,
       gsMw: this.gsDerived(M, ST.oppShort || M.opp),
       mwBack: () => this.stepMw(-1), mwFwd: () => this.stepMw(1),
