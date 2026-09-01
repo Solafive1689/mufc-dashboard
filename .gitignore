@@ -1,0 +1,10 @@
+# Backup artefacts. These belong in MUFC_Analytics/_archive/<date>/, never in a
+# working tree — see the `bak` function in ~/.zshrc. Two orphaned copies of
+# index.html (1.6 MB each) reached this repo before this file existed.
+*.bak
+*.bak_*
+*.orig
+*.rej
+
+# macOS
+.DS_Store
