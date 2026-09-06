@@ -49,6 +49,51 @@ def fail(msg):
     sys.exit(2)
 
 # ----------------------------------------------------------------------------- source
+INGEST_DIR = os.path.join(HERE, 'matches')
+
+
+def load_ingested():
+    """Gameweeks produced by ingest_whoscored.py, keyed by round.
+
+    These arrive already in the output payload shape, so they are written through
+    rather than passed to build_match. Anything the v2 source does not know about
+    (a gameweek captured after the v2 export) comes in this way."""
+    out = {}
+    if not os.path.isdir(INGEST_DIR):
+        return out
+    for fn in sorted(os.listdir(INGEST_DIR)):
+        m = re.fullmatch(r'gw(\d+)\.json', fn)
+        if m:
+            out[int(m.group(1))] = json.load(open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
+    return out
+
+
+def as_source_gw(payload):
+    """Adapt an ingested payload to the handful of D.gw<N> fields build_players
+    reads, so player pages pick up the gameweek without a second code path."""
+    meta = payload['meta']
+    roster = []
+    for pl in payload['players']:
+        att, cmp_ = pl['passes_att'], pl['passes_cmp']
+        da, dc = (pl['dribbles'].split('/') + ['0', '0'])[:2]
+        roster.append({'nm': pl['name'], 'sh': pl['shirt'], 'pos': pl['pos'], 'grp': pl['group'],
+                       'st': int(pl['started']), 'mins': pl['mins'], 'role': pl['pos'],
+                       'v': {'minutes': pl['mins'], 'goals': pl['goals'], 'assists': pl['assists'],
+                             'shots': pl['shots'], 'shots_on_target': pl['sot'],
+                             'key_passes': pl['key_passes'], 'passes_attempted': att,
+                             'passes_completed': cmp_, 'pass_accuracy_pct': pl['pass_acc'],
+                             'final_third_passes': pl['final_third_passes'],
+                             'passes_into_box': pl['passes_into_box'], 'touches': pl['touches'],
+                             'box_touches': pl['box_touches'], 'def_actions': pl['def_actions'],
+                             'recoveries': pl['recoveries'], 'dispossessed': pl['dispossessed'],
+                             'aerials_won': pl['aerials_won'], 'aerials_lost': pl['aerials_lost'],
+                             'dribbles_completed': int(dc) if str(dc).isdigit() else 0,
+                             'dribbles_attempted': int(da) if str(da).isdigit() else 0}})
+    plots = {pl['name']: payload['plots'].get(pl['player_id'], {}) for pl in payload['players']}
+    return {'opp': meta['opp'], 'ven': meta['venue'], 'score': meta['score'],
+            'roster': roster, 'plots': plots}
+
+
 def load_source():
     js = open(os.path.join(HERE, 'v2_source.json')).read()
     return json.loads(js)
@@ -98,10 +143,11 @@ def registry(src):
     return out
 
 # ----------------------------------------------------------------------------- index
-def build_index(src):
+def build_index(src, ingested=None):
     D = src['D']
     fixtures = []
     played = {1: 'gw1', 2: 'gw2'}
+    ingested = ingested or {}
     for f in D['fix']:
         gw = f['rd'] if f['comp'] == 'PL' else None
         fx = {'fixture_id': f"{f['comp']}-{f['rd']:02d}-{f['code']}", 'comp': f['comp'], 'round': f['rd'], 'date': f['date'],
@@ -113,8 +159,12 @@ def build_index(src):
             gf, ga = [int(x) for x in g['score'].split('-')]
             fx['result'] = 'W' if gf > ga else ('D' if gf == ga else 'L')
             fx['match'] = match_slug(gw, f['code'])
+        if f['comp'] == 'PL' and gw in ingested:
+            im = ingested[gw]['meta']
+            fx['status'] = 'played'; fx['score'] = im['score']; fx['xg'] = im['xg']; fx['oxg'] = im['oxg']
+            fx['result'] = im['result']; fx['match'] = im['match_id']
         if f['comp'] == 'PL' and gw == 3:
-            fx['scout'] = 'eve'
+            fx['scout'] = 'eve'   # the pre-match scout stays reachable after the fixture is played
         fixtures.append(fx)
     teams = {}
     for r in D['lg']['table']:
@@ -342,17 +392,33 @@ def gate(files):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--apply', action='store_true'); args = ap.parse_args()
     src = load_source()
+    ingested = load_ingested()
+    # A gameweek the v2 source already carries is built from it; anything else comes
+    # from build/matches/gw<N>.json. gw2 exists in both — the v2 source wins, so a
+    # re-ingest of an already-shipped week cannot quietly change what is published.
+    ingested = {gw: p for gw, p in ingested.items() if gw not in (1, 2)}
+    if ingested:
+        print(f"ingested gameweeks: {sorted(ingested)}")
     files = OrderedDict()
-    files['index.json'] = build_index(src)
+    files['index.json'] = build_index(src, ingested)
     files['crests.json'] = src['D']['crest']
     m1 = build_match(src, 'gw1', 1); m2 = build_match(src, 'gw2', 2)
     files[f"26-27/matches/{m1['meta']['match_id']}.json"] = m1
     files[f"26-27/matches/{m2['meta']['match_id']}.json"] = m2
+    for gw, p in sorted(ingested.items()):
+        # The 25/26 baseline is season-level and identical on every match payload;
+        # the ingest cannot know it, so it is carried across here.
+        if not p.get('baseline'):
+            p['baseline'] = m2['baseline']
+        files[f"26-27/matches/{p['meta']['match_id']}.json"] = p
     files['26-27/opponents/eve.json'] = build_opponent(src)
     files['26-27/season.json'] = build_season_running(src)
     files['25-26/season.json'] = build_season_complete(src)
     files['26-27/squad.json'] = build_squad(src)
-    for pid, p in build_players(src, [('gw1', 1, m1), ('gw2', 2, m2)]).items():
+    for gw, p in sorted(ingested.items()):
+        src['D'][f'gw{gw}'] = as_source_gw(p)
+    mlist = [('gw1', 1, m1), ('gw2', 2, m2)] + [(f'gw{gw}', gw, p) for gw, p in sorted(ingested.items())]
+    for pid, p in build_players(src, mlist).items():
         files[f"26-27/players/{pid}.json"] = p
     files['league/25-26.json'] = build_league(src)
     gate(files)

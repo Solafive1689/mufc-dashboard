@@ -124,12 +124,16 @@ window.MUFC = window.MUFC || {};
     let delta = '';
     if (o.delta !== undefined) { const good = r.direction === 'higher' ? o.delta > 0 : (r.direction === 'lower' ? o.delta < 0 : null); delta = `<span class="cmp__delta ${good === null ? '' : good ? 'good' : 'bad'}">${o.delta > 0 ? '+' : ''}${fmt(o.delta, d)}</span>`; }
     const tick = (state.baseline && o.baseline !== undefined && Number.isFinite(o.baseline) && a > 0) ? `<i class="cmp__tick" style="left:${Math.min(49, Math.max(1, (1 - Math.min(1, o.baseline / (a + b))) * 50)).toFixed(1)}%" data-tip="25/26 median ${o.baseline}"></i>` : '';
-    return `<div class="cmp" data-tip="${esc((o.label || r.label) + ' · ' + srcWords(o.src || r.source))}">
+    // A row whose source has not landed yet reads as a dash with no bar. Drawing a
+    // half-and-half bar off two nulls would say "level", which is a claim we do not have.
+    const pend = !!o.pending;
+    const bars = `${tick}<span class="cmp__bar u"><i style="width:${(f * 100).toFixed(1)}%"></i></span><span class="cmp__bar o ${o.grey ? 'grey' : ''}"><i style="width:${((1 - f) * 100).toFixed(1)}%"></i></span>`;
+    return `<div class="cmp${pend ? ' cmp--pending' : ''}" data-tip="${esc((o.label || r.label) + ' · ' + (pend ? 'Twelve report pending' : srcWords(o.src || r.source)))}">
       <span class="cmp__lab ${o.hot ? 'hot' : ''}">${esc(o.label || r.label)}</span>
-      <span class="cmp__u">${o.uText ?? fmt(a, d)}</span>
-      <span class="cmp__bars">${tick}<span class="cmp__bar u"><i style="width:${(f * 100).toFixed(1)}%"></i></span><span class="cmp__bar o ${o.grey ? 'grey' : ''}"><i style="width:${((1 - f) * 100).toFixed(1)}%"></i></span></span>
-      <span class="cmp__o">${o.oText ?? fmt(b, d)}</span>
-      <span>${delta}${o.base ? `<span class="cmp__base">${esc(o.base)}</span>` : ''}</span>
+      <span class="cmp__u">${pend ? '—' : (o.uText ?? fmt(a, d))}</span>
+      <span class="cmp__bars">${pend ? '' : bars}</span>
+      <span class="cmp__o">${pend ? '—' : (o.oText ?? fmt(b, d))}</span>
+      <span>${pend ? '<span class="cmp__base">Twelve pending</span>' : delta + (o.base ? `<span class="cmp__base">${esc(o.base)}</span>` : '')}</span>
     </div>`;
   }
   function fixtureHeader(fx, opts = {}) {
@@ -233,7 +237,7 @@ window.MUFC = window.MUFC || {};
     const cnt = (arr, fn) => arr.filter(fn).length;
     const filters = filterChips('shots', q.shots, [['all', 'All', shotsU.length + shotsO.length], ['open', 'Open play', cnt([...shotsU, ...shotsO], s => s.sit === 'open')], ['setpiece', 'Set piece', cnt([...shotsU, ...shotsO], s => ['corner', 'freekick', 'throwin', 'penalty'].includes(s.sit))], ['fastbreak', 'Fast break', cnt([...shotsU, ...shotsO], s => s.sit === 'fastbreak')]])
       + filterChips('outcome', q.outcome, [['all', 'Any outcome'], ['goal', 'Goals'], ['sot', 'On target'], ['blocked', 'Blocked']]);
-    const tape = Mx.tape.map(t => cmpRow({ key: t.key, united: t.united, opp: t.opp, src: t.src, baseline: Mx.baseline[t.key]?.median, base: Mx.baseline[t.key] ? `25/26 ${Mx.baseline[t.key].median}` : '' }));
+    const tape = Mx.tape.map(t => cmpRow({ key: t.key, united: t.united, opp: t.opp, src: t.src, pending: t.pending, baseline: Mx.baseline[t.key]?.median, base: Mx.baseline[t.key] ? `25/26 ${Mx.baseline[t.key].median}` : '' }));
     const players = Mx.players.map(p => ({ ...p, name: `${p.shirt}  ${p.name} · ${p.pos}`, pass: `${p.passes_cmp}/${p.passes_att}`, sh: `${p.shots}${p.sot ? ` (${p.sot})` : ''}`, _href: href('players', p.player_id) }));
     const scoutFx = IDX.fixtures.find(f => f.scout);
     const scout = scoutFx ? `<a class="scout" href="${href('opponents', scoutFx.scout)}"><span class="t-label">Next: ${esc(scoutFx.opp)} · opposition scout</span>

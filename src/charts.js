@@ -93,6 +93,15 @@ window.MUFC = window.MUFC || {};
   // Cumulative xG race: series [[min,xg],…] for both sides, goals [{min,team}].
   function xgRace(tl, oppName) {
     const w = 520, h = 200, padL = 30, padR = 12, padT = 10, padB = 22;
+    // Until the Twelve report lands there is no xG to accumulate — WhoScored's match
+    // centre carries no expectedGoals field. The goals are still known, so the panel
+    // keeps its axis and its minute markers instead of disappearing or throwing.
+    if (!(tl.united && tl.united.length) && !(tl.opp && tl.opp.length)) {
+      const bx = m => padL + (m / 95) * (w - padL - padR);
+      const bticks = [0, 15, 30, 45, 60, 75, 90].map(m => `<line class="grid" x1="${bx(m)}" y1="${padT}" x2="${bx(m)}" y2="${h - padB}"/><text x="${bx(m)}" y="${h - 6}" text-anchor="middle">${m === 45 ? 'HT' : m}</text>`).join('');
+      const bmarks = (tl.goals || []).map(g => `<circle class="goal ${g.team === 'u' ? 'u' : 'o'}" cx="${bx(g.min).toFixed(1)}" cy="${h - padB}" r="5" data-tip="${g.min}′ ${esc(g.who || '')} · ${g.sit || ''}" stroke="${g.team === 'u' ? 'var(--united)' : 'var(--opponent)'}"/>`).join('');
+      return `<svg viewBox="0 0 ${w} ${h}" class="chart chart--race" role="img" aria-label="xG timeline pending">${bticks}<line class="grid" x1="${padL}" y1="${h - padB}" x2="${w - padR}" y2="${h - padB}"/>${bmarks}<text x="${w / 2}" y="${padT + 78}" text-anchor="middle" fill="var(--muted, #8b8892)" font-size="11">xG timeline · Twelve report pending · goal minutes from WhoScored</text></svg>`;
+    }
     const maxX = 95, maxY = Math.max(tl.united.at(-1)[1], tl.opp.at(-1)[1], 1) * 1.08;
     const sx = m => padL + (m / maxX) * (w - padL - padR);
     const sy = v => padT + (1 - v / maxY) * (h - padT - padB);
