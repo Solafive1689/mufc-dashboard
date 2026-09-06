@@ -1,88 +1,48 @@
-# MUFC Performance Dashboard
+# MUFC · Performance — dashboard v3
 
-Manchester United, Premier League. One page, six sections, two seasons of match data — and, from matchweek two, an opposition scout on the fixture that hasn't been played yet.
+A static site: `index.html` + `styles.css` + `src/` + one JSON payload per route under `data/`.
+No build step is needed to serve it — GitHub Pages serves the folder as-is.
 
-**Live:** https://solafive1689.github.io/mufc-dashboard/
+## Routes (the URL is the state)
 
----
+    #/26-27/season                    running season · ledger · season v baseline · locked panels
+    #/26-27/matches                   calendar, 46 fixtures
+    #/26-27/matches/mw02-ips          one match · story · tape · xG race · shots · territory · players
+    #/26-27/opponents/eve             the scout for the next fixture (+ "did it hold?" after)
+    #/26-27/squad                     season-to-date strip · per-90 baseline · G+A · availability
+    #/26-27/players/mufc_fernandes_bruno
+    #/league                          25/26 table rebuilt from 380 results (26/27 unlocks at round 10)
+    #/25-26/season                    the finished season: dominance trap, ledger, game state
 
-## What it does
+Filters and comparisons live in the query string (`?shots=setpiece&outcome=sot`, `?metric=passes`,
+`?m=mw02-ips`) so any view can be sent to someone.
 
-United took **3.00 points per game** in the ten matches of 2025/26 they held under 45% of the ball, and **1.40** in the fifteen they held over 55%. The season finished on **1.87 PPG**. That gap is what the dashboard exists to interrogate.
+## Adding a matchweek
 
-2025/26 is complete — **38 matches**. 2026/27 is live and updated matchweek by matchweek.
+1. Run the pipeline as usual (WhoScored capture, Twelve backfill).
+2. `python3 build/build_payloads.py` — dry run. It refuses on a failed gate
+   (missing sample count, per-90 under the floor, a tape key with no registry entry).
+3. `python3 build/build_payloads.py --apply` — writes `data/`.
+4. Upload the folder to the `mufc-dashboard` repo (or `git push` once the folder is a checkout).
 
-Matchweek 1 was Hull City away. **71.7% possession, 21 shots to 8, xG 1.81 v 1.59, xT 2.98 v 0.88.** Lost 0–2. The same match again.
+`build_payloads.py` currently reads `build/v2_source.json` (the v2 `mufc.js` objects). To point it at
+the pipeline's CSVs, replace `load_source()`; every projection reads from that one dict.
 
-Matchweek 2 is Ipswich Town, and it is scouted before it is played. Ipswich opened at Sunderland on **37% possession and 0.86 xG** and won 2–1 — both goals from a ball win, both finished inside ten seconds.
+## Provenance rule
 
-Matchweek 3 is Everton away, and it has a page of its own: **[Everton — opposition scout](everton-gw3.html)**. Ten big chances conceded in two matches against one goal, a defensive block that falls 21 m after the hour in both of them, and set pieces producing two of their three goals. United have played Everton twice recently: 69.9% of the ball and a 0–1 defeat at home, 52.2% and a 1–0 win away.
+Sample badges (n, pending, below floor, caveat) sit on KPI tiles. The source class is written in
+words in each panel footer and shown on hover. A per-figure source badge appears only when it is a
+warning (modelled / proxy / inferred). Hover any number for its source.
 
-## Sections
+## Previews and the private export
 
-- **Match** — every matchweek from one to thirty-eight. Pick any played fixture and load it: minute-by-minute timeline, shot map, territory and passing shape, a pass network with an adjustable minimum-pass threshold, and heatmaps for United, the opponent, or the difference between them.
-- **Opposition scout** — select an unplayed matchweek from the same strip and the section fills with the next opponent instead of a result. Built from the event file of their most recent match: where they defend, how they move it forward, which channel they arrive down, who does the damage, six evidence plates on one shared scale, an open-play passing network, a sixteen-player table, and a source table naming every figure. Currently loaded for **Ipswich Town**, from 1,549 events.
-- **Squad** — squad table, sortable by touches, passes, key passes, box touches, defensive actions or minutes.
-- **Player**, **Season**, **League** — the same data cut by player, by season, and against the rest of the division.
-- **Method** — how each metric is defined and where it came from. Read it before arguing with a number.
+    python3 build/bundle.py            → preview.html   (everything inlined; public content only)
+    python3 build/bundle.py --staff    → staff-preview.html (adds private/eve-staff.json: coaching calls
+                                          and the "show sources" per-figure badges)
 
-Alongside the dashboard, one standalone page per scouted opponent:
+`private/` is never part of the public folder. Do not upload it.
 
-| Page | Fixture | Built from |
-| --- | --- | --- |
-| [`everton-gw3.html`](everton-gw3.html) | Everton (A), MW3, 6 Sep 2026 | Two league matches, one League Cup tie, and the 2025/26 head-to-head |
+## Payload shapes
 
-Its eight figures live in `figures/everton/`. Six are generated by `mufc_opponent_tactical.py` from the raw WhoScored event streams — filename stem matches the `--label` passed to the builder, so every figure traces back to the command that made it. The block-height and head-to-head charts are built separately from the same data.
-
-## Data
-
-- **Twelve Football** — xG, xT.
-- **WhoScored** — possession, shots, event-level match stats.
-- **Derived** — metrics computed from the above.
-
-Every figure in the dashboard carries its source tag. Nothing is unattributed.
-
-## Running it locally
-
-Static site, no build step. Serve the folder over http — opening `index.html` straight from the filesystem will not work, because it imports `mufc.js` as an ES module and browsers block module imports over `file://`.
-
-```bash
-git clone https://github.com/Solafive1689/mufc-dashboard.git
-cd mufc-dashboard
-python3 -m http.server 8000
-```
-
-Then open http://localhost:8000.
-
-## Updating the data
-
-`mufc.js` holds every gameweek as a keyed object on `D` — `gw1`, `gw2`, and so on — alongside `LEADS` for the game-state work and `IPS` / `IPS2` for the opposition scout.
-
-**Editing `mufc.js` alone no longer updates the site.** Since the offline build, `index.html` carries its own gzip-base64 copy of the data inside a `<script type="__bundler/manifest">` block, and the file on disk is not read by the page. Updating a gameweek is three steps, not one:
-
-1. Rebuild the gameweek into `mufc.js` (`build_dashboard_gw.py --match-id … --key gwN --apply`).
-2. Apply the light-theme swap — `#f3f2ef` → `#201e1d`, `#f0b429` → `#a8760a` — to the payload. Assert the counts before and after; they are six and two in the whole file.
-3. gzip it at level 9 with `mtime=0`, base64 it, and replace that one blob string in `index.html`. Then decompress it back out of the written file and compare character for character before committing.
-
-Diff the rebuilt payload against the previous one key by key, not by size. That check has twice caught a key going missing that a byte count would have passed.
-
-## Build notes
-
-Nothing is fetched from a third party at runtime, on any page.
-
-| File | What it is |
-| --- | --- |
-| `index.html` | The dashboard. Self-contained: fonts, React, ReactDOM, the runtime, the match data and both figure PNGs are gzip-base64'd into a manifest block and resolved through `window.__resources`. Ten bundled resources, zero external requests. |
-| `everton-gw3.html` | Opposition scout, MW3. Self-contained except its figures, which are ordinary files in `figures/`. |
-| `figures/everton/*.png` | The eight charts behind the Everton page |
-| `mufc.js` | Match data, one object per gameweek. **Not read by the page** — kept as the editable source and for rollback |
-| `support.js` | The runtime, also now bundled into `index.html` |
-| `react.production.min.js`, `react-dom.production.min.js` | React 18.3.1, vendored and also bundled |
-
-React was originally pulled from a CDN at runtime. When that CDN was unreachable the page rendered nothing at all — not a degraded version, a blank screen. It is now vendored *and* bundled, so the site depends on nothing but GitHub.
-
-One trap worth keeping written down: a Claude Design export carries its own copy of the data resource, and that copy can be stale. One shipped with a withdrawn xG pair the corrections log had already ruled against. Unpack the manifest and diff the bundled payload against disk before shipping any export.
-
----
-
-Built by **Reece Howell** — MSc Sport Performance Analysis, Twelve Football ambassador.
+See the docstring at the top of `build/build_payloads.py`. Every 26/27 payload carries
+`meta.sample`; per-90 values are `null` under 450 minutes; NaN stays `null` and renders as an em dash.
