@@ -1,13 +1,13 @@
 /* MUFC Performance — v3 tokens and components. Names match the Figma variables. */
 :root{
   --ground:#F4F2EE; --paper:#FFFFFF; --tint:#F8F6F3; --code-bg:#ECE8E3;
-  --ink:#1C1A19; --ink-2:#55514E; --muted:#7D7876; --on-ink:#FFFFFF;
+  --ink:#1C1A19; --ink-2:#55514E; --muted:#6E6A68; --on-ink:#FFFFFF;
   --line:#DCD7D2; --line-2:#ECE8E3;
   --united:#DA291C; --united-strong:#B31F14; --united-tint:#FBE9E6;
   --opponent:#2F5FBF; --opponent-tint:#E8EEF9;
-  --caveat:#A8760A; --caveat-tint:#F7EFD9;
+  --caveat:#8A6109; --caveat-tint:#F7EFD9;
   --verified:#17794E; --verified-tint:#E6F2EB;
-  --baseline:#7D7876; --grid:#ECE8E3;
+  --baseline:#6E6A68; --grid:#ECE8E3;
   --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px;
   --panel-pad:20px; --radius-panel:3px; --radius-chip:2px; --rail:200px; --content-max:1180px;
   --font:Archivo,system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -74,19 +74,20 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 /* ---------- nav */
 .nav{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:48px;z-index:19}
-.nav__in{display:flex;align-items:stretch;padding:0 24px;min-height:44px}
+.nav__in{display:flex;align-items:stretch;padding:0 24px;min-height:44px;overflow-x:auto;scrollbar-width:none}
+.nav__in::-webkit-scrollbar{display:none}
 .nav__item{display:flex;align-items:center;padding:0 14px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;letter-spacing:.02em}
 .nav__item:hover{color:var(--ink)}
 .nav__item.on{color:var(--ink);border-bottom-color:var(--united)}
 .nav__flex{flex:1}
 .nav__lineage{display:flex;align-items:center;font-size:12px;color:var(--muted);white-space:nowrap}
-.nav__lineage a{text-decoration:none}
+.nav__lineage a{text-decoration:none;display:inline-flex;align-items:center;min-height:24px;padding:0 3px;margin:0 -3px}
 .nav__lineage a:hover{color:var(--ink)}
 
 /* ---------- layout */
 .page{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);gap:48px;padding:40px 64px 80px;max-width:calc(var(--content-max) + var(--rail) + 48px + 128px);margin:0 auto}
 .rail{position:sticky;top:112px;align-self:start;border-left:2px solid var(--line);padding-top:8px}
-.rail a{display:block;padding:7px 0 7px 14px;margin-left:-2px;border-left:2px solid transparent;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.rail a{display:flex;align-items:center;min-height:24px;padding:7px 0 7px 14px;margin-left:-2px;border-left:2px solid transparent;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
 .rail a:hover{color:var(--ink)}
 .rail a.on{color:var(--ink);border-left-color:var(--united)}
 .rail a.locked{color:var(--muted);opacity:.7}
@@ -120,7 +121,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 /* ---------- badges */
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border-radius:var(--radius-chip);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.badge--sample,.badge--caveat{background:var(--caveat-tint);color:var(--caveat)}
+/* A sample count is context. A pending vendor report, a figure under the per-90
+   floor and a modelled value are warnings. They shared one amber, so the season
+   page carried five warning-coloured chips on five healthy KPIs and the colour
+   stopped meaning anything where it was doing real work. */
+.badge--sample{background:var(--code-bg);color:var(--ink-2)}
+.badge--caveat{background:var(--caveat-tint);color:var(--caveat)}
 .badge--pending{background:var(--caveat-tint);color:var(--caveat)}
 .badge--verified{background:var(--verified-tint);color:var(--verified)}
 .badge--ven{background:var(--opponent-tint);color:var(--opponent)}
@@ -134,7 +140,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .panel__head{display:flex;gap:12px;align-items:flex-start}
 .panel__title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0}
 .panel__intro{font-size:13px;color:var(--ink-2);margin:4px 0 0;max-width:70ch}
-.panel__export{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;padding:2px 4px;border-radius:2px}
+/* WCAG 2.5.8 asks for 24x24. These were 2px of padding around 10px text. */
+.panel__export{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;padding:6px 8px;margin-right:-8px;border-radius:2px;min-height:24px;display:inline-flex;align-items:center}
 .panel__export:hover{color:var(--ink);background:var(--tint)}
 .panel__filters{display:flex;gap:6px;flex-wrap:wrap}
 .panel__body{min-width:0}
@@ -157,6 +164,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .cmp__bar.o.grey i{background:var(--baseline)}
 .cmp__tick{position:absolute;top:-3px;width:2px;height:12px;background:var(--baseline);opacity:.9}
 .cmp__base{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;min-width:52px}
+.cmp__base--short{color:var(--caveat);text-transform:none;letter-spacing:.02em}
 .cmp__delta{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:2px;background:var(--code-bg);color:var(--ink-2)}
 .cmp__delta.good{background:var(--verified-tint);color:var(--verified)}
 .cmp__delta.bad{background:var(--caveat-tint);color:var(--caveat)}
@@ -174,6 +182,13 @@ tr.hot td{background:var(--united-tint)}
 tr.link{cursor:pointer}
 tr.link:hover td{background:var(--tint)}
 tr.link:hover td.drill::after{content:"Open ›";color:var(--united);font-weight:600;float:right}
+/* the anchor is the keyboard route into a row; it inherits the cell's look so the
+   table reads the same, and only announces itself on focus */
+/* the anchor should be as tall as the row it sits in — the whole row is the
+   perceived target, and a 15px text box is not it */
+.cell__link{color:inherit;text-decoration:none;display:flex;align-items:center;min-height:24px;padding:4px 0;margin:-4px 0}
+.cell__link:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:2px}
+tr.link:focus-within td{background:var(--tint)}
 tr.future td{color:var(--muted)}
 .res-W{color:var(--verified);font-weight:600}.res-L{color:var(--united);font-weight:600}.res-D{color:var(--muted);font-weight:600}
 .bar{height:6px;background:var(--grid);border-radius:1px;overflow:hidden;min-width:80px}
@@ -192,7 +207,7 @@ tr.future td{color:var(--muted)}
 .pill{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:2px;background:var(--tint);color:var(--ink-2);letter-spacing:.06em}
 .pill.warn{background:var(--caveat-tint);color:var(--caveat)}
 .more{font-size:12px;color:var(--muted);padding:8px 8px 0}
-.more button{color:var(--united);font-weight:600}
+.more button{color:var(--united);font-weight:600;min-height:24px;padding:4px 6px;margin:-4px -6px}
 
 /* ---------- fixture header */
 .fx{display:flex;align-items:center;gap:16px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px 20px}
@@ -221,6 +236,28 @@ tr.future td{color:var(--muted)}
 .scout__go{font-size:13px;font-weight:600;color:var(--opponent)}
 .story{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start}
 
+/* ---------- unlocks strip + latest match card */
+.unlocks{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px var(--panel-pad)}
+.unlocks__head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.unlocks__head .t-label{color:var(--muted)}
+.unlocks__list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0}
+.unlocks__item{display:grid;gap:3px;padding:10px 16px;border-left:1px solid var(--line-2)}
+.unlocks__item:first-child{border-left:0;padding-left:0}
+.unlocks__item b{font-size:13px;font-weight:700}
+.unlocks__item .pill{justify-self:start;margin-top:4px}
+.unlocks__item.open b{color:var(--verified)}
+.latest{display:grid;gap:10px;align-content:start;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px 20px;text-decoration:none}
+.latest .t-label{color:var(--muted)}
+.latest__score{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.latest__score span:first-child{font-size:30px;font-weight:800;line-height:1}
+.latest__score span:last-child{font-size:13px;color:var(--ink-2)}
+.latest__k{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--muted)}
+.latest__k b{font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:500}
+.latest__go{font-size:13px;font-weight:600;color:var(--united)}
+.latest:hover{border-color:var(--muted)}
+.latest:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media (max-width:900px){.unlocks__item{border-left:0;padding-left:0}}
+
 /* ---------- strips */
 .after{border:1px solid var(--united);background:var(--united-tint);border-radius:var(--radius-panel);padding:16px 20px;display:grid;gap:8px}
 .after .t-label{color:var(--united)}
@@ -242,6 +279,7 @@ tr.future td{color:var(--muted)}
 .ph__name{font-size:30px;font-weight:800;text-transform:uppercase;line-height:1.05;margin:2px 0}
 
 /* ---------- tooltip */
+.kpi[tabindex]:focus-visible,.cmp[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .tip{position:fixed;z-index:50;max-width:280px;background:var(--ink);color:var(--on-ink);font-size:12px;line-height:1.4;padding:8px 10px;border-radius:3px;pointer-events:none;box-shadow:0 4px 16px rgba(28,26,25,.12);display:none}
 .tip b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin-bottom:2px}
 .tip.show{display:block}
@@ -256,6 +294,10 @@ tr.future td{color:var(--muted)}
 .pitch .g{fill:var(--baseline);stroke:var(--baseline)}
 .pitch .hollow{fill:none}
 .pitch .blocked{opacity:.55}
+/* A shot whose xG has not been reported: same position and outcome, drawn at a
+   fixed size with a broken edge so it cannot be read as a priced chance. */
+.pitch .unpriced{stroke-dasharray:2.5 2.5;opacity:.8}
+.pitch--unpriced .turf{fill:var(--tint)}
 .pitch .touch{fill:var(--muted);opacity:.55}
 .pitch .link{stroke:var(--united);opacity:.45}
 .pitch .node{fill:var(--united);stroke:var(--paper);stroke-width:2}
@@ -267,6 +309,10 @@ tr.future td{color:var(--muted)}
 .xgline .u{stroke:var(--united);fill:none;stroke-width:2}
 .xgline .o{stroke:var(--opponent);fill:none;stroke-width:2}
 .xgline .goal{fill:var(--paper);stroke-width:2}
+/* The goal-only timeline the panel falls back to while a supplier's xG is
+   outstanding: a lighter note, and grid lines that have to carry the chart on
+   their own now that there is no series drawn over them. */
+.xgline .grid{stroke:var(--line)}
 .avail{display:grid;gap:4px}
 .avail__row{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:8px;font-size:13px}
 .avail__cells{display:grid;grid-template-columns:repeat(38,1fr);gap:3px}
@@ -289,9 +335,26 @@ tr.future td{color:var(--muted)}
   .row,.row--3,.story{grid-template-columns:1fr}
   .kpis{grid-template-columns:repeat(2,1fr)}
   .nav__lineage{display:none}
-  .ctx .chip:not(.on){display:none}
-  .cmp{grid-template-columns:minmax(90px,120px) 40px minmax(0,1fr) 40px}
-  .cmp__base,.cmp__delta{display:none}
+  /* The unselected chips used to be display:none here, which removed the season,
+     competition and baseline switches entirely below 900px — the finished 25/26
+     season was unreachable from a phone or a portrait tablet. .ctx__in already
+     scrolls, so they queue off-screen instead; the fade says there is more. */
+  .ctx{position:relative}
+  .ctx::after{content:"";position:absolute;top:0;right:0;bottom:0;width:32px;pointer-events:none;
+    background:linear-gradient(90deg,transparent,var(--paper))}
+  /* The delta is the finding — "1.50 against 1.87, -0.37". Hiding it left two
+     numbers and a bar and made the reader do the subtraction. The row takes two
+     lines instead: the label gets its own, and the bar keeps the full width it
+     needs to be read rather than being squeezed into a column. */
+  .cmp{grid-template-columns:auto minmax(0,1fr) auto auto;
+       grid-template-areas:"lab lab lab lab" "u bars o delta";gap:5px 10px;padding:9px 0}
+  .cmp__lab{grid-area:lab}
+  .cmp__u{grid-area:u;text-align:left}
+  .cmp__bars{grid-area:bars}
+  .cmp__o{grid-area:o}
+  .cmp>span:last-child{grid-area:delta;display:flex;gap:6px;align-items:center;justify-self:end}
+  .cmp__base{display:none}
+  .cmp__base--short{display:inline}
   .t-h2{font-size:24px}
   td.tab-hide,th.tab-hide{display:none}
 }
@@ -302,6 +365,7 @@ tr.future td{color:var(--muted)}
   .t-claim{font-size:28px}
   td.ph-hide,th.ph-hide{display:none}
   .ctx__in{padding:8px 12px}
+  .nav__in{padding:0 12px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media print{.ctx,.nav,.rail{display:none}.page{display:block;padding:0}.panel{break-inside:avoid;margin-bottom:16px}}

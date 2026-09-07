@@ -22,6 +22,10 @@ Routes emitted (data/):
 import argparse, json, math, os, re, sys
 from collections import OrderedDict
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from names import player_id  # noqa: E402  the one definition, shared with the ingest
+import shot_proxy  # noqa: E402  the geometric per-shot split, shared with the scout
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, 'data')
@@ -32,10 +36,6 @@ LOCKS = {'dominance': 10, 'gamestate': 10, 'adjusted': 15, 'league': 10}
 def slug(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
 
-def player_id(name):
-    parts = name.replace('í', 'i').replace('é', 'e').replace('á', 'a').replace('ó', 'o').replace('ú', 'u').replace('ñ', 'n').split()
-    return 'mufc_' + slug(parts[-1]) + '_' + slug(parts[0]) if len(parts) > 1 else 'mufc_' + slug(parts[0])
-
 def per90(total, mins):
     if mins is None or mins < FLOOR:
         return None
@@ -43,6 +43,67 @@ def per90(total, mins):
 
 def match_slug(gw, code):
     return f"mw{gw:02d}-{code.lower()}"
+
+
+def built_matches(files):
+    """Every played 26/27 match payload written so far this run, in round order.
+
+    The season and squad projections read from here rather than from a list of
+    gameweek names, so a matchweek that reaches data/26-27/matches/ reaches the
+    season page in the same run. Nothing downstream needs to know whether the
+    payload came from the v2 source or from ingest_whoscored.py."""
+    return sorted((p for name, p in files.items()
+                   if name.startswith('26-27/matches/') and name.endswith('.json')),
+                  key=lambda p: p['meta']['round'])
+
+
+def tape_value(payload, key, side='united'):
+    """One side of a tape row, or None when the row is still pending.
+
+    A pending row carries a null and must stay null: averaging over it would
+    quietly change the denominator without changing the label."""
+    row = next((r for r in payload['tape'] if r['key'] == key), None)
+    if row is None or row.get('pending'):
+        return None
+    return row.get(side)
+
+
+def kpi_value(payload, key):
+    k = next((k for k in payload['kpis'] if k['key'] == key), None)
+    if k is None or k.get('value') in (None, ''):
+        return None
+    try:
+        return float(k['value'])
+    except (TypeError, ValueError):
+        return None
+
+
+def ledger_row(m):
+    """One played match projected into the shape the season ledger uses."""
+    meta = m['meta']
+    ft = kpi_value(m, 'field_tilt')
+    return {'round': meta['round'], 'opp': meta['opp'], 'code': meta['code'], 'venue': meta['venue'],
+            'date': meta['date'], 'gf': meta['gf'], 'ga': meta['ga'], 'result': meta['result'],
+            'pts': 3 if meta['result'] == 'W' else (1 if meta['result'] == 'D' else 0),
+            'xg': meta.get('xg'), 'oxg': meta.get('oxg'),
+            'possession': tape_value(m, 'possession_pct'), 'field_tilt': ft,
+            'chance_quality': kpi_value(m, 'np_xg_per_shot'),
+            'shots': tape_value(m, 'shots'), 'pass_accuracy': tape_value(m, 'pass_accuracy'),
+            'clearances': tape_value(m, 'clearances'),
+            'story_headline': (m.get('story') or {}).get('headline'),
+            'match': meta['match_id']}
+
+
+def avg(rows, key, d=2):
+    """Mean over the rows that carry the column, with the count it was taken over.
+
+    Returns (value, n). A metric whose supplier has not reported yet has a
+    smaller n than the season, and the caller is expected to say so rather than
+    average a null as a zero."""
+    vals = [r[key] for r in rows if r.get(key) is not None]
+    if not vals:
+        return None, 0
+    return round(sum(vals) / len(vals), d), len(vals)
 
 def fail(msg):
     print('GATE FAILED:', msg, file=sys.stderr)
@@ -163,8 +224,11 @@ def build_index(src, ingested=None):
             im = ingested[gw]['meta']
             fx['status'] = 'played'; fx['score'] = im['score']; fx['xg'] = im['xg']; fx['oxg'] = im['oxg']
             fx['result'] = im['result']; fx['match'] = im['match_id']
-        if f['comp'] == 'PL' and gw == 3:
-            fx['scout'] = 'eve'   # the pre-match scout stays reachable after the fixture is played
+        # A scout attaches itself to whatever fixture its authored file names, so
+        # adding one is adding a file. This used to be `if gw == 3: 'eve'`.
+        sc = SCOUTS.get(fx['fixture_id'])
+        if sc:
+            fx['scout'] = sc['code']   # stays reachable after the fixture is played
         fixtures.append(fx)
     teams = {}
     for r in D['lg']['table']:
@@ -226,74 +290,351 @@ def build_match(src, key, gw):
     }
 
 # ----------------------------------------------------------------------------- opponent
-def build_opponent(src):
+def build_opponent(src, scout):
+    """One opposition scout: authored judgement from build/opponents/<code>.json,
+    event-derived structure from the opponent ingest.
+
+    The seam is deliberate and visible. Everything a human decided — the claim, the
+    four KPI tiles, the block heights, the loss zones, the channel counts, every
+    panel intro — comes from the file. Everything counted from an event stream
+    still comes from the ingest, which for now is the v2 source's IPS/IPS2 objects
+    and is still Everton's. Generalising THAT means running the opponent capture
+    for a new club; this half no longer needs a code change.
+    """
     I, I2 = src['IPS'], src['IPS2']
     meta = I2['meta']
     subject = meta['subject']
     tiles = [{'label': t['k'], 'value': t['v'], 'ver': t['ver'], 'opp': bool(t['opp'])} for t in I2['tiles']]
+    built = list(scout.get('built_from', []))
     return {
         'meta': {'subject': subject, 'name': meta['teams'][subject]['name'], 'foes': meta['foes'],
-                 'teams': meta['teams'], 'fixture_id': 'PL-03-EVE', 'built_from': [
-                     {'label': 'Everton 2–0 Crystal Palace', 'date': '2026-08-22', 'ws': '1983549'},
-                     {'label': 'Bournemouth 1–1 Everton', 'date': '2026-08-29', 'ws': '1983556'}],
-                 'sample': {'matches': 2, 'event_streams_bound': len(meta['foes'])}, 'xg': meta['xg'],
-                 'notes_source': 'opponents/everton_2026_27/notes.yaml'},
-        'claim': {'headline': ['Everton do not want', 'the ball.'],
-                  'lead': 'Under 42% possession in both league matches, four points from two, and ten big chances conceded to four created. Their goals come from set pieces, their threat from turnovers high up, and their block drops by 11–21 m between the 60th and 75th minute in both games.'},
-        'kpis': [{'label': 'Possession', 'value': '41.5', 'unit': '%', 'note': '41.9 home, 41.1 away · Twelve, mirror-verified', 'src': 'twelve'},
-                 {'label': 'Big chances conceded', 'value': '10', 'unit': '', 'note': 'v 4 created · 1 goal conceded · Pickford 8 saves', 'src': 'whoscored'},
-                 {'label': 'Shots from set pieces', 'value': '31', 'unit': '%', 'note': '9 of 29 · 2 of their 3 goals', 'src': 'counted'},
-                 {'label': 'Block height, 60–75′', 'value': '27.8', 'unit': 'm', 'note': 'v Palace · 29.6 m v Bournemouth · lowest of both matches', 'src': 'counted'}],
-        'block_height': {'blocks': ['0–15', '15–30', '30–45', '45–60', '60–75', '75–90'],
-                         'v_palace': [40.3, 42.0, 46.1, 49.0, 27.8, 41.1], 'v_bournemouth': [42.3, 57.3, 35.4, 40.6, 29.6, 40.0]},
-        'losses': {'total': 205, 'zones': [['Attacking left', 38], ['Defensive centre', 28], ['Attacking right', 24], ['Midfield right', 23], ['Defensive left', 23]]},
-        'channels': [{'ch': 'Left wing', 'entries': 23, 'shots': 8}, {'ch': 'Left half-space', 'entries': 3, 'shots': 4},
-                     {'ch': 'Centre', 'entries': 12, 'shots': 11}, {'ch': 'Right half-space', 'entries': 3, 'shots': 3},
-                     {'ch': 'Right wing', 'entries': 17, 'shots': 3}],
+                 'teams': meta['teams'], 'fixture_id': scout['fixture_id'], 'code': scout['code'],
+                 'built_from': built,
+                 'vendor_report': scout.get('vendor_report'),
+                 'sample': {'matches': len(built) or meta.get('sample', {}).get('matches', 0),
+                            'event_streams_bound': len(meta['foes'])},
+                 'xg': meta['xg'],
+                 'notes_source': scout.get('_source', {}).get('authored_from')},
+        'claim': scout['claim'],
+        'kpis': scout['kpis'],
+        'teaser': scout.get('teaser', []),
+        'panels': scout.get('panels', {}),
+        'block_height': scout['block_height'],
+        'losses': scout['losses'],
+        'channels': scout['channels'],
         'tiles': tiles, 'notes': I2['notes'], 'metrics': I2['metRows'], 'census': I2['cen'],
         'shots': I2['shots'], 'zones': I['zones'], 'transitions': I['trans'], 'chan_points': I['chan'], 'chan_shots': I['chanShots'],
         'network': {'nodes': I['nodes'], 'links': I['links']}, 'players': I2['players'],
     }
 
+
 # ----------------------------------------------------------------------------- seasons
-def build_season_running(src):
-    D = src['D']
-    played = [('gw1', 1), ('gw2', 2)]
-    rows = []
-    for key, gw in played:
-        g = D[key]; gf, ga = [int(x) for x in g['score'].split('-')]
-        fx = next(f for f in D['fix'] if f['comp'] == 'PL' and f['rd'] == gw)
-        pos = next(s for s in g['summary'] if s['lab'] == 'Possession %')
-        rows.append({'round': gw, 'opp': g['opp'], 'code': fx['code'], 'venue': g['ven'], 'date': g['date'], 'gf': gf, 'ga': ga,
-                     'result': 'W' if gf > ga else ('D' if gf == ga else 'L'), 'pts': 3 if gf > ga else (1 if gf == ga else 0),
-                     'xg': g['xg'], 'oxg': g['oxg'], 'possession': pos['u'], 'field_tilt': float(g['story']['hero'][0]['v']),
-                     'match': match_slug(gw, fx['code'])})
+def build_season_running(src, files):
+    rows = [ledger_row(m) for m in built_matches(files)]
+    if not rows:
+        fail('no played match payloads to project a running season from')
     n = len(rows)
     ppg = sum(r['pts'] for r in rows) / n
-    pairs = {p['lab']: p for p in D['season']['pairs']}
-    def mean(k): return round(sum(r[k] for r in rows) / n, 2)
+
+    xg, n_xg = avg(rows, 'xg')
+    oxg, _ = avg(rows, 'oxg')
+    poss, n_poss = avg(rows, 'possession', 1)
+    tilt, n_tilt = avg(rows, 'field_tilt', 1)
+    cq, n_cq = avg(rows, 'chance_quality')
+
+    def sample(k):
+        return f"n = {k}" if k == n else f"n = {k} of {n}"
+
+    xg_diff = None if xg is None or oxg is None else round(xg - oxg, 2)
     kpis = [
-        {'key': 'points', 'value': f"{ppg:.2f}", 'baseline': 1.87, 'note': f"n = {n} · 25/26 finished on 1.87"},
-        {'key': 'xg_diff', 'value': f"{mean('xg') - mean('oxg'):+.2f}", 'baseline': 0.55, 'note': f"n = {n} · 25/26 +0.55 per match"},
-        {'key': 'possession_pct', 'value': f"{mean('possession'):.1f}", 'baseline': 51.8, 'note': f"n = {n} · 25/26 51.8 · WhoScored"},
-        {'key': 'field_tilt', 'value': f"{mean('field_tilt'):.0f}", 'baseline': 51, 'note': f"n = {n} · 25/26 average 51"},
-        {'key': 'np_xg_per_shot', 'value': None, 'baseline': 0.12, 'note': 'GW2 Twelve report pending', 'pending': True},
+        {'key': 'points', 'value': f"{ppg:.2f}", 'baseline': 1.87, 'n': n,
+         'note': f"{sample(n)} · 25/26 finished on 1.87"},
+        {'key': 'xg_diff', 'value': None if xg_diff is None else f"{xg_diff:+.2f}", 'baseline': 0.55,
+         'n': n_xg, 'pending': xg_diff is None,
+         'note': f"{sample(n_xg)} · 25/26 +0.55 per match"
+                 + ('' if n_xg == n else ' · Twelve report pending')},
+        {'key': 'possession_pct', 'value': None if poss is None else f"{poss:.1f}", 'baseline': 51.8,
+         'n': n_poss, 'note': f"{sample(n_poss)} · 25/26 51.8 · WhoScored"},
+        {'key': 'field_tilt', 'value': None if tilt is None else f"{tilt:.0f}", 'baseline': 51,
+         'n': n_tilt, 'note': f"{sample(n_tilt)} · 25/26 average 51"},
+        {'key': 'np_xg_per_shot', 'value': None if cq is None else f"{cq:.2f}", 'baseline': 0.12,
+         'n': n_cq, 'pending': cq is None,
+         'note': (f"{sample(n_cq)} · 25/26 0.12 · Twelve"
+                  if cq is not None else 'Twelve report pending')},
     ]
-    svs = [{'key': 'points', 'now': round(ppg, 2), 'base': 1.87}, {'key': 'goals_for', 'now': mean('gf'), 'base': 1.82},
-           {'key': 'goals_against', 'now': mean('ga'), 'base': 1.32}, {'key': 'xg', 'now': mean('xg'), 'base': 1.90},
-           {'key': 'xga', 'now': mean('oxg'), 'base': 1.30}, {'key': 'possession_pct', 'now': mean('possession'), 'base': 51.8},
-           {'key': 'shots', 'now': 27.0, 'base': 15.7}, {'key': 'pass_accuracy', 'now': 88.7, 'base': 82.3}, {'key': 'clearances', 'now': 12.5, 'base': 25.0}]
+
+    # Every row is the mean of the column it names, over the matches that carry
+    # it. Where a supplier has not reported, the row says how many matches it
+    # actually averaged rather than borrowing the season's n.
+    BASE = {'points': 1.87, 'goals_for': 1.82, 'goals_against': 1.32, 'xg': 1.90, 'xga': 1.30,
+            'possession_pct': 51.8, 'shots': 15.7, 'pass_accuracy': 82.3, 'clearances': 25.0}
+    COLS = [('points', None, 2), ('goals_for', 'gf', 2), ('goals_against', 'ga', 2),
+            ('xg', 'xg', 2), ('xga', 'oxg', 2), ('possession_pct', 'possession', 1),
+            ('shots', 'shots', 1), ('pass_accuracy', 'pass_accuracy', 1),
+            ('clearances', 'clearances', 1)]
+    svs = []
+    for key, col, d in COLS:
+        if key == 'points':
+            now, k = round(ppg, 2), n
+        else:
+            now, k = avg(rows, col, d)
+        svs.append({'key': key, 'now': now, 'base': BASE[key], 'n': k,
+                    'pending': now is None})
+
     return {
         'meta': {'season': '26-27', 'sample': {'matches': n, 'of': 38}, 'baseline': '25-26'},
-        'claim': {'eyebrow': 'Season 2026/27 · Premier League', 'headline': D['gw2']['story']['h1a'] and ['Level at half time.', 'Four goals in twenty-six minutes.'],
-                  'lead': 'United have had 66% of the ball across two matches and converted it once. Last season the same pattern produced 3.00 points per game under 45% possession and 1.40 above 55%.'},
+        'claim': season_claim(rows, poss, n_poss),
         'kpis': kpis, 'ledger': rows, 'season_v_season': svs,
-        'locks': {'dominance': {'at': LOCKS['dominance'], 'played': n}, 'gamestate': {'at': LOCKS['gamestate'], 'played': n},
-                  'adjusted': {'at': LOCKS['adjusted'], 'played': n}},
+        'locks': {name: {'at': at, 'played': n}
+                  for name, at in (('dominance', LOCKS['dominance']),
+                                   ('gamestate', LOCKS['gamestate']),
+                                   ('adjusted', LOCKS['adjusted']))},
         'held_back': [{'label': 'Field tilt %', 'base': 51.34, 'gw1': 84}, {'label': 'np xG per shot', 'base': 0.12, 'gw1': 0.10},
                       {'label': 'xT created', 'base': 1.57, 'gw1': 2.98}, {'label': 'Box touches', 'base': 21.29, 'gw1': 32},
                       {'label': 'PPDA (higher = less press)', 'base': 6.05, 'gw1': 4.13}],
     }
+
+
+def load_opponents():
+    """Every authored opposition scout, keyed by the fixture it is built for.
+
+    build_opponent() used to return Everton's claim, KPIs, block heights, loss
+    zones and channel counts as literals, and build_index() attached the scout with
+    `if gw == 3`. A second opponent meant editing two functions. It is now a file."""
+    out = {}
+    d = os.path.join(HERE, 'opponents')
+    if not os.path.isdir(d):
+        return out
+    for fn in sorted(os.listdir(d)):
+        if not fn.endswith('.json'):
+            continue
+        with open(os.path.join(d, fn), encoding='utf-8') as fh:
+            o = json.load(fh)
+        if not o.get('fixture_id'):
+            fail(f"build/opponents/{fn} names no fixture_id")
+        o.setdefault('code', fn[:-5])
+        out[o['fixture_id']] = o
+    return out
+
+
+SCOUTS = {}
+
+
+def load_twelve(rnd):
+    """The Twelve match report for a round, transcribed into build/twelve/gw<N>.json.
+
+    The ingest never invents an xG: WhoScored's match centre carries no expectedGoals
+    field, so it writes nulls and marks the rows pending. This is the other half of
+    that contract — when the vendor report lands, its figures are transcribed once,
+    with the page they were printed on, and applied here. Nothing is read off a chart
+    and nothing is derived; a value absent from the report stays pending."""
+    path = os.path.join(HERE, 'twelve', f'gw{rnd}.json')
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding='utf-8') as fh:
+        return json.load(fh)
+
+
+def load_rosters(rnd):
+    """Understat player rosters for a round, if they have been captured.
+
+    A second, independent xG model. On MW3 it disagrees with Twelve by 34% on
+    Everton's total, so the two are never summed or averaged. Twelve's total is
+    what the tape and the KPI tiles publish; these values are written to
+    us_xg / us_xa, labelled understat, and used to shape how that total is split
+    across shots."""
+    path = os.path.join(HERE, 'understat', f'gw{rnd}-players.json')
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding='utf-8') as fh:
+        return json.load(fh)
+
+
+def apply_twelve(payload):
+    """Fill a match payload's vendor-modelled figures from its Twelve report."""
+    rnd = payload['meta']['round']
+    tw = load_twelve(rnd)
+    if not tw:
+        return payload
+    if tw.get('match_id') != payload['meta']['match_id']:
+        fail(f"twelve/gw{rnd}.json is for {tw.get('match_id')}, not {payload['meta']['match_id']}")
+    t = tw['team']
+
+    payload['meta']['xg'] = t['xg']['united']
+    payload['meta']['oxg'] = t['xg']['opp']
+    payload['meta'].setdefault('sources', [])
+    if 'twelve' not in payload['meta']['sources']:
+        payload['meta']['sources'].append('twelve')
+
+    TAPE = {'xg': 'xg', 'xt': 'xt'}
+    for key, field in TAPE.items():
+        row = next((r for r in payload['tape'] if r['key'] == key), None)
+        if row is None or field not in t:
+            continue
+        row['united'] = t[field]['united']
+        row['opp'] = t[field]['opp']
+        row['src'] = 'twelve'
+        row.pop('pending', None)
+
+    KPI = {'xg': ('xg', 2), 'np_xg_per_shot': ('np_xg_per_shot', 2), 'field_tilt': ('field_tilt', 0)}
+    for key, (field, dp) in KPI.items():
+        k = next((k for k in payload['kpis'] if k['key'] == key), None)
+        if k is None or field not in t:
+            continue
+        # field tilt was being counted here as final-third touch share and published
+        # under the registry's "Twelve, vendor model" label. Twelve prints its own
+        # figure; keep ours in the note rather than silently replacing the number.
+        if key == 'field_tilt' and k.get('value') not in (None, ''):
+            k['note'] = f"Twelve prints {t[field]['united']}; final-third touch share here was {k['value']}"
+        k['value'] = f"{t[field]['united']:.{dp}f}"
+        k['src'] = 'twelve'
+        k.pop('pending', None)
+        if 'pending' in (k.get('note') or '').lower():
+            k['note'] = f"Twelve report · {tw['_source']['generated']}"
+    for k in payload['kpis']:
+        if k['key'] == 'shots' and 'src' not in k:
+            k['src'] = 'counted'
+
+    payload['twelve'] = {'source': tw['_source'], 'team': t,
+                         'not_in_the_report': tw.get('not_in_the_report', [])}
+    payload.setdefault('provenance', {})['twelve_applied'] = True
+    apply_shot_proxy(payload, t)
+    return payload
+
+
+def understat_weights(payload, side):
+    """{surname: xG} for one side, from the Understat rosters, if captured."""
+    rs = load_rosters(payload['meta']['round'])
+    if not rs:
+        return None
+    key = 'united' if side == 'united' else 'opp'
+    out = {}
+    for p in rs['teams'][key]:
+        parts = str(p.get('player') or '').split()
+        if parts:
+            out[parts[-1].lower()] = p.get('xG') or 0.0
+    return out or None
+
+
+def apply_shot_proxy(payload, t):
+    """Price the shots geometrically when the report gives a total but no per-shot value.
+
+    Only runs where every shot on a side is unpriced. A side the vendor HAS priced
+    is never touched, so a later per-shot feed silently supersedes the proxy."""
+    sides = [('united', 'united'), ('opp', 'opp')]
+    priced = {}
+    for key, side in sides:
+        shots = payload['shots'][key]
+        if not shots or any(s.get('xg') is not None for s in shots):
+            continue
+        total = t['xg'][side]
+        np_total = (t.get('np_xg') or {}).get(side, total)
+        pw = understat_weights(payload, side)
+        n, npen = shot_proxy.price_side(shots, total, np_total, player_xg=pw)
+        if n:
+            priced[key] = {'shots': n, 'penalties': npen, 'total': total,
+                           'np_total': np_total, 'anchored': bool(pw)}
+    if not priced:
+        return payload
+
+    # Everything downstream of a shot's xg can now be drawn, and every one of them
+    # inherits `modelled` from the split — the map, the race and the situation list.
+    payload['timeline']['united'] = shot_proxy.cumulative(payload['shots']['united'])
+    payload['timeline']['opp'] = shot_proxy.cumulative(payload['shots']['opp'])
+    payload['timeline'].pop('pending', None)
+    payload['timeline']['src'] = 'modelled'
+    payload['shots']['situations'] = {'u': shot_proxy.situation_totals(payload['shots']['united']),
+                                      'o': shot_proxy.situation_totals(payload['shots']['opp'])}
+    anchored = all(v.get('anchored') for v in priced.values())
+    payload['shots']['priced'] = {
+        'method': 'understat-anchored' if anchored else 'geometric',
+        'src': 'modelled',
+        'note': ("circle area is a proxy: the side total is Twelve's, each player's share of it "
+                 "is Understat's, and a player's own shots are split by the goal mouth each saw"
+                 if anchored else
+                 "circle area is a proxy: the side total is Twelve's, the split across shots is "
+                 "the share of the goal mouth each one could see"),
+        'sides': priced}
+    for side, info in priced.items():
+        got = round(sum(s['xg'] for s in payload['shots'][side] if s.get('xg') is not None), 2)
+        want = round(info['total'], 2)
+        if abs(got - want) > 0.01:
+            fail(f"shot proxy for {payload['meta']['match_id']} {side} sums to {got}, "
+                 f"Twelve's total is {want}")
+    return payload
+
+
+def apply_rosters(payload):
+    """Attach WhoScored per-player xG and xA, in their own fields."""
+    rnd = payload['meta']['round']
+    rs = load_rosters(rnd)
+    if not rs:
+        return payload
+    by_name = {p['player']: p for p in rs['teams']['united']}
+    matched = 0
+    for pl in payload['players']:
+        r = by_name.get(pl['name'])
+        if r is None:
+            continue
+        pl['us_xg'] = r['xG']
+        pl['us_xa'] = r['xA']
+        matched += 1
+    if matched < len([p for p in payload['players'] if p['mins']]):
+        missing = [p['name'] for p in payload['players'] if 'us_xg' not in p]
+        fail(f"Understat xG missing for {missing} in gw{rnd} — names must match the payload exactly")
+    payload['understat'] = {'source': rs['_source']}
+    return payload
+
+
+def load_notes(name):
+    """An authored notes file, or None. Absent is not an error — the caller falls
+    back to something derived and says that it did."""
+    path = os.path.join(HERE, 'notes', name)
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding='utf-8') as fh:
+        return json.load(fh)
+
+
+def season_headline(rows):
+    """The authored headline while it still describes the season, else the most
+    recent match's own headline.
+
+    The season claim was a copy of MW2's match headline, typed once. After MW3 it
+    sat above a three-match season that had drawn 2-2, still announcing four goals
+    in twenty-six minutes. A headline is editorial and should not be computed —
+    but a stale one is worse than a plain one, so an authored line that has been
+    overtaken is replaced by copy that is at least current, loudly."""
+    notes = (load_notes('season-26-27.json') or {}).get('claim') or {}
+    latest = rows[-1]['round'] if rows else 0
+    written_for = notes.get('written_for_round')
+    headline = notes.get('headline')
+    if headline and written_for == latest:
+        return headline
+    if headline:
+        print(f"  [warn] season headline was written for MW{written_for}, "
+              f"MW{latest} has been played — falling back to the MW{latest} headline. "
+              f"Update build/notes/season-26-27.json.")
+    fallback = (rows[-1].get('story_headline') if rows else None) or ['The season so far.']
+    return fallback
+
+
+def season_claim(rows, poss, n_poss):
+    """The lead sentence counts what the ledger holds rather than restating a
+    figure that was true when it was typed."""
+    n = len(rows)
+    wins = sum(1 for r in rows if r['result'] == 'W')
+    word = {1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six',
+            7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten'}
+    matches = f"{word.get(n, n)} match{'es' if n != 1 else ''}"
+    ball = '' if poss is None else f"United have had {poss:.0f}% of the ball across {matches}"
+    won = ('and won none of them' if wins == 0
+           else f"and won {word.get(wins, wins)} of them")
+    return {'eyebrow': 'Season 2026/27 · Premier League',
+            'headline': season_headline(rows),
+            'lead': f"{ball} {won}. Last season the same pattern produced 3.00 points per game "
+                    f"under 45% possession and 1.40 above 55%."}
+
 
 def build_season_complete(src):
     D = src['D']
@@ -307,16 +648,80 @@ def build_season_complete(src):
     }
 
 # ----------------------------------------------------------------------------- squad + players
-def build_squad(src):
+def season_to_date(matches):
+    """Per-player 26/27 totals aggregated from the played match payloads.
+
+    The v2 source object carries a squad.s26 table that was correct for the two
+    matches it was exported from and does not grow. These are counted from the
+    same player rows the match pages render, so the squad strip and the player
+    pages can no longer disagree about how many appearances someone has."""
+    agg = OrderedDict()
+    for m in matches:
+        meta = m['meta']
+        for p in m['players']:
+            a = agg.setdefault(p['player_id'], {
+                'player_id': p['player_id'], 'name': p['name'], 'pos': p['pos'],
+                'apps': 0, 'starts': 0, 'mins': 0.0, 'g': 0, 'a': 0, 'involvements': []})
+            a['apps'] += 1
+            a['starts'] += 1 if p.get('started') else 0
+            a['mins'] += p.get('mins') or 0
+            a['g'] += p.get('goals') or 0
+            a['a'] += p.get('assists') or 0
+            if p.get('goals') or p.get('assists'):
+                a['involvements'].append({'g': p['goals'], 'a': p['assists'], 'opp': meta['opp'],
+                                          'ven': meta['venue'], 'mw': meta['round']})
+    rows = []
+    for a in agg.values():
+        a['mins'] = round(a['mins'])
+        a['ga'] = a['g'] + a['a']
+        a['per90_running'] = round(a['ga'] / a['mins'] * 90, 2) if a['mins'] else 0
+        a['over_floor'] = a['mins'] >= FLOOR
+        rows.append(a)
+    rows.sort(key=lambda p: (-p['ga'], -p['g'], -p['mins']))
+    return rows
+
+
+def squad_claim(rows, matches, team_goals, attributed, floor):
+    """Headline and lead counted from the strip, not typed against one export."""
+    scorers = [r for r in rows if r['ga']]
+    if scorers:
+        top = scorers[0]
+        runner = scorers[1] if len(scorers) > 1 else None
+        surname = top['name'].split()[-1]
+        head = [f"{surname} has {top['ga']} of the {team_goals}.",
+                'Nobody else has two.' if not runner or runner['ga'] < 2
+                else f"{runner['name'].split()[-1]} has {runner['ga']}."]
+    else:
+        head = ['No goal involvements yet.', f"{matches} matches in."]
+
+    own = team_goals - attributed
+    own_clause = ''
+    if own > 0:
+        own_clause = (f" {own} own goal{'s' if own != 1 else ''} sits in the team total "
+                      f"and in nobody's column.")
+
+    over = sum(1 for r in rows if r['over_floor'])
+    floor_clause = (f"none has reached the {floor}-minute floor, so there are no per-90 rates "
+                    f"on this page yet" if over == 0 else
+                    f"{over} of them {'is' if over == 1 else 'are'} past the {floor}-minute floor")
+
+    return {'eyebrow': 'Squad 2026/27 · season to date',
+            'headline': head,
+            'lead': f"{team_goals} team goals in {matches} matches.{own_clause} "
+                    f"{len(rows)} players used; {floor_clause}."}
+
+
+def build_squad(src, files):
     D = src['D']
-    s26 = sorted(D['squad']['s26'], key=lambda p: (-p['ga'], -p['g'], -p['mins']))
-    matches = 2; available = matches * 90
-    team_goals = 5; attributed = sum(p['g'] for p in s26)
-    strip = []
-    for p in s26:
-        strip.append({'player_id': p['id'], 'name': p['nm'], 'pos': p['pos'], 'apps': p['apps'], 'starts': p['starts'], 'mins': round(p['mins']),
-                      'g': p['g'], 'a': p['a'], 'ga': p['ga'], 'per90_running': round(p['ga'] / p['mins'] * 90, 2) if p['mins'] else 0,
-                      'over_floor': p['mins'] >= FLOOR, 'involvements': p.get('ret', []), 'rating': p['rat']})
+    matches = built_matches(files)
+    n = len(matches)
+    available = n * 90
+    strip = season_to_date(matches)
+    team_goals = sum(m['meta']['gf'] for m in matches)
+    attributed = sum(p['g'] for p in strip)
+    assists = sum(p['a'] for p in strip)
+    over_floor = sum(1 for p in strip if p['over_floor'])
+
     per90_rows = []
     for p in D['squad']['s25']:
         row = {'player_id': p['id'], 'name': p['nm'], 'pos': p['pos'], 'apps': p['apps'], 'mins': round(p['mins']), 'over_floor': p['over'],
@@ -329,14 +734,14 @@ def build_squad(src):
         if not row['over_floor'] and any(row[k] is not None for k in ['touches']):
             fail(f"per-90 emitted under the floor for {row['name']}")
     return {
-        'meta': {'season': '26-27', 'sample': {'matches': matches, 'minutes_available': available, 'players_used': len(s26)}, 'floor': FLOOR},
-        'claim': {'eyebrow': 'Squad 2026/27 · season to date', 'headline': ['Bruno has four of the five.', 'Nobody else has two.'],
-                  'lead': f"Five team goals in two matches: three and an assist for Bruno Fernandes, one for Mbeumo, an assist for Cunha, and one own goal that sits in the team total and in nobody's column. {len(s26)} players used; none has reached the {FLOOR}-minute floor, so there are no per-90 rates on this page yet."},
-        'kpis': {'matches': matches, 'team_goals': team_goals, 'attributed': attributed, 'assists': sum(p['a'] for p in s26),
-                 'players_used': len(s26), 'over_floor': sum(1 for p in s26 if p['mins'] >= FLOOR)},
+        'meta': {'season': '26-27', 'sample': {'matches': n, 'minutes_available': available, 'players_used': len(strip)}, 'floor': FLOOR},
+        'claim': squad_claim(strip, n, team_goals, attributed, FLOOR),
+        'kpis': {'matches': n, 'team_goals': team_goals, 'attributed': attributed, 'assists': assists,
+                 'players_used': len(strip), 'over_floor': over_floor},
         'season_to_date': strip, 'per90_baseline': per90_rows, 'goals_assists_25_26': D['ga'],
         'availability': {'gw_count': D['avail']['gwCount'], 'rows': D['avail']['rows']},
     }
+
 
 def build_players(src, matches):
     D = src['D']
@@ -387,7 +792,149 @@ def gate(files):
         for t in payload.get('tape', []):
             if t['key'] not in keys: fail(f"{name}: tape key {t['key']} not in registry")
     if len(idx['fixtures']) != 46: fail(f"expected 46 fixtures, got {len(idx['fixtures'])}")
+
+    # ---- the index is the identity layer; nothing may disagree with it -------
+    # Every gate below exists because something published disagreed with it once.
+    played = [f for f in idx['fixtures'] if f['comp'] == 'PL' and f['status'] == 'played']
+
+    for f in played:
+        m = files.get(f"26-27/matches/{f.get('match')}.json")
+        if m:
+            for k in ('xg', 'oxg', 'score', 'result'):
+                if f.get(k) != m['meta'].get(k):
+                    fail(f"index fixture {f['fixture_id']} has {k}={f.get(k)!r}, "
+                         f"its match payload has {m['meta'].get(k)!r}")
+        if not f.get('match'):
+            fail(f"fixture {f['fixture_id']} is played but names no match payload")
+        if f"26-27/matches/{f['match']}.json" not in files:
+            fail(f"fixture {f['fixture_id']} names match '{f['match']}' with no payload written")
+
+    season = files.get('26-27/season.json')
+    squad = files.get('26-27/squad.json')
+
+    if season is not None:
+        n_ledger = len(season['ledger'])
+        if n_ledger != len(played):
+            fail(f"season ledger holds {n_ledger} rows against {len(played)} played fixtures "
+                 f"— rounds {[r['round'] for r in season['ledger']]} "
+                 f"vs {[f['round'] for f in played]}")
+        if season['meta']['sample']['matches'] != n_ledger:
+            fail(f"season meta.sample.matches {season['meta']['sample']['matches']} "
+                 f"disagrees with its own ledger ({n_ledger} rows)")
+        by_round = {f['round']: f for f in played}
+        for r in season['ledger']:
+            f = by_round.get(r['round'])
+            if f is None:
+                fail(f"season ledger carries round {r['round']}, which the index has not played")
+            if f"{r['gf']}-{r['ga']}" != f['score'] or r['result'] != f['result']:
+                fail(f"season ledger round {r['round']} reads {r['result']} {r['gf']}-{r['ga']}, "
+                     f"index reads {f['result']} {f['score']}")
+        # A row with no value must say so. Averaging a null as a zero, or letting a
+        # frozen literal sit beside a computed mean, is the failure this catches.
+        notes = (load_notes('season-26-27.json') or {}).get('claim') or {}
+        if notes.get('headline') and notes.get('written_for_round') == season['ledger'][-1]['round'] \
+                and season['claim']['headline'] != notes['headline']:
+            fail('season claim headline does not match the current authored note')
+        for row in season['season_v_season']:
+            if row.get('now') is None and not row.get('pending'):
+                fail(f"season_v_season row '{row['key']}' has no value and is not marked pending")
+            if 'n' not in row:
+                fail(f"season_v_season row '{row['key']}' does not say how many matches it averaged")
+
+    if squad is not None and season is not None:
+        if squad['meta']['sample']['matches'] != season['meta']['sample']['matches']:
+            fail(f"squad says {squad['meta']['sample']['matches']} matches, "
+                 f"season says {season['meta']['sample']['matches']}")
+        if squad['meta']['sample']['minutes_available'] != squad['meta']['sample']['matches'] * 90:
+            fail("squad minutes_available is not matches * 90")
+
+    # ---- a vendor figure must have the vendor behind it ---------------------
+    for name, payload in files.items():
+        if not name.startswith('26-27/matches/'):
+            continue
+        rnd = payload['meta']['round']
+        tw = load_twelve(rnd)
+        for k in payload.get('kpis', []):
+            if k.get('pending') and k.get('value') not in (None, ''):
+                fail(f"{name}: kpi {k['key']} is marked pending and carries {k['value']}")
+            if k.get('src') == 'twelve' and k.get('value') in (None, '') and not k.get('pending'):
+                fail(f"{name}: kpi {k['key']} is sourced twelve, has no value, and is not pending")
+            if 'pending' in (k.get('note') or '').lower() and k.get('value') not in (None, ''):
+                fail(f"{name}: kpi {k['key']} carries {k['value']} under a note that still says pending")
+        for r in payload.get('tape', []):
+            if r.get('pending') and r.get('united') is not None:
+                fail(f"{name}: tape row {r['key']} is marked pending and carries {r['united']}")
+        if tw:
+            t = tw['team']
+            if payload['meta'].get('xg') != t['xg']['united'] or payload['meta'].get('oxg') != t['xg']['opp']:
+                fail(f"{name}: meta xG {payload['meta'].get('xg')}:{payload['meta'].get('oxg')} "
+                     f"does not match twelve/gw{rnd}.json ({t['xg']['united']}:{t['xg']['opp']})")
+
+    # ---- a scout must attach to a fixture that exists ------------------------
+    fids = {f['fixture_id'] for f in idx['fixtures']}
+    for name, payload in files.items():
+        if not name.startswith('26-27/opponents/'):
+            continue
+        fid = payload['meta']['fixture_id']
+        if fid not in fids:
+            fail(f"{name}: scout is built for fixture {fid}, which is not in the index")
+        fx = next(f for f in idx['fixtures'] if f['fixture_id'] == fid)
+        if fx.get('scout') != payload['meta']['code']:
+            fail(f"{name}: fixture {fid} points at scout {fx.get('scout')!r}, "
+                 f"this payload is {payload['meta']['code']!r}")
+        for k in ('claim', 'kpis', 'block_height', 'losses', 'channels'):
+            if not payload.get(k):
+                fail(f"{name}: authored block '{k}' is missing or empty")
+
+    # ---- a modelled figure must declare itself -----------------------------
+    for name, payload in files.items():
+        if not name.startswith('26-27/matches/'):
+            continue
+        mod = [s for side in ('united', 'opp') for s in payload['shots'][side]
+               if s.get('xg_src') == 'modelled']
+        pr = payload['shots'].get('priced')
+        if mod and not pr:
+            fail(f"{name}: {len(mod)} shots are modelled but shots.priced is absent, "
+                 f"so the page has no way to label them")
+        if pr and payload.get('timeline', {}).get('src') != 'modelled':
+            fail(f"{name}: shots are modelled but the timeline does not say so")
+        if pr:
+            for side, info in pr['sides'].items():
+                got = round(sum(s['xg'] for s in payload['shots'][side] if s.get('xg') is not None), 2)
+                if abs(got - round(info['total'], 2)) > 0.01:
+                    fail(f"{name}: modelled {side} shots sum to {got}, vendor total {info['total']}")
+
+    # ---- an anchored split must actually have its anchor ---------------------
+    for name, payload in files.items():
+        if not name.startswith('26-27/matches/'):
+            continue
+        pr = payload['shots'].get('priced')
+        if pr and pr['method'] == 'understat-anchored' and 'understat' not in payload:
+            fail(f"{name}: shots claim an Understat-anchored split with no Understat source")
+        if 'understat' in payload:
+            miss = [p['name'] for p in payload['players'] if p.get('mins') and 'us_xg' not in p]
+            if miss:
+                fail(f"{name}: Understat attached but {miss} carry no us_xg")
+
+    # ---- every player a match page links to must have a page ----------------
+    # The two player_id implementations agreed on the squad of the day and would
+    # have diverged on the next Højlund. build/names.py is now the only one; this
+    # is the gate that keeps it that way.
+    written = {name[len('26-27/players/'):-len('.json')]
+               for name in files if name.startswith('26-27/players/')}
+    for name, payload in files.items():
+        if not name.startswith('26-27/matches/'):
+            continue
+        for p in payload.get('players', []):
+            pid = p['player_id']
+            if pid != player_id(p['name']):
+                fail(f"{name}: player_id '{pid}' for {p['name']} is not what names.player_id() "
+                     f"produces ('{player_id(p['name'])}')")
+            if pid not in written:
+                fail(f"{name}: links to player '{pid}' ({p['name']}) with no player payload")
+
     return True
+
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--apply', action='store_true'); args = ap.parse_args()
@@ -399,22 +946,32 @@ def main():
     ingested = {gw: p for gw, p in ingested.items() if gw not in (1, 2)}
     if ingested:
         print(f"ingested gameweeks: {sorted(ingested)}")
+    global SCOUTS
+    SCOUTS = load_opponents()
+    if SCOUTS:
+        print(f"opposition scouts: {sorted(v['code'] for v in SCOUTS.values())}")
     files = OrderedDict()
-    files['index.json'] = build_index(src, ingested)
-    files['crests.json'] = src['D']['crest']
     m1 = build_match(src, 'gw1', 1); m2 = build_match(src, 'gw2', 2)
-    files[f"26-27/matches/{m1['meta']['match_id']}.json"] = m1
-    files[f"26-27/matches/{m2['meta']['match_id']}.json"] = m2
+    # Enrich the ingested weeks BEFORE the index is built. index.json is the identity
+    # layer every other payload is held to, and it carries each fixture's xG — built
+    # first, it recorded MW3 as null while the match payload already had Twelve's 0.86.
     for gw, p in sorted(ingested.items()):
         # The 25/26 baseline is season-level and identical on every match payload;
         # the ingest cannot know it, so it is carried across here.
         if not p.get('baseline'):
             p['baseline'] = m2['baseline']
+        ingested[gw] = apply_twelve(apply_rosters(p))
+    files['index.json'] = build_index(src, ingested)
+    files['crests.json'] = src['D']['crest']
+    files[f"26-27/matches/{m1['meta']['match_id']}.json"] = m1
+    files[f"26-27/matches/{m2['meta']['match_id']}.json"] = m2
+    for gw, p in sorted(ingested.items()):
         files[f"26-27/matches/{p['meta']['match_id']}.json"] = p
-    files['26-27/opponents/eve.json'] = build_opponent(src)
-    files['26-27/season.json'] = build_season_running(src)
+    for fid, scout in sorted(SCOUTS.items()):
+        files[f"26-27/opponents/{scout['code']}.json"] = build_opponent(src, scout)
+    files['26-27/season.json'] = build_season_running(src, files)
     files['25-26/season.json'] = build_season_complete(src)
-    files['26-27/squad.json'] = build_squad(src)
+    files['26-27/squad.json'] = build_squad(src, files)
     for gw, p in sorted(ingested.items()):
         src['D'][f'gw{gw}'] = as_source_gw(p)
     mlist = [('gw1', 1, m1), ('gw2', 2, m2)] + [(f'gw{gw}', gw, p) for gw, p in sorted(ingested.items())]

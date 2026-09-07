@@ -36,8 +36,10 @@ import json
 import os
 import re
 import sys
-import unicodedata
 from collections import defaultdict
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from names import player_id  # noqa: E402  the one definition, shared with build_payloads
 
 UNITED_TEAM_ID = 32
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -59,14 +61,6 @@ FULL_MATCH = 90
 def fail(msg: str) -> None:
     print(f"  GATE FAILED — {msg}")
     sys.exit(1)
-
-
-def slug(first: str, surname: str) -> str:
-    def fold(s):
-        s = unicodedata.normalize("NFKD", s or "")
-        s = "".join(c for c in s if not unicodedata.combining(c))
-        return re.sub(r"[^a-z]", "", s.lower())
-    return f"mufc_{fold(surname)}_{fold(first)}"
 
 
 def quals(e) -> dict:
@@ -278,7 +272,7 @@ def build_players(events, tid, side, roster, names, mcd_period_end):
         rid, shirt, known = roster.get(str(pid), (None, p.get("shirtNo", ""), p.get("name")))
         if not rid:
             parts = (p.get("name") or "").split()
-            rid = slug(parts[0] if parts else "", parts[-1] if len(parts) > 1 else (parts[0] if parts else ""))
+            rid = player_id(" ".join(parts))
         att, cmp_ = a["passes_att"], a["passes_cmp"]
         rows.append(dict(
             player_id=rid, name=known or p.get("name"), shirt=int(shirt) if str(shirt).isdigit() else p.get("shirtNo", 0),

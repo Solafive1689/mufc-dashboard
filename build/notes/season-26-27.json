@@ -1,0 +1,10 @@
+{
+  "_": "The season claim headline. Authored, not computed — it is a judgement about the season, and arithmetic cannot make one. Set written_for_round to the matchweek you wrote it after. When a later matchweek is played the build says so and falls back to that match's own headline, so the front page can never carry a claim about a season that has moved on without it.",
+  "claim": {
+    "written_for_round": 3,
+    "headline": [
+      "Seven scored in three matches.",
+      "Six conceded."
+    ]
+  }
+}

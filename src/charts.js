@@ -40,18 +40,30 @@ window.MUFC = window.MUFC || {};
       }
       return true;
     };
+    // A shot with no xG is not a shot with a small xG. Math.sqrt(null) is 0, so
+    // sizing an unpriced shot by the same formula draws every one of them at the
+    // 4px floor — a map that looks like thirty-two identical chances under a
+    // caption promising that circle area is xG. Until the Twelve report lands
+    // the marks carry position and outcome only, and say so.
     const mark = (s, side, mirror) => {
       const x = mirror ? 100 - s.x : s.x, y = mirror ? 100 - s.y : s.y;
-      const r = Math.max(4, Math.sqrt(s.xg) * 22);
+      const priced = s.xg !== null && s.xg !== undefined && !Number.isNaN(Number(s.xg));
+      const r = priced ? Math.max(4, Math.sqrt(s.xg) * 22) : 7;
       const goal = s.t === 'goal' || s.goal;
       const filled = goal || s.t === 'sot';
-      const cls = `${side} ${filled ? '' : 'hollow'} ${s.t === 'blocked' ? 'blocked' : ''}`;
-      const tip = `${s.who || ''} ${s.min}′ · xG ${s.xg} · ${goal ? 'goal' : s.t} · ${s.sit || ''}`;
+      const cls = `${side} ${filled ? '' : 'hollow'} ${s.t === 'blocked' ? 'blocked' : ''} ${priced ? '' : 'unpriced'}`;
+      const xgTxt = priced ? `xG ${Number(s.xg).toFixed(2)}${s.xg_src === 'modelled' ? ' modelled' : ''}` : 'xG pending';
+      const tip = `${s.who || ''} ${s.min}′ · ${xgTxt} · ${goal ? 'goal' : s.t} · ${s.sit || ''}`;
       return `<circle class="${cls}" cx="${px(x).toFixed(1)}" cy="${py(y).toFixed(1)}" r="${r.toFixed(1)}" stroke-width="${goal ? 3 : 1.5}" data-tip="${esc(tip)}"/>`;
     };
+    const kept = [...united.filter(keep), ...opp.filter(keep)];
+    const anyPriced = kept.some(s => s.xg !== null && s.xg !== undefined);
     const u = united.filter(keep).map(s => mark(s, uCls, false)).join('');
     const o = opp.filter(keep).map(s => mark(s, oCls, mirror)).join('');
-    return pitchFrame(o + u, '', 'Shot map, circle area proportional to expected goals');
+    const label = anyPriced
+      ? 'Shot map, circle area proportional to expected goals'
+      : 'Shot map, positions and outcomes only — expected goals not yet available, so every mark is drawn the same size';
+    return pitchFrame(o + u, anyPriced ? '' : 'pitch--unpriced', label);
   }
 
   // Heat grid: cols × rows counts, opacity ramp on the accent.
@@ -83,8 +95,9 @@ window.MUFC = window.MUFC || {};
   function touchPlot(points, shots) {
     const t = points.filter(p => !(p[0] > 99 && p[1] > 99)).map(p => `<circle class="touch" cx="${px(p[0]).toFixed(1)}" cy="${py(p[1]).toFixed(1)}" r="2.5"/>`).join('');
     const s = (shots || []).map(sh => {
-      const r = Math.max(4, Math.sqrt(sh.xg) * 22); const goal = sh.t === 'goal';
-      return `<circle class="u ${goal || sh.t === 'sot' ? '' : 'hollow'} ${sh.t === 'blocked' ? 'blocked' : ''}" cx="${px(sh.x).toFixed(1)}" cy="${py(sh.y).toFixed(1)}" r="${r.toFixed(1)}" stroke-width="${goal ? 3 : 1.5}" data-tip="${sh.min}′ · xG ${sh.xg} · ${sh.t}"/>` +
+      const priced = sh.xg !== null && sh.xg !== undefined;
+      const r = priced ? Math.max(4, Math.sqrt(sh.xg) * 22) : 7; const goal = sh.t === 'goal';
+      return `<circle class="u ${goal || sh.t === 'sot' ? '' : 'hollow'} ${sh.t === 'blocked' ? 'blocked' : ''} ${priced ? '' : 'unpriced'}" cx="${px(sh.x).toFixed(1)}" cy="${py(sh.y).toFixed(1)}" r="${r.toFixed(1)}" stroke-width="${goal ? 3 : 1.5}" data-tip="${sh.min}′ · ${priced ? `xG ${sh.xg}` : 'xG pending'} · ${sh.t}"/>` +
         (goal ? `<text x="${(px(sh.x) + r + 2).toFixed(1)}" y="${(py(sh.y) + 3).toFixed(1)}">${sh.min}′</text>` : '');
     }).join('');
     return pitchFrame(t + s, '', `${points.length} touches with shots overlaid`);
@@ -94,13 +107,52 @@ window.MUFC = window.MUFC || {};
   function xgRace(tl, oppName) {
     const w = 520, h = 200, padL = 30, padR = 12, padT = 10, padB = 22;
     // Until the Twelve report lands there is no xG to accumulate — WhoScored's match
-    // centre carries no expectedGoals field. The goals are still known, so the panel
-    // keeps its axis and its minute markers instead of disappearing or throwing.
+    // centre carries no expectedGoals field. The goals and their minutes are counted
+    // from the event stream and ARE known, so the panel shows when the match turned
+    // rather than an empty pair of axes captioned as a chart.
     if (!(tl.united && tl.united.length) && !(tl.opp && tl.opp.length)) {
-      const bx = m => padL + (m / 95) * (w - padL - padR);
-      const bticks = [0, 15, 30, 45, 60, 75, 90].map(m => `<line class="grid" x1="${bx(m)}" y1="${padT}" x2="${bx(m)}" y2="${h - padB}"/><text x="${bx(m)}" y="${h - 6}" text-anchor="middle">${m === 45 ? 'HT' : m}</text>`).join('');
-      const bmarks = (tl.goals || []).map(g => `<circle class="goal ${g.team === 'u' ? 'u' : 'o'}" cx="${bx(g.min).toFixed(1)}" cy="${h - padB}" r="5" data-tip="${g.min}′ ${esc(g.who || '')} · ${g.sit || ''}" stroke="${g.team === 'u' ? 'var(--united)' : 'var(--opponent)'}"/>`).join('');
-      return `<svg viewBox="0 0 ${w} ${h}" class="chart chart--race" role="img" aria-label="xG timeline pending">${bticks}<line class="grid" x1="${padL}" y1="${h - padB}" x2="${w - padR}" y2="${h - padB}"/>${bmarks}<text x="${w / 2}" y="${padT + 78}" text-anchor="middle" fill="var(--muted, #8b8892)" font-size="11">xG timeline · Twelve report pending · goal minutes from WhoScored</text></svg>`;
+      const bh = 118, dotY = bh - padB - 16;
+      const bx = m => padL + (Math.min(m, 95) / 95) * (w - padL - padR);
+      const ticks = [0, 15, 30, 45, 60, 75, 90].map(m =>
+        `<line class="grid" x1="${bx(m).toFixed(1)}" y1="${padT}" x2="${bx(m).toFixed(1)}" y2="${bh - padB}"/>` +
+        `<text x="${bx(m).toFixed(1)}" y="${bh - 6}" text-anchor="middle">${m === 45 ? 'HT' : m}</text>`).join('');
+      const goals = (tl.goals || []).slice().sort((a, b) => a.min - b.min);
+      // Two goals five minutes apart put their labels on top of each other. Lanes are
+      // assigned greedily by measured width, so a label only moves up when the one
+      // beside it would collide — the common case stays on a single line.
+      const lanes = [];
+      const stems = [], dots = [], labels = [];
+      let gu = 0, go = 0;
+      goals.forEach(g => {
+        if (g.team === 'u') gu++; else go++;
+        const who = String(g.who || '').split(' ').slice(-1)[0];
+        const text = `${g.min}′ ${who}`;
+        const x = bx(g.min), tw = text.length * 5.4;
+        let left = x - tw / 2, right = x + tw / 2, anchor = 'middle';
+        if (right > w - padR) { right = w - padR; left = right - tw; anchor = 'end'; }
+        if (left < padL) { left = padL; right = left + tw; anchor = 'start'; }
+        const tx = anchor === 'end' ? right : (anchor === 'start' ? left : x);
+        let lane = 0;
+        while ((lanes[lane] || []).some(s => left < s[1] + 7 && right > s[0] - 7)) lane++;
+        (lanes[lane] = lanes[lane] || []).push([left, right]);
+        const ly = dotY - 11 - lane * 12;
+        const mine = g.team === 'u';
+        // Emitted in three passes rather than three-per-goal: a stem drawn after a
+        // neighbour's label paints over it, and SVG has no z-index to fix it with.
+        stems.push(`<line class="grid" x1="${x.toFixed(1)}" y1="${(ly + 3).toFixed(1)}" x2="${x.toFixed(1)}" y2="${bh - padB}"/>`);
+        dots.push(`<circle class="goal ${mine ? 'u' : 'o'}" cx="${x.toFixed(1)}" cy="${dotY}" r="5" ` +
+          `stroke="${mine ? 'var(--united)' : 'var(--opponent)'}" ` +
+          `data-tip="${g.min}′ ${esc(g.who || '')} · ${g.sit || ''} · ${gu}–${go}"/>`);
+        labels.push(`<text x="${tx.toFixed(1)}" y="${ly}" text-anchor="${anchor}">${esc(text)}</text>`);
+      });
+      const marks = stems.join('') + dots.join('') + labels.join('');
+      const label = goals.length
+        ? `Goal timeline, United ${gu} Everton ${go}`.replace('Everton', esc(oppName)) + ' — ' +
+          goals.map(g => `${g.min} minutes ${esc(String(g.who || ''))}`).join(', ') +
+          '. Expected goals are not yet available from the supplier, so no xG line is drawn.'
+        : 'Goal timeline — no goals, and expected goals not yet available from the supplier.';
+      return `<svg class="xgline" viewBox="0 0 ${w} ${bh}" role="img" aria-label="${label}">${ticks}` +
+        `<line class="grid" x1="${padL}" y1="${bh - padB}" x2="${w - padR}" y2="${bh - padB}"/>${marks}</svg>`;
     }
     const maxX = 95, maxY = Math.max(tl.united.at(-1)[1], tl.opp.at(-1)[1], 1) * 1.08;
     const sx = m => padL + (m / maxX) * (w - padL - padR);

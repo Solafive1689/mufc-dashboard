@@ -7,7 +7,13 @@
 <meta name="description" content="Manchester United performance dashboard — 2026/27 season, match by match, with 2025/26 as the baseline.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!-- The only render-blocking third party on the page, and nothing sits behind it. A
+     request that HANGS rather than fails holds first paint for as long as it hangs —
+     measured at 12.6 s on a blocked network against 52 ms when it resolves. Loading
+     it as print media and promoting it on load takes it off the critical path;
+     styles.css already declares the fallback (--font: Archivo, system-ui). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>

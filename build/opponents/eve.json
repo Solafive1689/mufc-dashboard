@@ -1,0 +1,178 @@
+{
+ "_source": {
+  "note": "Everything on an opposition scout that is a judgement or a summary figure, authored once per opponent. The event-derived blocks — shots, zones, network, players — still come from the opponent ingest; this file is the half that used to be typed into build_payloads.py and therefore only ever described Everton.",
+  "authored_from": "opponents/everton_2026_27/notes.yaml",
+  "subject": "EVE",
+  "name": "Everton"
+ },
+ "code": "eve",
+ "fixture_id": "PL-03-EVE",
+ "built_from": [
+  {
+   "label": "Everton 2–0 Crystal Palace",
+   "date": "2026-08-22",
+   "ws": "1983549"
+  },
+  {
+   "label": "Bournemouth 1–1 Everton",
+   "date": "2026-08-29",
+   "ws": "1983556"
+  }
+ ],
+ "vendor_report": {
+  "label": "Twelve opposition report",
+  "date": "31 Aug"
+ },
+ "claim": {
+  "headline": [
+   "Everton do not want",
+   "the ball."
+  ],
+  "lead": "Under 42% possession in both league matches, four points from two, and ten big chances conceded to four created. Their goals come from set pieces, their threat from turnovers high up, and their block drops by 11–21 m between the 60th and 75th minute in both games."
+ },
+ "kpis": [
+  {
+   "label": "Possession",
+   "value": "41.5",
+   "unit": "%",
+   "note": "41.9 home, 41.1 away · Twelve, mirror-verified",
+   "src": "twelve"
+  },
+  {
+   "label": "Big chances conceded",
+   "value": "10",
+   "unit": "",
+   "note": "v 4 created · 1 goal conceded · Pickford 8 saves",
+   "src": "whoscored"
+  },
+  {
+   "label": "Shots from set pieces",
+   "value": "31",
+   "unit": "%",
+   "note": "9 of 29 · 2 of their 3 goals",
+   "src": "counted"
+  },
+  {
+   "label": "Block height, 60–75′",
+   "value": "27.8",
+   "unit": "m",
+   "note": "v Palace · 29.6 m v Bournemouth · lowest of both matches",
+   "src": "counted"
+  }
+ ],
+ "block_height": {
+  "blocks": [
+   "0–15",
+   "15–30",
+   "30–45",
+   "45–60",
+   "60–75",
+   "75–90"
+  ],
+  "v_palace": [
+   40.3,
+   42.0,
+   46.1,
+   49.0,
+   27.8,
+   41.1
+  ],
+  "v_bournemouth": [
+   42.3,
+   57.3,
+   35.4,
+   40.6,
+   29.6,
+   40.0
+  ]
+ },
+ "losses": {
+  "total": 205,
+  "zones": [
+   [
+    "Attacking left",
+    38
+   ],
+   [
+    "Defensive centre",
+    28
+   ],
+   [
+    "Attacking right",
+    24
+   ],
+   [
+    "Midfield right",
+    23
+   ],
+   [
+    "Defensive left",
+    23
+   ]
+  ]
+ },
+ "channels": [
+  {
+   "ch": "Left wing",
+   "entries": 23,
+   "shots": 8
+  },
+  {
+   "ch": "Left half-space",
+   "entries": 3,
+   "shots": 4
+  },
+  {
+   "ch": "Centre",
+   "entries": 12,
+   "shots": 11
+  },
+  {
+   "ch": "Right half-space",
+   "entries": 3,
+   "shots": 3
+  },
+  {
+   "ch": "Right wing",
+   "entries": 17,
+   "shots": 3
+  }
+ ],
+ "panels": {
+  "block": {
+   "title": "Where they defend · the block collapses between 60 and 75",
+   "intro": "Mean height of Everton’s defensive actions in metres per fifteen-minute block. Red = v Palace (H), grey = v Bournemouth (A). The drop survives a change of venue, opponent and game state.",
+   "note": "40.8 m over both matches; Twelve prints 41.83",
+   "hot_block": "60–75"
+  },
+  "losses": {
+   "intro": "Unsuccessful passes, dispossessions and errors by zone. The attacking-left cell is the densest on the pitch — 19 in each match — and it is the channel their best link plays in.",
+   "note": "zone = 3 × 3 grid on the common frame"
+  },
+  "channels": {
+   "intro": "Completed final-third entries (red) against the shots that followed (grey). Wide entries, central finishes.",
+   "note": "Twelve prints 24 left-wing entries against 23 here"
+  },
+  "shots": {
+   "intro": "Same shot-map component as the match page. Everton in blue attacking left → right, Bournemouth in grey; circle area = xG proxy; filled = on target, ring = goal.",
+   "note": "xG here is a per-shot proxy: the per-side total is Twelve’s, the split across shots is geometric"
+  },
+  "network": {
+   "intro": "Receivers are inferred from the next team-mate touch; links under 5 passes are not drawn."
+  }
+ },
+ "teaser": [
+  {
+   "value": "41.5%",
+   "label": "possession, both scouted matches"
+  },
+  {
+   "value": "10",
+   "label": "big chances conceded, one goal"
+  },
+  {
+   "value": "31%",
+   "label": "of their shots from set pieces"
+  }
+ ]
+}

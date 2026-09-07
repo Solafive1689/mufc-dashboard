@@ -14,7 +14,12 @@ css=open(os.path.join(ROOT,'styles.css'),encoding='utf-8').read()
 js=open(os.path.join(ROOT,'src','charts.js'),encoding='utf-8').read()+'\n'+open(os.path.join(ROOT,'src','app.js'),encoding='utf-8').read()
 payload=json.dumps(data,ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
 html=f"""<title>MUFC · Performance{' · STAFF' if a.staff else ''}</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<meta charset="utf-8">
+<!-- Without this a phone lays the page out at ~980px and every media query misses.
+     index.html has always carried it; the preview did not, so a preview opened on a
+     phone rendered the desktop layout and any mobile check against it was invalid. -->
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null">
 <style>{css}</style>
 <div id="app"><div class="page" style="grid-template-columns:1fr"><p class="t-cap">Loading the season…</p></div></div>
 <script>window.__DATA__={payload};window.__STAFF__={'true' if a.staff else 'false'};</script>
