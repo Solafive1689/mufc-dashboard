@@ -8,3 +8,14 @@
 
 # macOS
 .DS_Store
+# The staff export. app.js fetches private/<code>-staff.json when __STAFF__ is
+# set. It must never reach the public folder — this makes that enforceable
+# rather than remembered.
+private/
+staff-preview.html
+preview.html
+build/staging/
+
+# Python bytecode, since build/ became importable when names.py landed.
+__pycache__/
+*.pyc
