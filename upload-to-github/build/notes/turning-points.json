@@ -1,0 +1,41 @@
+{
+  "_": "Turning points are editorial: a judgement that a moment mattered. Each one names the round it hangs on and an `assert` block the build checks against the ledger (score, result, goal minute, scorer) — a point whose evidence no longer matches the data fails the build rather than publishing a story the numbers do not support. Streaks and era splits are NOT authored; build/story.py counts them.",
+  "seasons": {
+    "25-26": [
+      {"id": "amorim-out", "round": 20, "kind": "manager", "title": "Amorim dismissed after MW20",
+       "body": "Sacked on 5 January 2026, the day after a 1–1 at Leeds, on 1.55 points per game. Darren Fletcher took MW21 at Burnley; Michael Carrick was appointed on the 13th.",
+       "assert": {"round": 20, "result": "D", "score": "1-1", "opp": "Leeds United"},
+       "source": "Wikipedia, 2025–26 Manchester United F.C. season"},
+      {"id": "carrick-derby", "round": 22, "kind": "result", "title": "Carrick starts with the derby",
+       "body": "First match in charge: City beaten 2–0 at Old Trafford, then Arsenal 3–2 away a week later — six points from the two sides that finished first and second.",
+       "assert": {"round": 22, "result": "W", "score": "2-0", "opp": "Manchester City"},
+       "source": "ledger"},
+      {"id": "arsenal-away", "round": 23, "kind": "result", "title": "3–2 at the Emirates",
+       "body": "Behind after 28 minutes, level by 36, ahead by 52, pegged back at 86 and won it at 89. The game-state walk for this match is on the 25/26 season page.",
+       "assert": {"round": 23, "result": "W", "score": "3-2", "opp": "Arsenal"},
+       "source": "ledger · gamestate.gw23"},
+      {"id": "dominance-trap", "round": null, "kind": "pattern", "title": "The dominance trap",
+       "body": "Ten matches under 45% possession: ten wins, 3.00 points per game on an xG difference of +0.10. Fifteen matches over 55%: 1.40 per game on +1.07. The season's best chances came in its worst results.",
+       "assert": null,
+       "source": "25/26 season payload, buckets split on ws_possession_pct"}
+    ],
+    "26-27": [
+      {"id": "hull-opener", "round": 1, "kind": "result", "title": "Opening day at a promoted side, lost 0–2",
+       "body": "71.7% of the ball, 21 shots, 1.81 xG to 1.59 — and nothing scored. The first match of the season set the dominance-trap pattern up again.",
+       "assert": {"round": 1, "result": "L", "score": "0-2", "opp": "Hull City"},
+       "source": "ledger"},
+      {"id": "ipswich-five", "round": 2, "kind": "result", "title": "Five at home, a Fernandes hat-trick",
+       "body": "Level at half time; four goals in twenty-six minutes after it. Bruno's three are three of the six attributed United goals so far.",
+       "assert": {"round": 2, "result": "W", "score": "5-2", "opp": "Ipswich Town", "player_goals": {"mufc_fernandes_bruno": 3}},
+       "source": "ledger · squad season_to_date"},
+      {"id": "everton-96", "round": 3, "kind": "result", "title": "Two points lost in the 96th minute",
+       "body": "Šeško put United 2–1 up on 88; Maitland-Niles equalised on 96. United's xG was 0.86 to Everton's 1.42 — a draw the chances did not argue with.",
+       "assert": {"round": 3, "result": "D", "score": "2-2", "opp": "Everton", "goal": {"min": 96, "team": "o"}},
+       "source": "ledger · mw03-eve timeline"},
+      {"id": "ugarte-acl", "round": null, "kind": "injury", "title": "Ugarte out until April",
+       "body": "A cruciate ligament injury rules Manuel Ugarte out until early April 2027 — the season's one long-term absence so far.",
+       "assert": {"availability": "mufc_ugarte_manuel"},
+       "source": "build/notes/availability-26-27.json"}
+    ]
+  }
+}
