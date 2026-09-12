@@ -53,19 +53,38 @@ INGEST_DIR = os.path.join(HERE, 'matches')
 
 
 def load_ingested():
-    """Gameweeks produced by ingest_whoscored.py, keyed by round.
+    """Fixtures produced by ingest_whoscored.py, keyed by (competition, round).
 
     These arrive already in the output payload shape, so they are written through
     rather than passed to build_match. Anything the v2 source does not know about
-    (a gameweek captured after the v2 export) comes in this way."""
+    (a fixture captured after the v2 export) comes in this way.
+
+    Keyed on the competition as well as the round because round numbers repeat
+    across competitions: UCL matchday 1 and Premier League GW1 are both round 1.
+    ingest_whoscored.py names the league's files gw<N>.json and every other
+    competition <comp><NN>.json, so the filename already carries the distinction."""
     out = {}
     if not os.path.isdir(INGEST_DIR):
         return out
     for fn in sorted(os.listdir(INGEST_DIR)):
         m = re.fullmatch(r'gw(\d+)\.json', fn)
         if m:
-            out[int(m.group(1))] = json.load(open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
+            out[('PL', int(m.group(1)))] = json.load(open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
+            continue
+        m = re.fullmatch(r'([a-z]{2,4})(\d+)\.json', fn)
+        if m:
+            out[(m.group(1).upper(), int(m.group(2)))] = json.load(
+                open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
     return out
+
+
+def source_key(comp, rnd):
+    """The D key an ingested fixture is adapted into for build_players.
+
+    The league keeps gw<N>, matching the v2 source's own keys. Another competition
+    must not reuse it: UCL round 1 written as 'gw1' silently overwrites the league
+    opener, and every player's GW1 row becomes the UCL one."""
+    return f'gw{rnd}' if comp == 'PL' else f'{comp.lower()}{rnd}'
 
 
 def as_source_gw(payload):
@@ -159,8 +178,8 @@ def build_index(src, ingested=None):
             gf, ga = [int(x) for x in g['score'].split('-')]
             fx['result'] = 'W' if gf > ga else ('D' if gf == ga else 'L')
             fx['match'] = match_slug(gw, f['code'])
-        if f['comp'] == 'PL' and gw in ingested:
-            im = ingested[gw]['meta']
+        if (f['comp'], f['rd']) in ingested:
+            im = ingested[(f['comp'], f['rd'])]['meta']
             fx['status'] = 'played'; fx['score'] = im['score']; fx['xg'] = im['xg']; fx['oxg'] = im['oxg']
             fx['result'] = im['result']; fx['match'] = im['match_id']
         if f['comp'] == 'PL' and gw == 3:
@@ -342,14 +361,16 @@ def build_players(src, matches):
     D = src['D']
     out = {}
     s25 = {p['id']: p for p in D['squad']['s25']}; s26 = {p['id']: p for p in D['squad']['s26']}
-    for key, gw, m in matches:
+    for key, comp, gw, m in matches:
         g = D[key]
         for r in g['roster']:
             pid = player_id(r['nm'])
             entry = out.setdefault(pid, {'meta': {'player_id': pid, 'name': r['nm'], 'shirt': r['sh'], 'pos': r['pos'], 'group': r['grp']},
                                          'seasons': {}, 'match_log': [], 'plots': {}})
             v = r['v']
-            entry['match_log'].append({'match': m['meta']['match_id'], 'round': gw, 'opp': g['opp'], 'venue': g['ven'], 'score': g['score'],
+            # comp is on every row because round numbers repeat across competitions:
+            # without it a player's log shows two round 1s with nothing to tell them apart.
+            entry['match_log'].append({'match': m['meta']['match_id'], 'comp': comp, 'round': gw, 'opp': g['opp'], 'venue': g['ven'], 'score': g['score'],
                                        'result': m['meta']['result'], 'started': bool(r['st']), **{k: v.get(k) for k in v}})
             if r['nm'] in g['plots']:
                 entry['plots'][m['meta']['match_id']] = g['plots'][r['nm']]
@@ -396,16 +417,20 @@ def main():
     # A gameweek the v2 source already carries is built from it; anything else comes
     # from build/matches/gw<N>.json. gw2 exists in both — the v2 source wins, so a
     # re-ingest of an already-shipped week cannot quietly change what is published.
-    ingested = {gw: p for gw, p in ingested.items() if gw not in (1, 2)}
+    # A fixture the v2 source already carries is built from it; anything else comes
+    # from build/matches/. PL GW1-2 exist in both — the v2 source wins, so a
+    # re-ingest of an already-shipped week cannot quietly change what is published.
+    # Scoped to the league: a UCL round 1 or 2 is NOT in the v2 source and must pass.
+    ingested = {k: p for k, p in ingested.items() if k not in (('PL', 1), ('PL', 2))}
     if ingested:
-        print(f"ingested gameweeks: {sorted(ingested)}")
+        print(f"ingested fixtures: {', '.join(f'{c} r{r}' for c, r in sorted(ingested))}")
     files = OrderedDict()
     files['index.json'] = build_index(src, ingested)
     files['crests.json'] = src['D']['crest']
     m1 = build_match(src, 'gw1', 1); m2 = build_match(src, 'gw2', 2)
     files[f"26-27/matches/{m1['meta']['match_id']}.json"] = m1
     files[f"26-27/matches/{m2['meta']['match_id']}.json"] = m2
-    for gw, p in sorted(ingested.items()):
+    for (comp, rnd), p in sorted(ingested.items()):
         # The 25/26 baseline is season-level and identical on every match payload;
         # the ingest cannot know it, so it is carried across here.
         if not p.get('baseline'):
@@ -415,9 +440,10 @@ def main():
     files['26-27/season.json'] = build_season_running(src)
     files['25-26/season.json'] = build_season_complete(src)
     files['26-27/squad.json'] = build_squad(src)
-    for gw, p in sorted(ingested.items()):
-        src['D'][f'gw{gw}'] = as_source_gw(p)
-    mlist = [('gw1', 1, m1), ('gw2', 2, m2)] + [(f'gw{gw}', gw, p) for gw, p in sorted(ingested.items())]
+    for (comp, rnd), p in sorted(ingested.items()):
+        src['D'][source_key(comp, rnd)] = as_source_gw(p)
+    mlist = ([('gw1', 'PL', 1, m1), ('gw2', 'PL', 2, m2)]
+             + [(source_key(c, r), c, r, p) for (c, r), p in sorted(ingested.items())])
     for pid, p in build_players(src, mlist).items():
         files[f"26-27/players/{pid}.json"] = p
     files['league/25-26.json'] = build_league(src)

@@ -300,6 +300,13 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="WhoScored match centre → dashboard gameweek")
     ap.add_argument("--mcd", required=True)
     ap.add_argument("--gw", type=int, required=True)
+    ap.add_argument("--comp", default="PL",
+                    help="competition for this fixture (PL, UCL, ...). PL keeps the "
+                         "gw<N>.json staging name build_payloads already reads; any "
+                         "other competition is staged as <comp><NN>.json so a UCL "
+                         "matchday cannot overwrite the league gameweek of the same "
+                         "number. The published slug is unaffected — mw<NN>-<code> is "
+                         "already unique because the opponent code differs.")
     ap.add_argument("--index", default=os.path.join(REPO, "data", "index.json"))
     ap.add_argument("--roster", default=None, help="MUFC_<season>_ROSTER.csv for player_id and shirt")
     ap.add_argument("--master", default=None, help="pipeline master; reads tw_ columns for this date")
@@ -544,7 +551,9 @@ def main(argv=None):
         return 0
 
     os.makedirs(args.out, exist_ok=True)
-    dst = os.path.join(args.out, f"gw{args.gw}.json")
+    comp = args.comp.upper()
+    dst = os.path.join(args.out, f"gw{args.gw}.json" if comp == "PL"
+                       else f"{comp.lower()}{args.gw:02d}.json")
     txt = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     prev = open(dst, encoding="utf-8").read() if os.path.exists(dst) else None
     open(dst, "w", encoding="utf-8").write(txt)
