@@ -1,0 +1,25 @@
+{
+  "_": "Who was picking the team. Authored, dated and sourced; the build splits the ledger on these rounds and refuses if an era's rounds do not tile the season. A change of head coach is the one turning point no metric can detect on its own, so it lives here rather than being inferred from a run of results.",
+  "seasons": {
+    "25-26": [
+      {"id": "amorim", "name": "Rúben Amorim", "role": "head coach", "from_round": 1, "to_round": 20,
+       "from": "2025-08-17", "to": "2026-01-05",
+       "note": "Dismissed on 5 January 2026, the day after MW20 at Leeds.",
+       "source": "Wikipedia, 2025–26 Manchester United F.C. season (retrieved 2026-09-08)"},
+      {"id": "fletcher", "name": "Darren Fletcher", "role": "interim", "from_round": 21, "to_round": 21,
+       "from": "2026-01-05", "to": "2026-01-13",
+       "note": "One league match, MW21 at Burnley, 2–2.",
+       "source": "Wikipedia, 2025–26 Manchester United F.C. season (retrieved 2026-09-08)"},
+      {"id": "carrick", "name": "Michael Carrick", "role": "head coach", "from_round": 22, "to_round": 38,
+       "from": "2026-01-13", "to": null,
+       "note": "Appointed 13 January 2026 to the end of the season; permanent two-year contract for 26/27.",
+       "source": "Wikipedia, 2025–26 and 2026–27 Manchester United F.C. season (retrieved 2026-09-08)"}
+    ],
+    "26-27": [
+      {"id": "carrick", "name": "Michael Carrick", "role": "head coach", "from_round": 1, "to_round": 38,
+       "from": "2026-08-22", "to": null,
+       "note": "Permanent head coach on a two-year contract.",
+       "source": "manutd.com match report, Everton 2–2 United, 6 Sep 2026; Wikipedia 2026–27 season"}
+    ]
+  }
+}

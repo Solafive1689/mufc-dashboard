@@ -1,0 +1,19 @@
+{
+  "_": "Who is unavailable and why, as reported, with the date it was checked and where. Nothing in the pipeline holds this — WhoScored's match centre lists who played, not who could not. Update it on the Friday before each match; entries with a `returned` date drop out of the current list but stay here so a 'record without X' can be counted later. player_id values match the roster files (MUFC_2025_26_ROSTER.csv / MUFC_2026_27_ROSTER.csv); since 2026-09-08 names.player_id() mints particle surnames the same way (de Ligt → mufc_deligt_matthijs), so the two agree.",
+  "checked": "2026-09-08",
+  "source": "FotMob match page, Manchester United v Manchester City, 13 Sep 2026 (injury list)",
+  "players": [
+    {"player_id": "mufc_ugarte_manuel", "name": "Manuel Ugarte", "status": "out", "reason": "cruciate ligament injury",
+     "since": "2026-08", "expected_return": "2027-04", "returned": null, "long_term": true},
+    {"player_id": "mufc_deligt_matthijs", "name": "Matthijs de Ligt", "status": "out", "reason": "back injury",
+     "since": "2026-08", "expected_return": "2026-09-30", "returned": null, "long_term": false},
+    {"player_id": "mufc_heaton_tom", "name": "Tom Heaton", "status": "out", "reason": "abdominal injury",
+     "since": "2026-08", "expected_return": "2026-09-30", "returned": null, "long_term": false},
+    {"player_id": "mufc_baleba_carlos", "name": "Carlos Baleba", "status": "doubt", "reason": "ankle injury",
+     "since": "2026-09", "expected_return": null, "returned": null, "long_term": false},
+    {"player_id": "mufc_rashford_marcus", "name": "Marcus Rashford", "status": "doubt", "reason": "knock",
+     "since": "2026-09-06", "expected_return": null, "returned": null, "long_term": false},
+    {"player_id": "mufc_diallo_amad", "name": "Amad Diallo", "status": "doubt", "reason": "knock",
+     "since": "2026-09", "expected_return": null, "returned": null, "long_term": false}
+  ]
+}

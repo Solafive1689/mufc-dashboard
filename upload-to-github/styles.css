@@ -92,7 +92,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .rail a.on{color:var(--ink);border-left-color:var(--united)}
 .rail a.locked{color:var(--muted);opacity:.7}
 .rail a.locked::after{content:" · locked";font-weight:400}
-.content{display:grid;gap:32px;min-width:0}
+.content{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;min-width:0}
 .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
 .row--3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .row--wide{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
@@ -215,9 +215,9 @@ tr.future td{color:var(--muted)}
 .fx.opp .fx__rule{background:var(--opponent)}
 .fx__crest{width:40px;height:40px;border-radius:50%;background:var(--grid);flex:none;object-fit:contain}
 .fx__text{flex:1;min-width:0}
-.fx__eye{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fx__eye{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
 .fx__title{font-size:18px;font-weight:700;line-height:1.3;margin:2px 0}
-.fx__det{font-size:12px;color:var(--ink-2)}
+.fx__det{font-size:12px;color:var(--ink-2);overflow-wrap:anywhere}
 .fx__status{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:2px;background:var(--tint);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap}
 .fx__status.scout{background:var(--opponent-tint);color:var(--opponent);font-weight:600}
 .fx__status.played{font-family:var(--font);font-size:22px;font-weight:800;text-transform:none;letter-spacing:0}
@@ -313,6 +313,104 @@ tr.future td{color:var(--muted)}
    outstanding: a lighter note, and grid lines that have to carry the chart on
    their own now that there is no series drawn over them. */
 .xgline .grid{stroke:var(--line)}
+/* ---------- story charts (season scale) */
+.story{width:100%}
+.story text{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+.story .grid{stroke:var(--line-2)}
+.story .grid.zero{stroke:var(--line)}
+.story .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.story .ln.u{stroke:var(--united)}
+.story .ln.o{stroke:var(--opponent)}
+.story .ln.base{stroke:var(--baseline)}
+.story .ln.dash{stroke-dasharray:5 4}
+.story .pt{stroke:var(--paper);stroke-width:2}
+.story .pt.u{fill:var(--united)}.story .pt.o{fill:var(--opponent)}.story .pt.base{fill:var(--baseline)}
+.story .pt.W{fill:var(--verified)}.story .pt.D{fill:var(--baseline)}.story .pt.L{fill:var(--united)}
+.story .hit{fill:transparent}
+.story .end{font-weight:600;fill:var(--ink)}
+.story .end.base{fill:var(--muted)}
+.story .band{fill:var(--code-bg);opacity:.45;stroke:none}
+.story .band.b2{opacity:.9}
+.story .band__lab{font-size:9px;letter-spacing:.06em;text-transform:uppercase;fill:var(--ink-2);font-weight:600}
+.story .stem{stroke:var(--line);stroke-dasharray:2 3}
+.story .mark{fill:var(--paper);stroke:var(--united);stroke-width:2}
+.story .mark.manager{stroke:var(--ink)}
+.story .mark__lab{fill:var(--ink);font-weight:600}
+.story .guide{stroke:var(--line);stroke-width:1}
+.story .guide__lab{fill:var(--muted)}
+.story .fit{stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:6 4}
+.story .pt__lab{fill:var(--ink);font-size:9px}
+.story .axis__lab{fill:var(--muted);font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+.story .xbar.u{fill:var(--united)}.story .xbar.o{fill:var(--opponent)}
+.story .res.W{fill:var(--verified)}.story .res.D{fill:var(--baseline)}.story .res.L{fill:var(--united)}
+.story [tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.strip{width:100%;max-width:360px}
+.strip .range{stroke:var(--line);stroke-width:2}
+.strip .iqr{fill:var(--code-bg)}
+.strip .med{stroke:var(--ink-2);stroke-width:2}
+.strip .pt.u{fill:var(--united);stroke:var(--paper);stroke-width:2}
+.strip .dot__lab{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+.dists{display:grid;gap:6px}
+.dist{display:grid;grid-template-columns:minmax(110px,150px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:13px}
+.dist:last-child{border-bottom:0}
+.dist .t-cap{display:block}
+.rail-ev{width:100%}
+.rail{width:100%}
+.rail text{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+.rail .grid{stroke:var(--line-2)}.rail .grid.zero{stroke:var(--line)}
+.rail .side{fill:var(--muted);font-weight:600}
+.rail .ev.u.goal circle{fill:var(--united);stroke:var(--paper);stroke-width:2}
+.rail .ev.o.goal circle{fill:var(--opponent);stroke:var(--paper);stroke-width:2}
+.rail .ev.sub path{fill:var(--baseline)}
+.rail .ev.card rect{fill:#E0B04A}.rail .ev.card.red rect{fill:var(--united)}
+.rail .ev.card rect.hit,.rail .ev.card.red rect.hit,.rail .ev rect.hit{fill:transparent}
+.rail .ev__lab{fill:var(--ink);font-weight:600}
+.rail .ev:focus-visible{outline:2px solid var(--ink)}
+.lineup{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.lineup__side{margin:0;display:grid;gap:6px}
+.lineup__side figcaption{color:var(--muted)}
+.pitch--lineup .slot circle{stroke:var(--paper);stroke-width:2}
+.pitch--lineup .slot.u circle{fill:var(--united)}.pitch--lineup .slot.o circle{fill:var(--opponent)}
+.pitch--lineup .slot .shirt{fill:#fff;font-weight:700;font-size:10px}
+.pitch--lineup .slot .nm{fill:var(--ink);font-size:8px;font-weight:600}
+.pitch--lineup .slot .rt{fill:var(--ink-2);font-size:8px;font-weight:600}
+.pitch--lineup .slot:focus-visible{outline:2px solid var(--ink)}
+
+/* ---------- filter bar, eras, turning points, availability */
+.fbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-panel);padding:10px 16px;font-size:13px}
+.fbar .t-label{color:var(--muted);margin-right:4px}
+.fbar select{font:inherit;font-size:13px;height:32px;padding:0 8px;border:1px solid var(--line);border-radius:var(--radius-chip);background:var(--paper);color:var(--ink)}
+.fbar .fbar__on{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--caveat);display:flex;gap:8px;align-items:center}
+.fbar .fbar__on button{color:var(--united);font-weight:600;min-height:24px;padding:4px 6px}
+.eras{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0}
+.era{display:grid;gap:4px;padding:12px 16px;border-left:3px solid var(--line)}
+.era.on{border-left-color:var(--united)}
+.era__nm{font-size:15px;font-weight:700}
+.era__rec{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.era b.big{font-size:26px;font-weight:800;line-height:1.1}
+.era b.big small{font-size:12px;font-weight:400;color:var(--muted);margin-left:4px}
+.tps{display:grid;gap:0}
+.tp{display:grid;grid-template-columns:64px 1fr;gap:16px;padding:12px 0;border-top:1px solid var(--line-2)}
+.tp:first-child{border-top:0;padding-top:0}
+.tp__rd{font-family:var(--mono);font-size:11px;color:var(--muted);padding-top:3px}
+.tp__rd b{display:block;font-size:16px;color:var(--ink);font-family:var(--font);font-weight:800}
+.tp__t{font-size:15px;font-weight:700;margin:0 0 2px}
+.tp__b{font-size:13px;color:var(--ink-2);margin:0 0 6px;max-width:70ch}
+.tp__ev{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.tp__ev a{color:var(--united);font-weight:600;text-decoration:none}
+.tp .pill.manager{background:var(--ink);color:var(--on-ink)}
+.tp .pill.injury{background:var(--caveat-tint);color:var(--caveat)}
+.tp .pill.pattern{background:var(--opponent-tint);color:var(--opponent)}
+.streaks{display:flex;gap:24px;flex-wrap:wrap}
+.avl{display:grid;gap:0}
+.avl__row{display:grid;grid-template-columns:minmax(120px,170px) 70px minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:13px}
+.avl__row:last-child{border-bottom:0}
+.avl__row .pill.out{background:var(--united-tint);color:var(--united)}
+.avl__row .pill.doubt{background:var(--caveat-tint);color:var(--caveat)}
+.avl__row .rec{font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap}
+.twv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.twv .tile b{font-size:22px}
+@media (max-width:900px){.avl__row{grid-template-columns:1fr auto;grid-template-areas:"nm st" "why why" "rec rec"}.avl__row>:nth-child(1){grid-area:nm}.avl__row>:nth-child(2){grid-area:st}.avl__row>:nth-child(3){grid-area:why}.avl__row>:nth-child(4){grid-area:rec}.tp{grid-template-columns:48px 1fr;gap:10px}}
 .avail{display:grid;gap:4px}
 .avail__row{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:8px;font-size:13px}
 .avail__cells{display:grid;grid-template-columns:repeat(38,1fr);gap:3px}
@@ -322,18 +420,18 @@ tr.future td{color:var(--muted)}
 /* ---------- responsive */
 @media (max-width:1280px){.page{padding:32px 40px 64px;gap:32px}}
 @media (max-width:1194px){
-  .page{grid-template-columns:1fr;gap:24px;padding:24px 40px 64px}
+  .page{grid-template-columns:minmax(0,1fr);gap:24px;padding:24px 40px 64px}
   .rail{position:static;border:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
   .rail a{border:1px solid var(--line);border-left:1px solid var(--line);border-radius:2px;padding:9px 12px;margin:0;background:var(--paper)}
   .rail a.on{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
-  .row--wide{grid-template-columns:1fr}
-  .kpis{grid-template-columns:repeat(3,1fr)}
+  .row--wide{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
   .ctx__find{display:none}
 }
 @media (max-width:900px){
   .page{padding:24px 24px 64px}
-  .row,.row--3,.story{grid-template-columns:1fr}
-  .kpis{grid-template-columns:repeat(2,1fr)}
+  .row,.row--3,.story{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .nav__lineage{display:none}
   /* The unselected chips used to be display:none here, which removed the season,
      competition and baseline switches entirely below 900px — the finished 25/26
@@ -360,8 +458,8 @@ tr.future td{color:var(--muted)}
 }
 @media (max-width:560px){
   .page{padding:16px 16px 48px}
-  .kpis{grid-template-columns:1fr 1fr}
-  .kpi{min-height:0}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi{min-height:0;min-width:0}
   .t-claim{font-size:28px}
   td.ph-hide,th.ph-hide{display:none}
   .ctx__in{padding:8px 12px}

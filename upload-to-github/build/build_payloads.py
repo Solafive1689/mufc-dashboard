@@ -25,12 +25,15 @@ from collections import OrderedDict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from names import player_id  # noqa: E402  the one definition, shared with the ingest
 import shot_proxy  # noqa: E402  the geometric per-shot split, shared with the scout
+import story  # noqa: E402  eras, streaks, pace, turning points — counted, then checked
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, 'data')
 FLOOR = 450            # minutes before a per-90 is shown
 LOCKS = {'dominance': 10, 'gamestate': 10, 'adjusted': 15, 'league': 10}
+COMP_NAMES = {'PL': 'Premier League', 'UCL': 'Champions League', 'EFL': 'Carabao Cup', 'FAC': 'FA Cup'}
+ROUND_PREFIX = {'PL': 'MW', 'UCL': 'MD', 'EFL': 'R', 'FAC': 'R'}
 
 # ----------------------------------------------------------------------------- helpers
 def slug(s):
@@ -45,25 +48,30 @@ def match_slug(gw, code):
     return f"mw{gw:02d}-{code.lower()}"
 
 
-def built_matches(files, comp='PL'):
-    """Every played 26/27 match payload written so far this run, in round order,
-    for ONE competition — the league by default.
+def ordinal(n):
+    n = int(n)
+    if 10 <= n % 100 <= 20:
+        return f"{n}th"
+    return f"{n}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th') }"
+
+
+def built_matches(files):
+    """Every played 26/27 match payload written so far this run, in round order.
 
     The season and squad projections read from here rather than from a list of
     gameweek names, so a matchweek that reaches data/26-27/matches/ reaches the
     season page in the same run. Nothing downstream needs to know whether the
-    payload came from the v2 source or from ingest_whoscored.py.
-
-    Scoped to a competition because the season page is a league table in
-    miniature and its 25/26 baselines are league figures: the gate holds its
-    ledger to the index's played PL fixtures, and squad minutes to that same
-    count. A UCL payload in data/26-27/matches/ (mw01-sab) must not leak into
-    either — one competition per projection, never a combined one. Player
-    pages are the exception and take every competition, tagged by comp."""
+    payload came from the v2 source or from ingest_whoscored.py."""
     return sorted((p for name, p in files.items()
                    if name.startswith('26-27/matches/') and name.endswith('.json')
-                   and p['meta'].get('comp', 'PL') == comp),
+                   and p['meta'].get('comp', 'PL') == 'PL'),   # the season ledger is the league
                   key=lambda p: p['meta']['round'])
+
+
+def built_cup_matches(files):
+    return sorted((p for name, p in files.items()
+                   if name.startswith('26-27/matches/') and p['meta'].get('comp', 'PL') != 'PL'),
+                  key=lambda p: p['meta']['date'])
 
 
 def tape_value(payload, key, side='united'):
@@ -100,7 +108,12 @@ def ledger_row(m):
             'shots': tape_value(m, 'shots'), 'pass_accuracy': tape_value(m, 'pass_accuracy'),
             'clearances': tape_value(m, 'clearances'),
             'story_headline': (m.get('story') or {}).get('headline'),
-            'match': meta['match_id']}
+            'match': meta['match_id'],
+            # who was on the pitch, so the season page can be filtered "with X" /
+            # "without X" without loading every match payload
+            'xi': [p['player_id'] for p in m.get('players', []) if p.get('started')],
+            'used': [p['player_id'] for p in m.get('players', []) if p.get('mins')],
+            'formation': meta.get('formation'), 'opp_formation': meta.get('opp_formation')}
 
 
 def avg(rows, key, d=2):
@@ -123,38 +136,33 @@ INGEST_DIR = os.path.join(HERE, 'matches')
 
 
 def load_ingested():
-    """Fixtures produced by ingest_whoscored.py, keyed by (competition, round).
+    """Gameweeks produced by ingest_whoscored.py, keyed by round.
 
     These arrive already in the output payload shape, so they are written through
     rather than passed to build_match. Anything the v2 source does not know about
-    (a fixture captured after the v2 export) comes in this way.
-
-    Keyed on the competition as well as the round because round numbers repeat
-    across competitions: UCL matchday 1 and Premier League GW1 are both round 1.
-    ingest_whoscored.py names the league's files gw<N>.json and every other
-    competition <comp><NN>.json, so the filename already carries the distinction."""
+    (a gameweek captured after the v2 export) comes in this way."""
     out = {}
     if not os.path.isdir(INGEST_DIR):
         return out
     for fn in sorted(os.listdir(INGEST_DIR)):
         m = re.fullmatch(r'gw(\d+)\.json', fn)
         if m:
-            out[('PL', int(m.group(1)))] = json.load(open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
-            continue
-        m = re.fullmatch(r'([a-z]{2,4})(\d+)\.json', fn)
-        if m:
-            out[(m.group(1).upper(), int(m.group(2)))] = json.load(
-                open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
+            out[int(m.group(1))] = json.load(open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
     return out
 
 
-def source_key(comp, rnd):
-    """The D key an ingested fixture is adapted into for build_players.
-
-    The league keeps gw<N>, matching the v2 source's own keys. Another competition
-    must not reuse it: UCL round 1 written as 'gw1' silently overwrites the league
-    opener, and every player's GW1 row becomes the UCL one."""
-    return f'gw{rnd}' if comp == 'PL' else f'{comp.lower()}{rnd}'
+def load_ingested_cups():
+    """Champions League matchdays and cup rounds, keyed by fixture_id (UCL-01-SAB).
+    They get a match payload and a player-log row; the league ledger stays league."""
+    out = {}
+    if not os.path.isdir(INGEST_DIR):
+        return out
+    for fn in sorted(os.listdir(INGEST_DIR)):
+        m = re.fullmatch(r'(ucl|efl|fac)(\d+)\.json', fn)
+        if m:
+            p = json.load(open(os.path.join(INGEST_DIR, fn), encoding='utf-8'))
+            out[f"{m.group(1).upper()}-{int(m.group(2)):02d}-{p['meta']['code']}"] = p
+    return out
 
 
 def as_source_gw(payload):
@@ -165,19 +173,30 @@ def as_source_gw(payload):
     for pl in payload['players']:
         att, cmp_ = pl['passes_att'], pl['passes_cmp']
         da, dc = (pl['dribbles'].split('/') + ['0', '0'])[:2]
+        # The ingest publishes def_actions as one number; the per-event codes in the
+        # player's defensive plot (t i c b ch r a, with outcome) let the log carry
+        # the same tackles / interceptions / clearances columns the v2 weeks have.
+        d = (payload.get('plots', {}).get(pl['player_id']) or {}).get('d') or []
+        cnt = lambda code, ok=None: sum(1 for x in d if x[2] == code and (ok is None or bool(x[3]) == ok))
+        v = {'minutes': pl['mins'], 'goals': pl['goals'], 'assists': pl['assists'],
+             'shots': pl['shots'], 'shots_on_target': pl['sot'],
+             'key_passes': pl['key_passes'], 'passes_attempted': att,
+             'passes_completed': cmp_, 'pass_accuracy_pct': pl['pass_acc'],
+             'final_third_passes': pl['final_third_passes'],
+             'passes_into_box': pl['passes_into_box'], 'touches': pl['touches'],
+             'box_touches': pl['box_touches'], 'def_actions': pl['def_actions'],
+             'recoveries': pl['recoveries'], 'dispossessed': pl['dispossessed'],
+             'aerials_won': pl['aerials_won'], 'aerials_lost': pl['aerials_lost'],
+             'dribbles_completed': int(dc) if str(dc).isdigit() else 0,
+             'dribbles_attempted': int(da) if str(da).isdigit() else 0,
+             'tackles': cnt('t'), 'tackles_won': cnt('t', True), 'interceptions': cnt('i'),
+             'clearances': cnt('c'), 'blocks': cnt('b')}
+        # published-by-WhoScored fields the extended ingest emits; absent on older captures
+        for k in ('rating', 'motm', 'yellow', 'red', 'on', 'off', 'captain'):
+            if pl.get(k) is not None:
+                v[k] = pl[k]
         roster.append({'nm': pl['name'], 'sh': pl['shirt'], 'pos': pl['pos'], 'grp': pl['group'],
-                       'st': int(pl['started']), 'mins': pl['mins'], 'role': pl['pos'],
-                       'v': {'minutes': pl['mins'], 'goals': pl['goals'], 'assists': pl['assists'],
-                             'shots': pl['shots'], 'shots_on_target': pl['sot'],
-                             'key_passes': pl['key_passes'], 'passes_attempted': att,
-                             'passes_completed': cmp_, 'pass_accuracy_pct': pl['pass_acc'],
-                             'final_third_passes': pl['final_third_passes'],
-                             'passes_into_box': pl['passes_into_box'], 'touches': pl['touches'],
-                             'box_touches': pl['box_touches'], 'def_actions': pl['def_actions'],
-                             'recoveries': pl['recoveries'], 'dispossessed': pl['dispossessed'],
-                             'aerials_won': pl['aerials_won'], 'aerials_lost': pl['aerials_lost'],
-                             'dribbles_completed': int(dc) if str(dc).isdigit() else 0,
-                             'dribbles_attempted': int(da) if str(da).isdigit() else 0}})
+                       'st': int(pl['started']), 'mins': pl['mins'], 'role': pl['pos'], 'v': v})
     plots = {pl['name']: payload['plots'].get(pl['player_id'], {}) for pl in payload['players']}
     return {'opp': meta['opp'], 'ven': meta['venue'], 'score': meta['score'],
             'roster': roster, 'plots': plots}
@@ -232,11 +251,12 @@ def registry(src):
     return out
 
 # ----------------------------------------------------------------------------- index
-def build_index(src, ingested=None):
+def build_index(src, ingested=None, cups_played=None):
     D = src['D']
     fixtures = []
     played = {1: 'gw1', 2: 'gw2'}
     ingested = ingested or {}
+    cups_played = cups_played or {}
     for f in D['fix']:
         gw = f['rd'] if f['comp'] == 'PL' else None
         fx = {'fixture_id': f"{f['comp']}-{f['rd']:02d}-{f['code']}", 'comp': f['comp'], 'round': f['rd'], 'date': f['date'],
@@ -248,8 +268,8 @@ def build_index(src, ingested=None):
             gf, ga = [int(x) for x in g['score'].split('-')]
             fx['result'] = 'W' if gf > ga else ('D' if gf == ga else 'L')
             fx['match'] = match_slug(gw, f['code'])
-        if (f['comp'], f['rd']) in ingested:
-            im = ingested[(f['comp'], f['rd'])]['meta']
+        if f['comp'] == 'PL' and gw in ingested:
+            im = ingested[gw]['meta']
             fx['status'] = 'played'; fx['score'] = im['score']; fx['xg'] = im['xg']; fx['oxg'] = im['oxg']
             fx['result'] = im['result']; fx['match'] = im['match_id']
         # A scout attaches itself to whatever fixture its authored file names, so
@@ -258,19 +278,66 @@ def build_index(src, ingested=None):
         if sc:
             fx['scout'] = sc['code']   # stays reachable after the fixture is played
         fixtures.append(fx)
+    # Domestic cups. The v2 fixture layer was 38 + 8 and the calendar said so in
+    # its footer; the Carabao Cup tie drawn on 26 August had nowhere to go. They
+    # are authored in build/fixtures/cups.json and merged here in date order, so
+    # the calendar, the rest-days column and the competition filter all see them.
+    for c in load_cups():
+        fixtures.append({'fixture_id': f"{c['comp']}-{c['round']:02d}-{c['code']}", 'comp': c['comp'], 'round': c['round'],
+                         'round_label': c.get('round_label'), 'date': c['date'], 'ko': c['ko'], 'opp': c['opp'],
+                         'short': c['short'], 'code': c['code'], 'venue': c['venue'], 'tv': c.get('tv'),
+                         'rest_days': None, 'congested': False, 'status': 'scheduled', 'match': None, 'scout': None,
+                         'source': c.get('source')})
+    for fx in fixtures:
+        cp = cups_played.get(fx['fixture_id'])
+        if cp:
+            im = cp['meta']
+            fx['status'] = 'played'; fx['score'] = im['score']; fx['xg'] = im.get('xg'); fx['oxg'] = im.get('oxg')
+            fx['result'] = im['result']; fx['match'] = im['match_id']
+    fixtures.sort(key=lambda f: (f['date'], f['ko'] or ''))
+    # rest days are recomputed over the merged list — a cup tie three days before
+    # a league match is exactly the congestion the column exists to show
+    prev = None
+    from datetime import date as _date
+    for f in fixtures:
+        d = _date.fromisoformat(f['date'])
+        f['rest_days'] = (d - prev).days if prev else None
+        f['congested'] = bool(f['rest_days'] is not None and f['rest_days'] <= 3)
+        prev = d
     teams = {}
     for r in D['lg']['table']:
         teams[r['team']] = {'name': r['team'], 'tier_25_26': r['tier'], 'pos_25_26': r['pos']}
+    counts = OrderedDict()
+    for f in fixtures:
+        counts[f['comp']] = counts.get(f['comp'], 0) + 1
     return {
         'seasons': [{'id': '26-27', 'label': '2026/27', 'status': 'running', 'baseline': '25-26'},
                     {'id': '25-26', 'label': '2025/26', 'status': 'complete', 'baseline': None}],
         'fixtures': fixtures,
+        'fixture_counts': counts,
+        'comp_names': COMP_NAMES,
+        'round_prefix': ROUND_PREFIX,
         'teams': teams,
         'registry': registry(src),
         'thresholds': dict(LOCKS, floor_minutes=FLOOR),
-        'tier_names': D['tierName'],
+        'tier_names': dict(D['tierName'], new='Not in the 25/26 Premier League'),
         'generated_from': 'mufc.js (v2 payload) via build_payloads.py',
     }
+
+
+def load_cups():
+    path = os.path.join(HERE, 'fixtures', 'cups.json')
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding='utf-8') as fh:
+        cups = json.load(fh).get('fixtures', [])
+    for c in cups:
+        for k in ('comp', 'round', 'date', 'opp', 'code', 'venue'):
+            if c.get(k) in (None, ''):
+                fail(f"fixtures/cups.json: a fixture is missing '{k}'")
+        if c['comp'] not in COMP_NAMES:
+            fail(f"fixtures/cups.json: competition '{c['comp']}' has no name in COMP_NAMES")
+    return cups
 
 # ----------------------------------------------------------------------------- match
 def build_match(src, key, gw):
@@ -317,6 +384,36 @@ def build_match(src, key, gw):
         'plots': {player_id(k): v for k, v in g['plots'].items()},
     }
 
+PUBLISHED_FIELDS = ('rating', 'motm', 'yellow', 'red', 'on', 'off', 'captain')
+
+
+def graft_published(base, ing):
+    """Copy the extended ingest's published blocks onto a v2-built match payload.
+
+    Additive only: nothing the v2 payload already says is touched. Refuses if the
+    two disagree on the scoreline or on who played — a graft from the wrong
+    capture would put one match's ratings on another match's page."""
+    if ing['meta'].get('score') != base['meta'].get('score'):
+        fail(f"gw{base['meta']['round']}: re-ingest says {ing['meta'].get('score')}, the published payload says {base['meta'].get('score')}")
+    by_id = {p['player_id']: p for p in ing.get('players', [])}
+    missing = [p['name'] for p in base['players'] if p['player_id'] not in by_id]
+    if missing:
+        fail(f"gw{base['meta']['round']}: re-ingest has no rows for {missing} — is it the right capture?")
+    for p in base['players']:
+        src_p = by_id[p['player_id']]
+        for k in PUBLISHED_FIELDS:
+            if src_p.get(k) is not None and p.get(k) is None:
+                p[k] = src_p[k]
+    for k in ('lineup', 'events', 'published'):
+        if ing.get(k) and not base.get(k):
+            base[k] = ing[k]
+    if ing.get('events'):
+        n_goals = sum(1 for e in ing['events'] if e['kind'] == 'goal')
+        if n_goals != base['meta']['gf'] + base['meta']['ga']:
+            fail(f"gw{base['meta']['round']}: grafted events carry {n_goals} goals against {base['meta']['score']}")
+    return base
+
+
 # ----------------------------------------------------------------------------- opponent
 def build_opponent(src, scout):
     """One opposition scout: authored judgement from build/opponents/<code>.json,
@@ -357,10 +454,53 @@ def build_opponent(src, scout):
 
 
 # ----------------------------------------------------------------------------- seasons
+def baseline_ledger(src):
+    """The 25/26 ledger with per-match possession and opponent tier attached.
+
+    Possession per match lives in the dominance-trap scatter (x = ws_possession_pct);
+    the ledger rows themselves only carry the result and both xG figures. Joined on
+    round so the running season can be compared like for like — same venue, same
+    tier — rather than against one season-long mean."""
+    D = src['D']
+    poss = {p['gw']: p['x'] for p in D['season']['trap']['pts']}
+    tier = {r['team']: r['tier'] for r in D['lg']['table']}
+    short = {'Wolves': 'Wolverhampton Wanderers', 'Man City': 'Manchester City', 'Newcastle': 'Newcastle United',
+             'Spurs': 'Tottenham Hotspur', 'West Ham': 'West Ham United', "Nott'm Forest": 'Nottingham Forest',
+             'Forest': 'Nottingham Forest', 'Palace': 'Crystal Palace', 'Leeds': 'Leeds United'}
+    rows = []
+    for m in D['season']['matches']:
+        full = short.get(m['opp'], m['opp'])
+        rows.append({**m, 'round': m['gw'], 'venue': m['ven'], 'result': m['res'],
+                     'possession': poss.get(m['gw']), 'tier': tier.get(full), 'opp_full': full})
+    return rows
+
+
+def baseline_means(base_rows):
+    """Season means of the 25/26 ledger — the figures the running season is held
+    against. Computed, not typed: the xG-difference baseline was a literal 0.55
+    while the same payload's own distribution table said +0.60."""
+    b = story.norm(base_rows)
+    n = len(b)
+    xg = sum(r['xg'] for r in b) / n; oxg = sum(r['oxg'] for r in b) / n
+    poss = [r['possession'] for r in b if r.get('possession') is not None]
+    return {'points': round(sum(r['pts'] for r in b) / n, 2),
+            'goals_for': round(sum(r['gf'] for r in b) / n, 2),
+            'goals_against': round(sum(r['ga'] for r in b) / n, 2),
+            'xg': round(xg, 2), 'xga': round(oxg, 2), 'xg_diff': round(xg - oxg, 2),
+            'possession_pct': round(sum(poss) / len(poss), 1) if poss else None, 'n': n}
+
+
 def build_season_running(src, files):
-    rows = [ledger_row(m) for m in built_matches(files)]
+    D = src['D']
+    matches = built_matches(files)
+    rows = [ledger_row(m) for m in matches]
     if not rows:
         fail('no played match payloads to project a running season from')
+    teams = {r['team']: r for r in D['lg']['table']}
+    for r in rows:
+        # a side that was not in the 25/26 Premier League has no finishing tier;
+        # it is 'new', which the index names, rather than a null the filter drops
+        r['tier'] = (teams.get(r['opp']) or {}).get('tier') or 'new'
     n = len(rows)
     ppg = sum(r['pts'] for r in rows) / n
 
@@ -373,29 +513,39 @@ def build_season_running(src, files):
     def sample(k):
         return f"n = {k}" if k == n else f"n = {k} of {n}"
 
+    base_rows = baseline_ledger(src)
+    B = baseline_means(base_rows)
+    dist = {d['lab']: d for d in D['season']['dists']}
+    b_tilt = dist['Field tilt %']['mean']; b_cq = dist['np xG per shot']['mean']
     xg_diff = None if xg is None or oxg is None else round(xg - oxg, 2)
     kpis = [
-        {'key': 'points', 'value': f"{ppg:.2f}", 'baseline': 1.87, 'n': n,
-         'note': f"{sample(n)} · 25/26 finished on 1.87"},
-        {'key': 'xg_diff', 'value': None if xg_diff is None else f"{xg_diff:+.2f}", 'baseline': 0.55,
+        {'key': 'points', 'value': f"{ppg:.2f}", 'baseline': B['points'], 'n': n,
+         'note': f"{sample(n)} · 25/26 finished on {B['points']:.2f}"},
+        {'key': 'xg_diff', 'value': None if xg_diff is None else f"{xg_diff:+.2f}", 'baseline': B['xg_diff'],
          'n': n_xg, 'pending': xg_diff is None,
-         'note': f"{sample(n_xg)} · 25/26 +0.55 per match"
+         'note': f"{sample(n_xg)} · 25/26 {B['xg_diff']:+.2f} per match"
                  + ('' if n_xg == n else ' · Twelve report pending')},
-        {'key': 'possession_pct', 'value': None if poss is None else f"{poss:.1f}", 'baseline': 51.8,
-         'n': n_poss, 'note': f"{sample(n_poss)} · 25/26 51.8 · WhoScored"},
-        {'key': 'field_tilt', 'value': None if tilt is None else f"{tilt:.0f}", 'baseline': 51,
-         'n': n_tilt, 'note': f"{sample(n_tilt)} · 25/26 average 51"},
-        {'key': 'np_xg_per_shot', 'value': None if cq is None else f"{cq:.2f}", 'baseline': 0.12,
+        {'key': 'possession_pct', 'value': None if poss is None else f"{poss:.1f}", 'baseline': B['possession_pct'],
+         'n': n_poss, 'note': f"{sample(n_poss)} · 25/26 {B['possession_pct']} · WhoScored"},
+        {'key': 'field_tilt', 'value': None if tilt is None else f"{tilt:.0f}", 'baseline': round(b_tilt),
+         'n': n_tilt, 'note': f"{sample(n_tilt)} · 25/26 average {b_tilt:.0f}"},
+        {'key': 'np_xg_per_shot', 'value': None if cq is None else f"{cq:.2f}", 'baseline': b_cq,
          'n': n_cq, 'pending': cq is None,
-         'note': (f"{sample(n_cq)} · 25/26 0.12 · Twelve"
+         'note': (f"{sample(n_cq)} · 25/26 {b_cq:.2f} · Twelve"
                   if cq is not None else 'Twelve report pending')},
     ]
 
     # Every row is the mean of the column it names, over the matches that carry
     # it. Where a supplier has not reported, the row says how many matches it
-    # actually averaged rather than borrowing the season's n.
-    BASE = {'points': 1.87, 'goals_for': 1.82, 'goals_against': 1.32, 'xg': 1.90, 'xga': 1.30,
-            'possession_pct': 51.8, 'shots': 15.7, 'pass_accuracy': 82.3, 'clearances': 25.0}
+    # actually averaged rather than borrowing the season's n. The 25/26 side is
+    # computed from the same ledger where it can be; shots, pass accuracy and
+    # clearances are not per match in the 25/26 payload, so those three come from
+    # the season distribution table and say so with `base_src`.
+    BASE = {'points': B['points'], 'goals_for': B['goals_for'], 'goals_against': B['goals_against'],
+            'xg': B['xg'], 'xga': B['xga'], 'possession_pct': B['possession_pct'],
+            'shots': dist['Shots']['mean'], 'pass_accuracy': dist['Pass accuracy %']['mean'],
+            'clearances': dist['Clearances']['mean']}
+    PER_MATCH = {'points', 'goals_for', 'goals_against', 'xg', 'xga', 'possession_pct'}
     COLS = [('points', None, 2), ('goals_for', 'gf', 2), ('goals_against', 'ga', 2),
             ('xg', 'xg', 2), ('xga', 'oxg', 2), ('possession_pct', 'possession', 1),
             ('shots', 'shots', 1), ('pass_accuracy', 'pass_accuracy', 1),
@@ -406,20 +556,47 @@ def build_season_running(src, files):
             now, k = round(ppg, 2), n
         else:
             now, k = avg(rows, col, d)
-        svs.append({'key': key, 'now': now, 'base': BASE[key], 'n': k,
-                    'pending': now is None})
+        svs.append({'key': key, 'col': col or 'pts', 'now': now, 'base': round(BASE[key], d), 'n': k,
+                    'pending': now is None, 'base_src': 'ledger' if key in PER_MATCH else 'season-mean',
+                    'filterable': key in PER_MATCH})
+
+    # ---- the narrative layer ------------------------------------------------
+    goals_by_round = {m['meta']['round']: (m.get('timeline') or {}).get('goals', []) for m in matches}
+    player_goals = {(m['meta']['round'], p['player_id']): p.get('goals', 0) for m in matches for p in m['players']}
+    strip_ids = {p['player_id'] for m in matches for p in m['players']}
+    avail = story.availability(matches, strip_ids, fail)
+    tps = story.turning_points('26-27', rows, fail, ctx={
+        'goals': goals_by_round, 'player_goals': player_goals,
+        'availability': {p['player_id']: p for p in (avail or {}).get('players', [])}})
+    KEYS = OrderedDict([('possession_pct', ('possession', 'Possession %', 'neutral')),
+                        ('xg', ('xg', 'xG for', 'higher')), ('xga', ('oxg', 'xG against', 'lower')),
+                        ('goals_for', ('gf', 'Goals for', 'higher')), ('goals_against', ('ga', 'Goals against', 'lower'))])
+    narrative = {
+        'eras': story.eras('26-27', rows, fail),
+        'streaks': story.streaks(rows),
+        'cumulative': story.cumulative(rows),
+        'rolling': story.rolling(rows, 5),
+        'pace': story.pace(rows, base_rows),
+        'against_baseline': story.against_baseline(rows, base_rows, KEYS),
+        'turning_points': tps,
+        'availability': avail,
+    }
 
     return {
-        'meta': {'season': '26-27', 'sample': {'matches': n, 'of': 38}, 'baseline': '25-26'},
+        'meta': {'season': '26-27', 'sample': {'matches': n, 'of': 38}, 'baseline': '25-26',
+                 'baseline_means': B},
         'claim': season_claim(rows, poss, n_poss),
         'kpis': kpis, 'ledger': rows, 'season_v_season': svs,
+        # the 25/26 ledger travels with the running season so the same venue /
+        # tier / player filter can be applied to both sides of every comparison
+        'baseline_ledger': [{'round': r['round'], 'opp': r['opp_full'], 'venue': r['venue'], 'result': r['result'],
+                             'gf': r['gf'], 'ga': r['ga'], 'pts': r['pts'], 'xg': r['xg'], 'oxg': r['oxg'],
+                             'possession': r['possession'], 'tier': r['tier']} for r in base_rows],
+        'story': narrative,
         'locks': {name: {'at': at, 'played': n}
                   for name, at in (('dominance', LOCKS['dominance']),
                                    ('gamestate', LOCKS['gamestate']),
                                    ('adjusted', LOCKS['adjusted']))},
-        'held_back': [{'label': 'Field tilt %', 'base': 51.34, 'gw1': 84}, {'label': 'np xG per shot', 'base': 0.12, 'gw1': 0.10},
-                      {'label': 'xT created', 'base': 1.57, 'gw1': 2.98}, {'label': 'Box touches', 'base': 21.29, 'gw1': 32},
-                      {'label': 'PPDA (higher = less press)', 'base': 6.05, 'gw1': 4.13}],
     }
 
 
@@ -666,13 +843,49 @@ def season_claim(rows, poss, n_poss):
 
 def build_season_complete(src):
     D = src['D']
+    rows = baseline_ledger(src)
+    B = baseline_means(rows)
+    mu = next(r for r in D['lg']['table'] if r['team'] == 'Manchester United')
+    ranks = {r['lab']: r for r in D['lg']['ranks']}
+    dist = {d['lab']: d for d in D['season']['dists']}
+    # Every figure on the tile row is counted from the ledger or the rebuilt table
+    # in this same run; the League page used to type '3rd', 69, 50, 8 and 17 by hand.
+    kpis = [
+        {'label': 'Finished', 'value': ordinal(mu['pos']),
+         'note': f"{mu['pts']} points, {B['points']:.2f} per game · {mu['w']}W {mu['d']}D {mu['l']}L · home {mu['hpts']}, away {mu['apts']}", 'src': 'derived'},
+        {'label': 'Goals', 'value': f"{mu['gf']}:{mu['ga']}", 'note': f"GD {mu['gd']:+d} · {ordinal(ranks['Goals scored']['rank'])} for scored, {ordinal(ranks['Goals conceded']['rank'])} for conceded", 'src': 'derived'},
+        {'key': 'xg_diff', 'value': f"{B['xg_diff']:+.2f}", 'note': f"xG {B['xg']:.2f} for, {B['xga']:.2f} against, per match · Twelve", 'src': 'twelve'},
+        {'key': 'possession_pct', 'value': f"{B['possession_pct']:.1f}", 'note': f"median {dist['Possession % (WhoScored)']['med']} · WhoScored", 'src': 'whoscored'},
+        {'label': 'Clean sheets', 'value': mu['cs'], 'note': f"{ordinal(ranks['Clean sheets']['rank'])} of 20 · {ranks['Clean sheets']['bestTeam']} {ranks['Clean sheets']['best']}", 'src': 'derived'},
+    ]
+    avail_rows = D['avail']['rows']
+    cells = {r['id']: r['cells'] for r in avail_rows}
+    regulars = [(r['id'], r['nm']) for r in avail_rows if r['mins'] >= FLOOR]
+    narrative = {
+        'eras': story.eras('25-26', rows, fail),
+        'streaks': story.streaks(rows),
+        'cumulative': story.cumulative(rows),
+        'rolling': story.rolling(rows, 5),
+        'turning_points': story.turning_points('25-26', rows, fail),
+        'with_without': story.with_without(rows, cells, regulars),
+        'leads': story.lead_windows(src['LEADS']),
+    }
+    ledger = [{'gw': r['gw'], 'opp': r['opp'], 'ven': r['ven'], 'res': r['res'], 'gf': r['gf'], 'ga': r['ga'],
+               'pts': r['pts'], 'xg': r['xg'], 'oxg': r['oxg'], 'possession': r['possession'], 'tier': r['tier']}
+              for r in rows]
     return {
-        'meta': {'season': '25-26', 'sample': {'matches': 38, 'of': 38}, 'validated': D['lg']['validated']},
+        'meta': {'season': '25-26', 'sample': {'matches': 38, 'of': 38}, 'validated': D['lg']['validated'],
+                 'means': B},
         'claim': {'eyebrow': 'Season 2025/26 · Premier League · final', 'headline': ['Dominated the ball,', 'dropped the points.'],
                   'lead': 'United took 3.00 points per game in the ten matches they held under 45% of the ball, and 1.40 in the fifteen they held over 55% — while creating their best chances in the second group. Split on ws_possession_pct.'},
-        'ledger': D['season']['matches'], 'timelines': D['season']['tl'], 'trap': D['season']['trap'], 'dists': D['season']['dists'],
+        'kpis': kpis,
+        'ledger': ledger, 'timelines': D['season']['tl'], 'trap': D['season']['trap'], 'dists': D['season']['dists'],
         'pairs': D['season']['pairs'], 'corr': D['season']['corr'], 'buckets': D['season']['buckets'],
         'gamestate': D['gs'], 'leads': src['LEADS'], 'phase': D['phase'], 'adjusted': D['resid'],
+        'story': narrative,
+        # the availability grid, keyed by player, so "with X / without X" can be
+        # applied to the ledger on the page without loading squad.json
+        'lineups': {r['id']: {'name': r['nm'], 'cells': r['cells']} for r in avail_rows},
     }
 
 # ----------------------------------------------------------------------------- squad + players
@@ -765,7 +978,14 @@ def build_squad(src, files):
         'meta': {'season': '26-27', 'sample': {'matches': n, 'minutes_available': available, 'players_used': len(strip)}, 'floor': FLOOR},
         'claim': squad_claim(strip, n, team_goals, attributed, FLOOR),
         'kpis': {'matches': n, 'team_goals': team_goals, 'attributed': attributed, 'assists': assists,
-                 'players_used': len(strip), 'over_floor': over_floor},
+                 'players_used': len(strip), 'over_floor': over_floor,
+                 # these two were typed into the view layer as "2 different scorers"
+                 # and "3 players have an involvement" — true at MW2, wrong at MW3
+                 'scorers': sum(1 for p in strip if p['g']),
+                 'involved': sum(1 for p in strip if p['ga']),
+                 # WhoScored's minutes-weighted rating over the played matches, where
+                 # the ingest has emitted one; absent on payloads built from the v2 source
+                 'rated_matches': sum(1 for m in matches if any(p.get('rating') is not None for p in m['players']))},
         'season_to_date': strip, 'per90_baseline': per90_rows, 'goals_assists_25_26': D['ga'],
         'availability': {'gw_count': D['avail']['gwCount'], 'rows': D['avail']['rows']},
     }
@@ -774,35 +994,81 @@ def build_squad(src, files):
 def build_players(src, matches):
     D = src['D']
     out = {}
-    s25 = {p['id']: p for p in D['squad']['s25']}; s26 = {p['id']: p for p in D['squad']['s26']}
-    for key, comp, gw, m in matches:
+    s25 = {p['id']: p for p in D['squad']['s25']}   # squad.s26 is no longer read — see season_from_log
+    for key, gw, m in matches:
         g = D[key]
         for r in g['roster']:
             pid = player_id(r['nm'])
             entry = out.setdefault(pid, {'meta': {'player_id': pid, 'name': r['nm'], 'shirt': r['sh'], 'pos': r['pos'], 'group': r['grp']},
                                          'seasons': {}, 'match_log': [], 'plots': {}})
             v = r['v']
-            # comp is on every row because round numbers repeat across competitions:
-            # without it a player's log shows two round 1s with nothing to tell them apart.
-            entry['match_log'].append({'match': m['meta']['match_id'], 'comp': comp, 'round': gw, 'opp': g['opp'], 'venue': g['ven'], 'score': g['score'],
+            entry['match_log'].append({'match': m['meta']['match_id'], 'round': gw, 'comp': m['meta'].get('comp', 'PL'),
+                                       'date': m['meta'].get('date'), 'opp': g['opp'], 'venue': g['ven'], 'score': g['score'],
                                        'result': m['meta']['result'], 'started': bool(r['st']), **{k: v.get(k) for k in v}})
             if r['nm'] in g['plots']:
                 entry['plots'][m['meta']['match_id']] = g['plots'][r['nm']]
     for pid, e in out.items():
-        e['meta']['sample'] = {'matches': len(e['match_log']), 'minutes': sum((r.get('minutes') or 0) for r in e['match_log'])}
-        for sid, table in (('25-26', s25), ('26-27', s26)):
-            p = table.get(pid)
-            if p:
-                e['seasons'][sid] = {'apps': p['apps'], 'starts': p['starts'], 'mins': round(p['mins']), 'rating_wtd': p['rat'], 'mom': p['mom'],
+        log = e['match_log']
+        e['meta']['sample'] = {'matches': len(log), 'minutes': sum((r.get('minutes') or 0) for r in log)}
+        p = s25.get(pid)
+        if p:
+            e['seasons']['25-26'] = {'apps': p['apps'], 'starts': p['starts'], 'mins': round(p['mins']), 'rating_wtd': p['rat'], 'mom': p['mom'],
                                      'g': p['g'], 'a': p['a'], 'ga': p['ga'], 'ga90': p.get('ga90'), 'over_floor': p['mins'] >= FLOOR,
                                      'per90': {k: per90(p['v'][k], p['mins']) for k in ['touches', 'passes', 'key', 'shots', 'tackles', 'int', 'clear', 'aerials', 'drib']},
                                      'pct': p['pct'], 'attempts': p['att'], 'totals': p['v']}
+        # The 26/27 block used to come from the v2 source's squad.s26 table, which
+        # was exported after MW2 and never grew: every player page said 2 apps and
+        # 180′ for the season while its own match log listed three matches. It is
+        # now the sum of the match log — the same rows the page renders — and the
+        # gate below holds the two to each other.
+        e['seasons']['26-27'] = season_from_log(log)
     return out
+
+
+def season_from_log(log):
+    mins = sum((r.get('minutes') or 0) for r in log)
+    tot = lambda k: sum((r.get(k) or 0) for r in log)
+    g, a = tot('goals'), tot('assists')
+    # WhoScored's published match rating, minutes-weighted over the matches that
+    # carry one. The ingest emits it from MW3 on; MW1 and MW2 came through the v2
+    # source without it, so the count of rated matches travels with the figure.
+    rated = [r for r in log if r.get('rating') is not None and r.get('minutes')]
+    rating = (round(sum(r['rating'] * r['minutes'] for r in rated) / sum(r['minutes'] for r in rated), 2)
+              if rated else None)
+    att = {'pass': tot('passes_attempted'), 'tackle': tot('tackles'), 'aerial': tot('aerials_won') + tot('aerials_lost'),
+           'drib': tot('dribbles_attempted')}
+    pct = {'pass': round(100 * tot('passes_completed') / att['pass'], 1) if att['pass'] else None,
+           'tackle': round(100 * tot('tackles_won') / att['tackle'], 1) if att['tackle'] and any(r.get('tackles_won') is not None for r in log) else None,
+           'aerial': round(100 * tot('aerials_won') / att['aerial'], 1) if att['aerial'] else None,
+           'drib': round(100 * tot('dribbles_completed') / att['drib'], 1) if att['drib'] else None}
+    totals = {'touches': tot('touches'), 'passes': tot('passes_attempted'), 'key': tot('key_passes'), 'shots': tot('shots'),
+              'tackles': tot('tackles'), 'int': tot('interceptions'), 'clear': tot('clearances'),
+              'aerials': tot('aerials_won'), 'drib': tot('dribbles_completed')}
+    return {'apps': len(log), 'starts': sum(1 for r in log if r.get('started')), 'mins': round(mins),
+            'rating_wtd': rating, 'rated_matches': len(rated),
+            'mom': sum(1 for r in log if r.get('motm')),
+            'g': g, 'a': a, 'ga': g + a, 'ga90': round((g + a) / mins * 90, 3) if mins else None,
+            'over_floor': mins >= FLOOR,
+            'per90': {k: per90(v, mins) for k, v in totals.items()},
+            'pct': pct, 'attempts': att, 'totals': totals, 'src': 'counted from the match log'}
 
 # ----------------------------------------------------------------------------- league
 def build_league(src):
     D = src['D']; lg = D['lg']
+    mu = next(r for r in lg['table'] if r['team'] == 'Manchester United')
+    ranks = {r['lab']: r for r in lg['ranks']}
+    def tile(label, lab, value, note_extra=''):
+        r = ranks[lab]
+        return {'label': label, 'value': value, 'src': 'derived',
+                'note': f"{ordinal(r['rank'])} of 20 · {r['bestTeam']} {r['best']} · median {r['med']}{note_extra}"}
+    # The five tiles were literals ('3rd', 69, 50, 8, 17) that happened to agree
+    # with the table beneath them. They are read from it now.
+    kpis = [{'label': 'Finished', 'value': ordinal(mu['pos']), 'src': 'derived',
+             'note': f"{mu['pts']} points · {mu['w']}W {mu['d']}D {mu['l']}L · {ranks['Points']['bestTeam']} {ranks['Points']['best']}"},
+            tile('Goals scored', 'Goals scored', mu['gf']), tile('Goals conceded', 'Goals conceded', mu['ga']),
+            tile('Clean sheets', 'Clean sheets', mu['cs']), tile('Points v top six', 'Points v top six', mu['topPts'])]
     return {'meta': {'season': '25-26', 'sample': {'results': 380}, 'validated': lg['validated'], 'locks': {'league': LOCKS['league']}},
+            'kpis': kpis,
             'claim': {'eyebrow': 'Premier League 2025/26 · final · 38 of 38', 'headline': ['Third in almost everything.', 'Fifteenth in clean sheets.'],
                       'lead': "Third in points, goals, goal difference, home points and away points — and fifteenth in clean sheets, with 8 in 38 against Arsenal's 19. United finished third by outscoring the league, not by shutting games down. The table is recomputed from all 380 results and matches two independent published tables on every column."},
             'table': lg['table'], 'ranks': lg['ranks'], 'tier_record': D['tierRec'], 'tier_metrics': D['tierMetrics'], 'tier_counts': D['counts'],
@@ -821,7 +1087,11 @@ def gate(files):
                 fail(f"{name}: kpi key {k['key']} not in registry")
         for t in payload.get('tape', []):
             if t['key'] not in keys: fail(f"{name}: tape key {t['key']} not in registry")
-    if len(idx['fixtures']) != 46: fail(f"expected 46 fixtures, got {len(idx['fixtures'])}")
+    want = 46 + len(load_cups())
+    if len(idx['fixtures']) != want: fail(f"expected {want} fixtures (38 + 8 + cups), got {len(idx['fixtures'])}")
+    if len({f['fixture_id'] for f in idx['fixtures']}) != len(idx['fixtures']): fail('duplicate fixture_id in the index')
+    dates = [f['date'] for f in idx['fixtures']]
+    if dates != sorted(dates): fail('index fixtures are not in date order')
 
     # ---- the index is the identity layer; nothing may disagree with it -------
     # Every gate below exists because something published disagreed with it once.
@@ -877,6 +1147,67 @@ def gate(files):
                  f"season says {season['meta']['sample']['matches']}")
         if squad['meta']['sample']['minutes_available'] != squad['meta']['sample']['matches'] * 90:
             fail("squad minutes_available is not matches * 90")
+        k = squad['kpis']; strip = squad['season_to_date']
+        if k['scorers'] != sum(1 for p in strip if p['g']) or k['involved'] != sum(1 for p in strip if p['ga']):
+            fail('squad kpi scorers/involved disagree with the season-to-date strip')
+
+    # ---- the narrative layer must agree with the ledger it narrates ---------
+    if season is not None:
+        st = season['story']
+        n = season['meta']['sample']['matches']
+        if len(st['cumulative']) != n or (st['pace']['at'] or {}).get('round') != season['ledger'][-1]['round']:
+            fail('season story cumulative/pace do not cover the ledger')
+        if st['cumulative'][-1]['pts'] != sum(r['pts'] for r in season['ledger']):
+            fail('cumulative points disagree with the ledger')
+        if any(e['played'] > n for e in st['eras']):
+            fail('an era claims more matches than have been played')
+        for tp in st['turning_points']:
+            if tp['round'] is not None and not tp['evidence']:
+                fail(f"turning point '{tp['id']}' names a round but carries no evidence")
+        av = st.get('availability')
+        if av:
+            # a name here has to be someone the pipeline knows: the 25/26 grid, or a
+            # player who has appeared in a 26/27 match payload
+            known = set(((files.get('25-26/season.json') or {}).get('lineups') or {}).keys())
+            for mname, m in files.items():
+                if mname.startswith('26-27/matches/'):
+                    known |= {p['player_id'] for p in m.get('players', [])}
+            for p in av['players']:
+                p['known'] = p['player_id'] in known
+                if not p['known']:
+                    # a summer signing who has not yet played has no page to link to;
+                    # that is allowed, but said, so a typo in an id cannot hide as one
+                    print(f"  [warn] availability: {p['player_id']} ({p['name']}) has no 25/26 grid row and no 26/27 "
+                          f"appearance yet — listed without a link")
+            if av['checked'] < season['ledger'][-1]['date']:
+                print(f"  [warn] availability list was checked on {av['checked']}, before MW{season['ledger'][-1]['round']} was played — update build/notes/availability-26-27.json")
+        b = st['against_baseline']
+        for row in b:
+            if len(row['matches']) != n:
+                fail(f"against_baseline '{row['key']}' covers {len(row['matches'])} matches, season has {n}")
+
+    base = files.get('25-26/season.json')
+    if base is not None:
+        if len(base['ledger']) != 38 or base['story']['cumulative'][-1]['pts'] != sum(r['pts'] for r in base['ledger']):
+            fail('25/26 ledger or cumulative points are wrong')
+        lg = files.get('league/25-26.json')
+        mu = next(r for r in lg['table'] if r['team'] == 'Manchester United')
+        if base['story']['cumulative'][-1]['pts'] != mu['pts'] or base['story']['cumulative'][-1]['gf'] != mu['gf']:
+            fail('25/26 season ledger disagrees with the rebuilt league table on points or goals')
+        if not base['story']['eras'] or base['story']['eras'][-1]['to_round'] != 38:
+            fail('25/26 eras do not reach round 38')
+
+    # ---- a player page's season block is the sum of its own match log --------
+    for name, payload in files.items():
+        if not name.startswith('26-27/players/'):
+            continue
+        s = payload['seasons'].get('26-27') or {}
+        log = payload['match_log']
+        if s.get('apps') != len(log) or s.get('mins') != round(sum((r.get('minutes') or 0) for r in log)):
+            fail(f"{name}: seasons['26-27'] says {s.get('apps')} apps / {s.get('mins')}′, "
+                 f"the match log has {len(log)} / {round(sum((r.get('minutes') or 0) for r in log))}′")
+        if s.get('rating_wtd') is not None and s.get('rated_matches', 0) == 0:
+            fail(f"{name}: carries a season rating with no rated matches")
 
     # ---- a vendor figure must have the vendor behind it ---------------------
     for name, payload in files.items():
@@ -970,44 +1301,61 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--apply', action='store_true'); args = ap.parse_args()
     src = load_source()
     ingested = load_ingested()
-    # A fixture the v2 source already carries is built from it; anything else comes
-    # from build/matches/. PL GW1-2 exist in both — the v2 source wins, so a
-    # re-ingest of an already-shipped week cannot quietly change what is published.
-    # Scoped to the league: a UCL round 1 or 2 is NOT in the v2 source and must pass.
-    ingested = {k: p for k, p in ingested.items() if k not in (('PL', 1), ('PL', 2))}
+    # A gameweek the v2 source already carries is built from it; anything else comes
+    # from build/matches/gw<N>.json. gw1 and gw2 exist in the v2 source — that
+    # payload wins for everything it holds (Twelve's per-shot xG, the written
+    # story), so a re-ingest cannot quietly change what is published. What a
+    # re-ingest CAN add is the published blocks the v2 export never carried —
+    # lineup, events, ratings, cards — and those are grafted on, gated on the
+    # two agreeing about the score and the players.
+    early = {gw: p for gw, p in ingested.items() if gw in (1, 2)}
+    ingested = {gw: p for gw, p in ingested.items() if gw not in (1, 2)}
     if ingested:
-        print(f"ingested fixtures: {', '.join(f'{c} r{r}' for c, r in sorted(ingested))}")
+        print(f"ingested gameweeks: {sorted(ingested)}")
     global SCOUTS
     SCOUTS = load_opponents()
     if SCOUTS:
         print(f"opposition scouts: {sorted(v['code'] for v in SCOUTS.values())}")
     files = OrderedDict()
     m1 = build_match(src, 'gw1', 1); m2 = build_match(src, 'gw2', 2)
-    # Enrich the ingested fixtures BEFORE the index is built. index.json is the identity
+    for gw, m in ((1, m1), (2, m2)):
+        if gw in early:
+            graft_published(m, early[gw])
+            print(f"gw{gw}: published blocks (lineup, events, ratings) grafted from build/matches/gw{gw}.json")
+    # Enrich the ingested weeks BEFORE the index is built. index.json is the identity
     # layer every other payload is held to, and it carries each fixture's xG — built
     # first, it recorded MW3 as null while the match payload already had Twelve's 0.86.
-    # Keys are (competition, round) — see load_ingested.
-    for key, p in sorted(ingested.items()):
+    for gw, p in sorted(ingested.items()):
         # The 25/26 baseline is season-level and identical on every match payload;
         # the ingest cannot know it, so it is carried across here.
         if not p.get('baseline'):
             p['baseline'] = m2['baseline']
-        ingested[key] = apply_twelve(apply_rosters(p))
-    files['index.json'] = build_index(src, ingested)
+        ingested[gw] = apply_twelve(apply_rosters(p))
+    cups = load_ingested_cups()
+    for fid, p in cups.items():
+        if not p.get('baseline'):
+            p['baseline'] = m2['baseline']
+    if cups:
+        print(f"cup / European matches: {sorted(cups)}")
+    files['index.json'] = build_index(src, ingested, cups)
     files['crests.json'] = src['D']['crest']
     files[f"26-27/matches/{m1['meta']['match_id']}.json"] = m1
     files[f"26-27/matches/{m2['meta']['match_id']}.json"] = m2
-    for _key, p in sorted(ingested.items()):
+    for gw, p in sorted(ingested.items()):
+        files[f"26-27/matches/{p['meta']['match_id']}.json"] = p
+    for fid, p in sorted(cups.items()):
         files[f"26-27/matches/{p['meta']['match_id']}.json"] = p
     for fid, scout in sorted(SCOUTS.items()):
         files[f"26-27/opponents/{scout['code']}.json"] = build_opponent(src, scout)
     files['26-27/season.json'] = build_season_running(src, files)
     files['25-26/season.json'] = build_season_complete(src)
     files['26-27/squad.json'] = build_squad(src, files)
-    for (comp, rnd), p in sorted(ingested.items()):
-        src['D'][source_key(comp, rnd)] = as_source_gw(p)
-    mlist = ([('gw1', 'PL', 1, m1), ('gw2', 'PL', 2, m2)]
-             + [(source_key(c, r), c, r, p) for (c, r), p in sorted(ingested.items())])
+    for gw, p in sorted(ingested.items()):
+        src['D'][f'gw{gw}'] = as_source_gw(p)
+    mlist = [('gw1', 1, m1), ('gw2', 2, m2)] + [(f'gw{gw}', gw, p) for gw, p in sorted(ingested.items())]
+    for fid, p in sorted(cups.items(), key=lambda kv: kv[1]['meta']['date']):
+        src['D'][f'cup_{fid}'] = as_source_gw(p)
+        mlist.append((f'cup_{fid}', p['meta']['round'], p))
     for pid, p in build_players(src, mlist).items():
         files[f"26-27/players/{pid}.json"] = p
     files['league/25-26.json'] = build_league(src)

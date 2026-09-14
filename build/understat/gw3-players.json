@@ -1,0 +1,392 @@
+{
+ "_source": {
+  "provider": "Understat",
+  "export": "player match rosters (matchrosters 55/56)",
+  "schema_note": "key_passes and xA per player alongside xG — that pairing is Understat's player-match schema, not WhoScored's match centre. An earlier version of this file called it WhoScored; that was wrong.",
+  "disagreement_with_twelve": {
+   "united": {
+    "understat": 0.87,
+    "twelve": 0.86,
+    "gap": "+0.01"
+   },
+   "opp": {
+    "understat": 1.06,
+    "twelve": 1.42,
+    "gap": "+0.36, or 34% of Understat's figure"
+   },
+   "shots": {
+    "understat_opp": 18,
+    "twelve_opp": 17
+   },
+   "note": "Two independent xG models. They are never summed or averaged together. Twelve's total is what the tape and the KPI tiles publish; Understat's per-player values are used only to shape the split of that total across shots."
+  }
+ },
+ "round": 3,
+ "match_id": "mw03-eve",
+ "teams": {
+  "united": [
+   {
+    "number": 1,
+    "player": "Senne Lammens",
+    "position": "GK",
+    "min": 90,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 2,
+    "player": "Diogo Dalot",
+    "position": "DR",
+    "min": 87,
+    "shots": 1,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 0,
+    "xG": 0.02,
+    "xA": 0.04
+   },
+   {
+    "number": 3,
+    "player": "Lisandro Martínez",
+    "position": "DC",
+    "min": 90,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 4,
+    "player": "Harry Maguire",
+    "position": "DC",
+    "min": 90,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 5,
+    "player": "Luke Shaw",
+    "position": "DL",
+    "min": 90,
+    "shots": 1,
+    "goals": 0,
+    "key_passes": 1,
+    "assists": 1,
+    "xG": 0.04,
+    "xA": 0.41
+   },
+   {
+    "number": 6,
+    "player": "Youri Tielemans",
+    "position": "DMC",
+    "min": 90,
+    "shots": 2,
+    "goals": 0,
+    "key_passes": 1,
+    "assists": 0,
+    "xG": 0.04,
+    "xA": 0.02
+   },
+   {
+    "number": 7,
+    "player": "Kobbie Mainoo",
+    "position": "DMC",
+    "min": 87,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 1,
+    "xG": 0,
+    "xA": 0.06
+   },
+   {
+    "number": 8,
+    "player": "Bryan Mbeumo",
+    "position": "AMR",
+    "min": 90,
+    "shots": 2,
+    "goals": 1,
+    "key_passes": 1,
+    "assists": 0,
+    "xG": 0.11,
+    "xA": 0.07
+   },
+   {
+    "number": 9,
+    "player": "Bruno Fernandes",
+    "position": "AMC",
+    "min": 90,
+    "shots": 4,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 0,
+    "xG": 0.13,
+    "xA": 0.06
+   },
+   {
+    "number": 10,
+    "player": "Marcus Rashford",
+    "position": "AML",
+    "min": 73,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 1,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0.09
+   },
+   {
+    "number": 11,
+    "player": "Matheus Cunha",
+    "position": "FW",
+    "min": 73,
+    "shots": 2,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0.1,
+    "xA": 0
+   },
+   {
+    "number": 12,
+    "player": "Andrey Santos",
+    "position": "Sub",
+    "min": 3,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 13,
+    "player": "Patrick Dorgu",
+    "position": "Sub",
+    "min": 17,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 14,
+    "player": "Leny Yoro",
+    "position": "Sub",
+    "min": 3,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 15,
+    "player": "Noussair Mazraoui",
+    "position": "Sub",
+    "min": 1,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 16,
+    "player": "Benjamin Sesko",
+    "position": "Sub",
+    "min": 17,
+    "shots": 2,
+    "goals": 1,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0.43,
+    "xA": 0
+   }
+  ],
+  "opp": [
+   {
+    "number": 1,
+    "player": "Jordan Pickford",
+    "position": "GK",
+    "min": 90,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 2,
+    "player": "Merlin Röhl",
+    "position": "DR",
+    "min": 78,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 1,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0.34
+   },
+   {
+    "number": 3,
+    "player": "James Tarkowski",
+    "position": "DC",
+    "min": 90,
+    "shots": 1,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0.01,
+    "xA": 0
+   },
+   {
+    "number": 4,
+    "player": "Jarrad Branthwaite",
+    "position": "DC",
+    "min": 90,
+    "shots": 2,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0.08,
+    "xA": 0
+   },
+   {
+    "number": 5,
+    "player": "Vitalii Mykolenko",
+    "position": "DL",
+    "min": 90,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0
+   },
+   {
+    "number": 6,
+    "player": "Harrison Armstrong",
+    "position": "DMC",
+    "min": 90,
+    "shots": 2,
+    "goals": 0,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0.09,
+    "xA": 0
+   },
+   {
+    "number": 7,
+    "player": "James Garner",
+    "position": "DMC",
+    "min": 80,
+    "shots": 0,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 0,
+    "xG": 0,
+    "xA": 0.02
+   },
+   {
+    "number": 8,
+    "player": "Brennan Johnson",
+    "position": "AMR",
+    "min": 69,
+    "shots": 1,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 0,
+    "xG": 0.07,
+    "xA": 0.07
+   },
+   {
+    "number": 9,
+    "player": "Kiernan Dewsbury-Hall",
+    "position": "AMC",
+    "min": 90,
+    "shots": 4,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 0,
+    "xG": 0.17,
+    "xA": 0.09
+   },
+   {
+    "number": 10,
+    "player": "Tyrique George",
+    "position": "AML",
+    "min": 90,
+    "shots": 1,
+    "goals": 1,
+    "key_passes": 3,
+    "assists": 0,
+    "xG": 0.05,
+    "xA": 0.22
+   },
+   {
+    "number": 11,
+    "player": "Thierno Barry",
+    "position": "FW",
+    "min": 90,
+    "shots": 4,
+    "goals": 0,
+    "key_passes": 1,
+    "assists": 0,
+    "xG": 0.49,
+    "xA": 0.02
+   },
+   {
+    "number": 12,
+    "player": "Jack Grealish",
+    "position": "Sub",
+    "min": 21,
+    "shots": 1,
+    "goals": 0,
+    "key_passes": 1,
+    "assists": 0,
+    "xG": 0.02,
+    "xA": 0.04
+   },
+   {
+    "number": 13,
+    "player": "Ainsley Maitland-Niles",
+    "position": "Sub",
+    "min": 10,
+    "shots": 1,
+    "goals": 1,
+    "key_passes": 0,
+    "assists": 0,
+    "xG": 0.03,
+    "xA": 0
+   },
+   {
+    "number": 14,
+    "player": "Hayden Hackney",
+    "position": "Sub",
+    "min": 12,
+    "shots": 1,
+    "goals": 0,
+    "key_passes": 2,
+    "assists": 1,
+    "xG": 0.05,
+    "xA": 0.08
+   }
+  ]
+ }
+}

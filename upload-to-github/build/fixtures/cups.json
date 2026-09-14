@@ -1,0 +1,8 @@
+{
+  "_": "Domestic cup fixtures, which the v2 fixture layer (38 league + 8 Champions League) never carried. One entry per tie as it is drawn; the build merges them into index.json in date order and the calendar counts what it holds rather than saying 46. A played cup tie gets a match payload the same way a league match does — run the ingest with --comp EFL.",
+  "fixtures": [
+    {"comp": "EFL", "round": 3, "round_label": "R3", "date": "2026-09-16", "ko": "20:00",
+     "opp": "Brighton & Hove Albion", "short": "Brighton", "code": "BHA", "venue": "H", "tv": null,
+     "source": "brightonandhovealbion.com, 'Albion head to Old Trafford in Carabao Cup' and 'Date confirmed for Carabao Cup tie against Manchester United' (retrieved 2026-09-08)"}
+  ]
+}

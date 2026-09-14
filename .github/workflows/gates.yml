@@ -1,0 +1,42 @@
+name: gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Dry run — every gate must pass
+        run: python3 build/build_payloads.py
+
+      - name: Payloads are reproducible from their inputs
+        run: |
+          python3 build/build_payloads.py --apply
+          if ! git diff --quiet data/; then
+            echo "::error::data/ is not reproducible — the committed payloads differ from a fresh build"
+            git --no-pager diff --stat data/
+            exit 1
+          fi
+          echo "data/ rebuilds byte-identical"
+
+      - name: Site scripts parse
+        run: |
+          node --check src/app.js
+          node --check src/charts.js
+
+      - name: Nothing private is about to be published
+        run: |
+          if git ls-files | grep -q '^private/'; then
+            echo "::error::private/ is tracked — the staff export must never reach the public folder"
+            exit 1
+          fi
+          echo "private/ is not tracked"

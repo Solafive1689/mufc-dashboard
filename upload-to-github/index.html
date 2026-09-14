@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MUFC · Performance</title>
+<meta name="description" content="Manchester United performance dashboard — 2026/27 season, match by match, with 2025/26 as the baseline.">
+<!-- The two faces used to come from Google Fonts — the only third party on the page,
+     and a request that hung held first paint for 12.6 s. They are self-hosted now
+     (fonts/, latin subsets, 12 files) and load with font-display: swap; styles.css
+     already declares the fallback (--font: Archivo, system-ui). -->
+<link rel="preload" href="fonts/archivo-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app"><div class="page" style="grid-template-columns:1fr"><p class="t-cap">Loading the season…</p></div></div>
+<script src="src/charts.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

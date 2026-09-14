@@ -6,8 +6,15 @@ dashboard needs for a gameweek.
     python build/ingest_whoscored.py --mcd logs/mcd_EVE_MUN_20260906.json --gw 3 --apply
     python build/ingest_whoscored.py --mcd ... --gw 3 --master ../MUFC_Analytics/MUFC_2026_27_EPL_Master.csv --apply
 
+    python build/ingest_whoscored.py --mcd logs/mcd_MUN_BHA_20260916.json --gw 3 --comp EFL --apply   (a cup tie)
+
 Writes
   build/matches/gw<N>.json                      the payload, same shape as data/26-27/matches/mw02-ips.json
+  build/matches/<comp><N>.json                  the same, for a Champions League matchday or cup round
+  Since 2026-09-08 the payload also carries `lineup` (formation slots, both sides),
+  `events` (goals, subs, cards, both sides) and, per United player, WhoScored's
+  published `rating`, `motm`, `yellow`, `red`, `on`, `off`, `captain`. Re-run
+  for gw1 and gw2 against logs/mcd_*.json to give MW1 and MW2 the same blocks.
   build/staging/MUFC_2026_27_EPL_MW<N>_row.csv  the 127-column master row, ws_ populated, tw_ blank
   build/staging/MUFC_MW<N>_player_match.csv     per-player rows, both teams
 
@@ -176,8 +183,121 @@ def build_network(events, tid, first_sub_min, names, pos_of, mins_of, starters):
     return dict(nodes=nodes, links=links)
 
 
-def build_players(events, tid, side, roster, names, mcd_period_end):
-    """One row per player who appeared, in the payload's 25-field shape."""
+def match_rating(p):
+    """WhoScored's published match rating: the value at the highest MINUTE key.
+
+    The ratings dict is minute-keyed with string keys. Sorting those lexically
+    puts '96' after '100' and returns a mid-match rating — the trap the 25/26
+    player layer build found and closed (corrections log 2025_26-037)."""
+    r = (p.get("stats") or {}).get("ratings") or {}
+    if not r:
+        return None
+    try:
+        k = max(r, key=lambda s: float(s))
+    except (TypeError, ValueError):
+        return None
+    v = r[k]
+    return round(float(v), 2) if isinstance(v, (int, float)) else None
+
+
+def build_published(side, events, tid):
+    """Per-player fields copied from WhoScored rather than counted: the match
+    rating, man of the match, cards, substitution minutes and the captaincy.
+
+    They are published — checking them against WhoScored proves nothing — and
+    the payload labels them so. Keyed by playerId."""
+    out = {}
+    cap = ((side.get("formations") or [{}])[0]).get("captainPlayerId")
+    for p in side.get("players", []):
+        pid = p["playerId"]
+        out[pid] = dict(rating=match_rating(p), motm=bool(p.get("isManOfTheMatch")),
+                        on=p.get("subbedInExpandedMinute"), off=p.get("subbedOutExpandedMinute"),
+                        yellow=0, red=0, captain=(pid == cap))
+    for e in events:
+        if e.get("teamId") != tid or e["type"]["displayName"] != "Card":
+            continue
+        pid = e.get("playerId")
+        if pid not in out:
+            continue
+        q = quals(e)
+        if "Red" in q or "SecondYellow" in q or (e.get("cardType") or {}).get("displayName") in ("Red", "SecondYellow"):
+            out[pid]["red"] += 1
+        else:
+            out[pid]["yellow"] += 1
+    return out
+
+
+def build_lineup(side, names, roster, published, label):
+    """Formation slots as WhoScored draws them, for every formation the side used.
+
+    `formationPositions` is the slot template — where the shape puts each role,
+    not where anyone actually stood; mean positions are the network's job. vertical
+    runs 0 (own goal line) to 10 (attacking), horizontal 0 to 10 across; both are
+    kept raw and scaled by the renderer, so a change in WhoScored's template does
+    not silently move players on the page. A side with no formation block gets a
+    list, and the page draws a list."""
+    out = []
+    for f in side.get("formations") or []:
+        ids = f.get("playerIds") or []
+        slots = f.get("formationSlots") or []
+        pos = f.get("formationPositions") or []
+        name = f.get("formationName") or ""
+        name = "-".join(name) if name and "-" not in name else name
+        xi = []
+        for i, pid in enumerate(ids):
+            slot = slots[i] if i < len(slots) else 0
+            if not slot:
+                continue   # substitute in this formation block
+            pp = pos[slot - 1] if slot - 1 < len(pos) else None
+            p = next((x for x in side.get("players", []) if x["playerId"] == pid), {})
+            rid, shirt, known = roster.get(str(pid), (None, p.get("shirtNo", ""), p.get("name")))
+            if not rid:
+                rid = player_id(p.get("name") or names.get(str(pid), "?"))
+            pub = published.get(pid, {})
+            xi.append(dict(player_id=rid, name=known or p.get("name") or names.get(str(pid), "?"),
+                           short=(known or p.get("name") or names.get(str(pid), "?")).split()[-1],
+                           shirt=int(shirt) if str(shirt).isdigit() else p.get("shirtNo", 0),
+                           pos=p.get("position", ""), slot=slot,
+                           v=pp.get("vertical") if pp else None, h=pp.get("horizontal") if pp else None,
+                           rating=pub.get("rating"), captain=pub.get("captain", False)))
+        xi.sort(key=lambda d: d["slot"])
+        out.append(dict(formation=name, start=f.get("startMinuteExpanded", 0), end=f.get("endMinuteExpanded"),
+                        xi=xi, side=label))
+    return out
+
+
+def build_events(events, us_id, them_id, names, published_us, published_them):
+    """Goals, substitutions and cards for both sides, one list in minute order.
+    team: u / o. Minutes are expanded (46+ for stoppage) plus one, as the goal
+    list already does."""
+    out = []
+    for e in events:
+        t = e["type"]["displayName"]
+        tid = e.get("teamId")
+        if tid not in (us_id, them_id):
+            continue
+        team = "u" if tid == us_id else "o"
+        who = names.get(str(e.get("playerId")), "?").split()[-1]
+        minute = e["minute"] + 1
+        q = quals(e)
+        if e.get("isGoal"):
+            og = bool(e.get("isOwnGoal") or "OwnGoal" in q)
+            out.append(dict(min=minute, team=("o" if team == "u" else "u") if og else team, kind="goal",
+                            who=who + (" (og)" if og else ""), pen="Penalty" in q))
+        elif t == "SubstitutionOn":
+            off = names.get(str(e.get("relatedPlayerId")), "?").split()[-1]
+            out.append(dict(min=minute, team=team, kind="sub", who=who, off=off))
+        elif t == "Card":
+            red = "Red" in q or "SecondYellow" in q or (e.get("cardType") or {}).get("displayName") in ("Red", "SecondYellow")
+            out.append(dict(min=minute, team=team, kind="card", who=who, card="red" if red else "yellow"))
+    out.sort(key=lambda d: (d["min"], d["kind"]))
+    return out
+
+
+def build_players(events, tid, side, roster, names, mcd_period_end, published=None):
+    """One row per player who appeared, in the payload's 25-field shape, plus the
+    published fields (rating, motm, cards, on/off) when `published` is given."""
+    published = published or {}
     ev = [e for e in events if e.get("teamId") == tid]
     on = {e["playerId"]: e["minute"] for e in ev if e["type"]["displayName"] == "SubstitutionOn"}
     off = {e["playerId"]: e["minute"] for e in ev if e["type"]["displayName"] == "SubstitutionOff"}
@@ -284,7 +404,9 @@ def build_players(events, tid, side, roster, names, mcd_period_end):
             dribbles=f"{a['takeon_won']}/{a['takeon_att']}", def_actions=a["def_actions"],
             recoveries=a["recoveries"], dispossessed=a["dispossessed"],
             aerials_won=a["aerials_won"], aerials_lost=a["aerials_lost"],
-            goals=a["goals"], assists=a["assists"]))
+            goals=a["goals"], assists=a["assists"],
+            # published by WhoScored, not counted here — the page labels them so
+            **{k: v for k, v in (published.get(pid) or {}).items()}))
         plots[rid] = per[pid]
     rows.sort(key=lambda r: (not r["started"], -r["mins"]))
     return rows, plots, agg
@@ -294,17 +416,11 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="WhoScored match centre → dashboard gameweek")
     ap.add_argument("--mcd", required=True)
     ap.add_argument("--gw", type=int, required=True)
-    ap.add_argument("--comp", default="PL",
-                    help="competition for this fixture (PL, UCL, ...). PL keeps the "
-                         "gw<N>.json staging name build_payloads already reads; any "
-                         "other competition is staged as <comp><NN>.json so a UCL "
-                         "matchday cannot overwrite the league gameweek of the same "
-                         "number. The published slug is unaffected — mw<NN>-<code> is "
-                         "already unique because the opponent code differs.")
     ap.add_argument("--index", default=os.path.join(REPO, "data", "index.json"))
     ap.add_argument("--roster", default=None, help="MUFC_<season>_ROSTER.csv for player_id and shirt")
     ap.add_argument("--master", default=None, help="pipeline master; reads tw_ columns for this date")
     ap.add_argument("--story", default=None, help="written story JSON; overrides the draft scaffold")
+    ap.add_argument("--comp", default=None, help="competition code when the fixture is not in index.json by date (PL, UCL, EFL, FAC)")
     ap.add_argument("--out", default=os.path.join(HERE, "matches"))
     ap.add_argument("--apply", action="store_true", help="write (default is a dry run)")
     args = ap.parse_args(argv)
@@ -379,13 +495,16 @@ def main(argv=None):
         idx = json.load(open(args.index, encoding="utf-8"))
         fx = next((f for f in idx.get("fixtures", []) if f.get("date") == date), {})
     code = (fx.get("code") or them["name"][:3]).upper()
-    match_id = f"mw{args.gw:02d}-{code.lower()}"
+    comp = args.comp or fx.get("comp", "PL")
+    # league weeks keep mwNN-code; a cup tie or European matchday is prefixed by
+    # its competition so two round-3s cannot collide
+    match_id = f"mw{args.gw:02d}-{code.lower()}" if comp == "PL" else f"{comp.lower()}{args.gw:02d}-{code.lower()}"
 
     def formation(side):
         f = (side.get("formations") or [{}])[0].get("formationName", "")
         return "-".join(f) if f and "-" not in f else f
 
-    meta = dict(match_id=match_id, season="26-27", comp=fx.get("comp", "PL"), round=args.gw,
+    meta = dict(match_id=match_id, season="26-27", comp=comp, round=args.gw,
                 date=date, opp=fx.get("opp", them["name"]), code=code, venue=venue,
                 score=f"{gf}-{ga}", gf=gf, ga=ga,
                 result="W" if gf > ga else "L" if gf < ga else "D",
@@ -457,7 +576,26 @@ def main(argv=None):
                      if e["teamId"] == us["teamId"] and e["type"]["displayName"] == "SubstitutionOn"),
                     default=max(e["minute"] for e in ev) + 1)
     period_end = int(m.get("expandedMaxMinute") or max(e["expandedMinute"] for e in ev))
-    players, plots, _ = build_players(ev, us["teamId"], us, roster, names, period_end)
+    pub_us = build_published(us, ev, us["teamId"])
+    pub_them = build_published(them, ev, them["teamId"])
+    players, plots, _ = build_players(ev, us["teamId"], us, roster, names, period_end, pub_us)
+    rated = sum(1 for p in players if p.get("rating") is not None)
+    if rated and rated < sum(1 for p in players if p["mins"]):
+        fail(f"WhoScored rating present for {rated} players but {sum(1 for p in players if p['mins'])} played "
+             f"— a partial ratings block means the capture was taken before the match was finalised")
+    lineup = dict(united=build_lineup(us, names, roster, pub_us, "u"),
+                  opp=build_lineup(them, names, {}, pub_them, "o"))
+    for side_key, side in (("united", us), ("opp", them)):
+        first = next((f for f in lineup[side_key] if f["xi"]), None)
+        if first and len(first["xi"]) != 11:
+            fail(f"{side['name']}: first formation block has {len(first['xi'])} slotted players, expected 11")
+    events_list = build_events(ev, us["teamId"], them["teamId"], names, pub_us, pub_them)
+    n_goal_events = sum(1 for e in events_list if e["kind"] == "goal")
+    if n_goal_events != gf + ga:
+        fail(f"events list carries {n_goal_events} goals against a {gf}-{ga} scoreline")
+    print(f"  [ ok ] events reconcile: {n_goal_events} goals, "
+          f"{sum(1 for e in events_list if e['kind']=='sub')} subs, {sum(1 for e in events_list if e['kind']=='card')} cards"
+          f" · ratings for {rated} of {len(players)} players")
     mins_of = {}
     for p in us["players"]:
         r = next((r for r in players if r["name"] in (p.get("name"), roster.get(str(p["playerId"]), ("", "", ""))[2])), None)
@@ -500,6 +638,10 @@ def main(argv=None):
         heat=dict(cols=12, rows=8, u=build_heat(ev, us["teamId"], False),
                   o=build_heat(ev, them["teamId"], True)),
         network=network, players=players, plots=plots,
+        lineup=lineup, events=events_list,
+        published=dict(source="whoscored", fields=["rating", "motm", "yellow", "red", "on", "off", "captain", "lineup", "events"],
+                       note="Copied from WhoScored's match centre, not counted here. A rating is WhoScored's model; "
+                            "the lineup is the formation template, not where anyone stood."),
         quadrant=dict(xl="Box touches", yl="Key passes",
                       note="Top right is doing both.",
                       pts=[dict(nm=p["name"].split()[-1], x=p["box_touches"], y=p["key_passes"],
@@ -545,9 +687,9 @@ def main(argv=None):
         return 0
 
     os.makedirs(args.out, exist_ok=True)
-    comp = args.comp.upper()
-    dst = os.path.join(args.out, f"gw{args.gw}.json" if comp == "PL"
-                       else f"{comp.lower()}{args.gw:02d}.json")
+    # league weeks are gw<N>.json; anything else is <comp><N>.json so a cup third
+    # round cannot overwrite matchweek 3
+    dst = os.path.join(args.out, f"gw{args.gw}.json" if comp == "PL" else f"{comp.lower()}{args.gw}.json")
     txt = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     prev = open(dst, encoding="utf-8").read() if os.path.exists(dst) else None
     open(dst, "w", encoding="utf-8").write(txt)

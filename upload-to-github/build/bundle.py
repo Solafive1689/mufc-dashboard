@@ -19,7 +19,7 @@ html=f"""<title>MUFC · Performance{' · STAFF' if a.staff else ''}</title>
      index.html has always carried it; the preview did not, so a preview opened on a
      phone rendered the desktop layout and any mobile check against it was invalid. -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null"><!-- the preview is one file, so it still asks Google for the faces; the site itself self-hosts them in fonts/ -->
 <style>{css}</style>
 <div id="app"><div class="page" style="grid-template-columns:1fr"><p class="t-cap">Loading the season…</p></div></div>
 <script>window.__DATA__={payload};window.__STAFF__={'true' if a.staff else 'false'};</script>

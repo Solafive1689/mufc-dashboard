@@ -1,0 +1,34 @@
+{
+  "_source": {
+    "report": "Twelve Football match report — Everton 2-2 Manchester United, English Premier League 2026/27, 06 Sep 2026",
+    "file": "manchesterunitedmatchreportvsevertond3RDH2BHWF.pdf",
+    "generated": "07 Sep 2026",
+    "subject": "Manchester United",
+    "note": "Transcribed by hand from the report. Every value below is printed in the PDF; page numbers are cited per field. Nothing here is derived, and nothing is read off a chart."
+  },
+  "round": 3,
+  "match_id": "mw03-eve",
+  "team": {
+    "xg":              {"united": 0.86, "opp": 1.42, "page": 2},
+    "np_xg":           {"united": 0.86, "opp": 1.42, "page": [21, 13]},
+    "np_xg_per_shot":  {"united": 0.06, "opp": 0.08, "page": [21, 13]},
+    "np_shots":        {"united": 14,   "opp": 17,   "page": [21, 13]},
+    "high_opp_shots":  {"united": 2,    "opp": 4,    "page": [21, 13]},
+    "box_touches":     {"united": 15,   "opp": 21,   "page": [21, 13]},
+    "box_to_shot_pct": {"united": 86,   "opp": 79,   "page": [21, 13]},
+    "xt":              {"united": 1.56, "opp": 1.61, "page": [18, 6]},
+    "field_tilt":      {"united": 43,   "opp": 57,   "page": [18, 23]},
+    "possession":      {"united": 54,   "opp": 46,   "page": 2},
+    "shots":           {"united": 14,   "opp": 17,   "page": 2},
+    "shots_on_target": {"united": 3,    "opp": 6,    "page": 2},
+    "xpoints":         {"united": 0.91, "page": 23},
+    "win_prob_pct":    {"united": 21,   "page": 23},
+    "ball_in_play_min":{"united": 51.45,"page": 23},
+    "ppda":            {"united": 13.05,"page": 6},
+    "def_action_height_m": {"united": 29.57, "page": 6}
+  },
+  "not_in_the_report": [
+    "Per-shot xG. The shot maps on pages 14 and 22 size their marks by xG but print no values, so the shot map cannot be priced from this report.",
+    "A shot-by-shot cumulative xG series. Pages 14 and 22 plot xG progression as rendered step charts with only the full-time total labelled (1.42 and 0.86), so the xG race cannot be reconstructed without reading values off an image."
+  ]
+}

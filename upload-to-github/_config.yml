@@ -1,0 +1,9 @@
+# GitHub Pages: never publish the build inputs, the CI workflow or the previews.
+exclude:
+  - build
+  - .github
+  - preview.html
+  - preview-BEFORE.html
+  - preview-AFTER.html
+  - staff-preview.html
+  - private
