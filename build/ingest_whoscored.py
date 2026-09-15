@@ -527,10 +527,16 @@ def main(argv=None):
                 if not p.get("isFirstEleven") and p["playerId"] not in
                 {e["playerId"] for e in ev if e["teamId"] == us["teamId"]
                  and e["type"]["displayName"] == "SubstitutionOn"}],
+        # twelve_applied is the same flag build_payloads.apply_twelve() sets when
+        # the layer arrives via build/twelve/<gw>.json, so a payload reads the
+        # same whichever path filled its tw_ columns (MW4 came in via --master
+        # and shipped with the flag unset while MW3's read true).
         provenance=dict(source=os.path.basename(args.mcd), events=len(ev),
-                        united_team_id=UNITED_TEAM_ID, twelve=has_tw,
-                        note="WhoScored's match centre carries no expectedGoals field. "
-                             "Every xG here is null until the Twelve report is merged with --master."),
+                        united_team_id=UNITED_TEAM_ID, twelve=has_tw, twelve_applied=has_tw,
+                        note=("Twelve layer read off the pipeline master at ingest (--master)."
+                              if has_tw else
+                              "WhoScored's match centre carries no expectedGoals field. "
+                              "Every xG here is null until the Twelve report is merged with --master.")),
     )
     if args.story and os.path.exists(args.story):
         payload["story"].update(json.load(open(args.story, encoding="utf-8")))
