@@ -21,6 +21,12 @@ NETLIFY_SITE="${NETLIFY_SITE:-}"   # site name or ID; blank uses the linked site
 # build must run on the interpreter that has pandas et al. Override with PY=... if
 # the venv moves.
 PY="${PY:-$HOME/Desktop/MUFC_Analytics/.venv/bin/python}"
+# The season tracker is a single self-contained HTML file in the pipeline repo
+# (no relative asset paths — verified before this was added). It is served at
+# /tracker/ on the same site, copied straight into the staged folder at deploy
+# time; it never enters this repo, so the data/ reproducibility gate is untouched.
+# Blank to leave the tracker off the site.
+TRACKER="${TRACKER:-$HOME/Desktop/MUFC_Analytics/mufc_2026_27_tracker.html}"
 
 # Everything that should be served. Anything not listed is never uploaded —
 # this is the allowlist that keeps private/ off the public internet.
@@ -90,6 +96,15 @@ rm -rf "$STAGE_DIR"; mkdir -p "$STAGE_DIR"
 for p in "${PUBLISH_PATHS[@]}"; do
   [ -e "$p" ] && cp -R "$p" "$STAGE_DIR/" && echo "  + $p"
 done
+if [ -n "$TRACKER" ]; then
+  [ -f "$TRACKER" ] || die "tracker not found at $TRACKER (set TRACKER= to skip)"
+  # Refuse a tracker that references anything by relative path — the file is
+  # served alone, so a relative src/href would 404 on the site.
+  if grep -qE '(src|href)="(\./|\.\./|[A-Za-z0-9_-]+/)[^"]*\.(js|css|png|jpg|svg|json)"' "$TRACKER"; then
+    die "tracker carries relative asset references — it would not render alone at /tracker/"
+  fi
+  mkdir -p "$STAGE_DIR/tracker" && cp "$TRACKER" "$STAGE_DIR/tracker/index.html" && echo "  + tracker/index.html  ($(du -h "$TRACKER" | cut -f1), from $(basename "$TRACKER"))"
+fi
 find "$STAGE_DIR" -name '.DS_Store' -delete
 echo "  staged $(find "$STAGE_DIR" -type f | wc -l | tr -d ' ') files, $(du -sh "$STAGE_DIR" | cut -f1)"
 
